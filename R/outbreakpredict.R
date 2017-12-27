@@ -151,7 +151,7 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) {
   model %>%
     outbreak.predict.scalars.sim(newdata, quant, nsim) %>%
-    outbreak.predict.scalars.confint(level)
+    outbreak.predict.scalars.confints(level)
 }
 
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
@@ -250,8 +250,8 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' @export
 outbreak.predict.timeseries = function(model, newdata, quant, nsim=1000, level=.95) {
   model %>%
-    confint.derived.function.sim(newdata, quant, nsim) %>%
-    confint.derived.function.calc(level)
+    outbreak.predict.timeseries.sim(newdata, quant, nsim) %>%
+    outbreak.predict.timeseries.confints(level)
 }
 
 #' Predict cumulative case count for an outbreak
