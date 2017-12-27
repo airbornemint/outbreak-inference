@@ -1,9 +1,10 @@
 Package: outbreakpredict
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Predicting Non-Linear Characteristics of Infectious Disease Outbreaks 
+Version: 0.1
+Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre"))
+Description: Stochastic predictions of non-linear characteristics of infectious disease outbreaks using generalized linear (mixed) models
 Depends: R (>= 3.4.2)
-License: What license is it under?
+License: MIT
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1.9000
