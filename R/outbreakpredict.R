@@ -320,4 +320,4 @@ outbreak.calc.thresholds = function(model, params, time, onset=0.05, offset=0.95
 
   data.frame(onset=onsetTime(onset), offset=offsetTime(offset))
 }
-```
+
