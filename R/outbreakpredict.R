@@ -291,7 +291,7 @@ outbreak.calc.cum = function(model, params, time, timedelta=1) {
 #' @export
 outbreak.calc.thresholds = function(model, params, time, onset=0.05, offset=0.95) {
   # Calculate cumulative case counts from the model and parameters
-  cumfit = outbreak.predict.cum(model, params, time)
+  cumfit = outbreak.calc.cum(model, params, time)
 
   # Compare to thresholds
   onsetTime = function(threshold) {
