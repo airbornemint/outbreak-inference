@@ -58,7 +58,6 @@ randomMVN = function(mu, sig, nsim) {
   t(mu + L %*% matrix(rnorm(m * nsim), m, nsim))
 }
 
-#' @export
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
 #' scalar outbreak parameters, and returns predicted scalar parameter values for each simulation.
 #'
@@ -73,6 +72,7 @@ randomMVN = function(mu, sig, nsim) {
 #' @return data frame with one row for each simulation; each row has \code{outbreak.sim} column giving
 #' a unique ID for the simulation, and one column for each scalar parameter returned by \code{quant}
 #'
+#' @export
 outbreak.predict.scalars.sim = function(model, newdata, quant, nsim=100) {
   # Multivariate normal random generator
   # Generate random model parameters
@@ -109,7 +109,6 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
   confints
 }
 
-#' @export
 #' Calculates confidence intervals for scalar predicted from generalized additive (mixed) model of an outbreak
 #'
 #' This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
@@ -148,13 +147,13 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #' @param nsim number of simulations to run
 #' @param level confidence level for returned predictions
 #' @return data frame of predictions, as described above
+#' @export
 outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) {
   model %>%
     outbreak.predict.scalars.sim(newdata, quant, nsim) %>%
     outbreak.predict.scalars.confint(level)
 }
 
-#' @export
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
 #' time series outbreak parameters, and returns predicted time series parameter values for each simulation.
 #'
@@ -169,6 +168,7 @@ outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) 
 #' @return matrix with one row for each simulation; each row contains the
 #' time series calculated by \code{quant} for the corresponding simulation run
 #'
+#' @export
 outbreak.predict.timeseries.sim = function(model, newdata, quant, nsim=100) {
   # Generate random model parameters
   randomParams = randomMVN(coef(model), model$Vp, nsim)
@@ -205,7 +205,6 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
   confints
 }
 
-#' @export
 #' Calculates confidence intervals for time series predicted from generalized additive (mixed) model of an outbreak
 #'
 #' This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
@@ -248,13 +247,13 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' @param nsim number of simulations to run
 #' @param level confidence level for returned predictions
 #' @return data frame of predictions, as described above
+#' @export
 outbreak.predict.timeseries = function(model, newdata, quant, nsim=1000, level=.95) {
   model %>%
     confint.derived.function.sim(newdata, quant, nsim) %>%
     confint.derived.function.calc(level)
 }
 
-#' @export
 #' Predict cumulative case count for an outbreak
 #'
 #' This is useful as \code{quant} for outbreak.predict.timeseries.
@@ -266,6 +265,7 @@ outbreak.predict.timeseries = function(model, newdata, quant, nsim=1000, level=.
 #' time step of the original time series from which \code{model} was obtained, not the
 #' (potentially different) time step at which model predictions are being evaluated
 #' @return time series of cumulative case counts
+#' @export
 outbreak.calc.cum = function(model, params, time, timedelta=1) {
   # Get model predictions for given (randomized) param values
   predictors = model %>% predict(data.frame(time=time + timedelta / 2), type="lpmatrix")
@@ -278,7 +278,6 @@ outbreak.calc.cum = function(model, params, time, timedelta=1) {
   cumsum(fit) / sum(fit)
 }
 
-#' @export
 # Predict outbreak thresholds for an outbreak
 #' This is useful as \code{quant} for outbreak.predict.scalars.
 #'
@@ -289,6 +288,7 @@ outbreak.calc.cum = function(model, params, time, timedelta=1) {
 #' @param offset offset threshold as fraction of total outbreak case count
 #' @return data frame with columns \code{onset} and \code{offset} representing time
 #' when the outbreak crossed onsed and offset thresholds
+#' @export
 outbreak.calc.thresholds = function(model, params, time, onset=0.05, offset=0.95) {
   # Calculate cumulative case counts from the model and parameters
   cumfit = outbreak.predict.cum(model, params, time)
