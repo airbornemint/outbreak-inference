@@ -2,7 +2,7 @@ Package: outbreakpredict
 Title: Predicting Non-Linear Characteristics of Infectious Disease Outbreaks 
 Version: 0.1
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre"))
-Description: Stochastic predictions of non-linear characteristics of infectious disease outbreaks using generalized linear (mixed) models
+Description: Stochastic predictions of non-linear characteristics of infectious disease outbreaks using generalized additive (mixed) models.
 Depends: R (>= 3.4.2)
 Imports: stats, utils, mgcv, dplyr, magrittr
 License: Apache License 2.0
