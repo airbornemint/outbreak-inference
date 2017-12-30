@@ -72,13 +72,15 @@
 #' @importFrom mgcv mroot
 #' @importFrom dplyr bind_rows
 #' @importFrom magrittr %>%
+NULL
 
-#' @title Sample from a multivariate normal distribution
+#' Sample from a multivariate normal distribution
 #'
 #' @param mu matrix of means
 #' @param sig matrix of covariances
 #' @param nsim number of samples to draw
 #' @return matrix of sampled values
+#' @keywords internal
 randomMVN = function(mu, sig, nsim) {
   L = mroot(sig)
   m = ncol(L)

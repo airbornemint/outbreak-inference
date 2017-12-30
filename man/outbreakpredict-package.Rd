@@ -3,28 +3,12 @@
 \docType{package}
 \name{outbreakpredict-package}
 \alias{outbreakpredict-package}
-\alias{randomMVN}
-\title{Sample from a multivariate normal distribution}
-\usage{
-randomMVN(mu, sig, nsim)
-}
-\arguments{
-\item{mu}{matrix of means}
-
-\item{sig}{matrix of covariances}
-
-\item{nsim}{number of samples to draw}
-}
-\value{
-matrix of sampled values
-}
+\title{Stochastic modeling of infectious disease outbreak characteristics}
 \description{
-Stochastic modeling of infectious disease outbreak characteristics
-}
-\details{
 This package lets you made estimates (with confidence intervals) of characteristics of infectious
 disease outbreaks.
-
+}
+\details{
 It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
 using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
 
