@@ -102,6 +102,7 @@ randomMVN = function(mu, sig, nsim) {
 #' a unique ID for the simulation, and one column for each scalar parameter returned by \code{quant}
 #'
 #' @export
+#' @keywords internal
 outbreak.predict.scalars.sim = function(model, newdata, quant, nsim=100) {
   # Multivariate normal random generator
   # Generate random model parameters
@@ -121,6 +122,7 @@ outbreak.predict.scalars.sim = function(model, newdata, quant, nsim=100) {
 #' @param predictions data frame of predictions as returned by \code{\link{outbreak.predict.scalars.sim}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.predict.scalars}}
+#' @keywords internal
 outbreak.predict.scalars.confints = function(predictions, level=.95) {
   confints = matrix(NA, nrow=1, ncol=0) %>% as.data.frame()
 
@@ -198,6 +200,7 @@ outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) 
 #' time series calculated by \code{quant} for the corresponding simulation run
 #'
 #' @export
+#' @keywords internal
 outbreak.predict.timeseries.sim = function(model, newdata, quant, nsim=100) {
   # Generate random model parameters
   randomParams = randomMVN(coef(model), model$Vp, nsim)
@@ -216,6 +219,7 @@ outbreak.predict.timeseries.sim = function(model, newdata, quant, nsim=100) {
 #' @param predictions data frame of predictions as returned by \code{\link{outbreak.predict.timeseries.sim}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.predict.timeseries}}
+#' @keywords internal
 outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
   resultNames = c("lower", "median", "upper")
   if (is.null(predictions)) {
