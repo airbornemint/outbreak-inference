@@ -16,3 +16,11 @@ This package can handle two types of estimated characteristics:
  * Time series estimates, in which a time series is calculated from the incidence time series of an outbreak (for example, cumulative incidence time series).
  
  See package documentation in R — `help(outbreakpredict)` — for more information.
+ 
+## Installation
+ 
+```
+install.packages("devtools")
+library(devtools)
+install_github("airbornemint/outbreak-predict")
+```
