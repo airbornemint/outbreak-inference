@@ -172,7 +172,7 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #' \code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}, corresponding
 #' to lower confidence limit, median, and upper confidence limit.
 #'
-#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gam}}, with a single parameter (time)
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
 #' @param newdata vector of time values at which the model will be evaluated
 #' @param quant function returning calculated scalar parameters, as described above
 #' @param nsim number of simulations to run
@@ -274,7 +274,7 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' \code{upper}, containing the median and the confidence interval for the computed
 #' time series at each time point.
 #'
-#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gam}}, with a single parameter (time)
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
 #' @param newdata vector of time values at which the model will be evaluated
 #' @param quant function returning calculated time series, as described above
 #' @param nsim number of simulations to run
