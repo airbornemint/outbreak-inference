@@ -4,7 +4,7 @@ This R package lets you make estimates (with confidence intervals) of characteri
 
 To accomplish this, you:
 
-1. Use the `glmv` package to obtain a generalized additive model (GAM) or generalized additive mixed model (GAMM) of your outbreak. 
+1. Use the `mgcv` package to obtain a generalized additive model (GAM) or generalized additive mixed model (GAMM) of your outbreak. 
 2. Write a function that calculates the desired characteristic of a *potential* outbreak (for example, time of outbreak peak)
 3. Call the appropriate function in `outbreakpredict` with the model from step 1 and the function from step 2.
 
