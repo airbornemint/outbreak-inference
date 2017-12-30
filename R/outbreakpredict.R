@@ -52,7 +52,19 @@
 #' thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
 #'   outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
 #' })
+#' 
+#' @importFrom stats coef na.omit predict quantile rnorm
+#' @importFrom utils head tail
+#' @importFrom mgcv mroot
+#' @importFrom dplyr bind_rows
+#' @importFrom magrittr %>%
 
+#' @title Sample from a multivariate normal distribution
+#'
+#' @param mu matrix of means
+#' @param sig matrix of covariances
+#' @param nsim number of samples to draw
+#' @return matrix of sampled values
 randomMVN = function(mu, sig, nsim) {
   L = mroot(sig)
   m = ncol(L)
@@ -66,7 +78,7 @@ randomMVN = function(mu, sig, nsim) {
 #' useful if you want to calculate summary statistics of simulation results other than
 #' the ones returned by \code{outbreak.predict.scalars}.
 #'
-#' @param model model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gamm}}
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}
 #' @param newdata time values at which the model will be evaluated during simulation
 #' @param quant scalar parameter generator function; see \code{\link{outbreak.predict.scalars}} for more info
 #' @param nsim number of simulations to run
@@ -142,7 +154,7 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #' \code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}, corresponding
 #' to lower confidence limit, median, and upper confidence limit.
 #'
-#' @param model model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gam}}, with a single parameter (time)
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gam}}, with a single parameter (time)
 #' @param newdata vector of time values at which the model will be evaluated
 #' @param quant function returning calculated scalar parameters, as described above
 #' @param nsim number of simulations to run
@@ -162,7 +174,7 @@ outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) 
 #' it's useful if you want to calculate summary statistics of simulation results other
 #' than the ones returned by \code{outbreak.predict.timeseries}.
 #'
-#' @param model model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gamm}}
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}
 #' @param newdata time values at which the model will be evaluated during simulation
 #' @param quant time series parameter generator function; see \code{\link{outbreak.predict.timeseries}} for more info
 #' @param nsim number of simulations to run
@@ -242,7 +254,7 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' \code{upper}, containing the median and the confidence interval for the computed
 #' time series at each time point.
 #'
-#' @param model model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gam}}, with a single parameter (time)
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gam}}, with a single parameter (time)
 #' @param newdata vector of time values at which the model will be evaluated
 #' @param quant function returning calculated time series, as described above
 #' @param nsim number of simulations to run

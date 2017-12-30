@@ -8,7 +8,7 @@ scalar outbreak parameters, and returns predicted scalar parameter values for ea
 outbreak.predict.scalars.sim(model, newdata, quant, nsim = 100)
 }
 \arguments{
-\item{model}{model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gamm}}}
+\item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}}
 
 \item{newdata}{time values at which the model will be evaluated during simulation}
 

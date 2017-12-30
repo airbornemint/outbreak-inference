@@ -4,15 +4,27 @@
 \name{outbreakpredict-package}
 \alias{outbreakpredict-package}
 \alias{randomMVN}
-\title{Stochastic modeling of infectious disease outbreak characteristics}
+\title{Sample from a multivariate normal distribution}
 \usage{
 randomMVN(mu, sig, nsim)
 }
+\arguments{
+\item{mu}{matrix of means}
+
+\item{sig}{matrix of covariances}
+
+\item{nsim}{number of samples to draw}
+}
+\value{
+matrix of sampled values
+}
 \description{
-This package lets you made estimates (with confidence intervals) of characteristics of infectious
-disease outbreaks.
+Stochastic modeling of infectious disease outbreak characteristics
 }
 \details{
+This package lets you made estimates (with confidence intervals) of characteristics of infectious
+disease outbreaks.
+
 It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
 using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
 
@@ -58,6 +70,7 @@ cumCases = outbreak.predict.timeseries(model, modelTime, function(model, params,
 thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
   outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
 })
+
 }
 \author{
 Ben Artin \email{ben@artins.org}
