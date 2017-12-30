@@ -1,7 +1,4 @@
-#' A package to check Roxygen's sanity
-#' @name outbreakpredict-package
-#' @docType package
-#' @author Ben Artin \email{ben@@artins.org}
+#' Stochastic modeling of infectious disease outbreak characteristics
 #'
 #' This package allows modeling of characteristics of an infections disease outbreak
 #' by using generalized additive (mixed) models (GAM/GAMM) to model the outbreak, then using
@@ -31,6 +28,10 @@
 #' as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with \code{\link{outbreak.predict.timeseries}} to
 #' predict cumulative case count over time for the outbreak.
 #'
+#' @name outbreakpredict-package
+#' @docType package
+#' @author Ben Artin \email{ben@@artins.org}
+#'
 #' @examples
 #' data = ... # Import data as newcases vs time
 #'
@@ -51,7 +52,6 @@
 #'   outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
 #' })
 
-# Multivariate normal random generator
 randomMVN = function(mu, sig, nsim) {
   L = mroot(sig)
   m = ncol(L)

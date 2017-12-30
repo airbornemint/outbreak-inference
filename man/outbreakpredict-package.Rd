@@ -4,40 +4,16 @@
 \name{outbreakpredict-package}
 \alias{outbreakpredict-package}
 \alias{randomMVN}
-\title{A package to check Roxygen's sanity}
+\title{Stochastic modeling of infectious disease outbreak characteristics}
 \usage{
 randomMVN(mu, sig, nsim)
 }
 \description{
-A package to check Roxygen's sanity
-}
-\examples{
-data = ... # Import data as newcases vs time
-
-# Generate GAM model for outbreak
-model = gam(newcases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
-
-# Generate time series at which model will be evaluated for predictions
-eps = .05
-modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
-
-# Predict cumulative case count time series
-thresholds = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
-  outbreak.calc.cum(model, params, newdata$time, timedelta=1)
-})
-
-# Predict time when outbreak crosses 5\% and 95\% of cumulative case count
-thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
-  outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
-})
-}
-\author{
-Ben Artin \email{ben@artins.org}
-
 This package allows modeling of characteristics of an infections disease outbreak
 by using generalized additive (mixed) models (GAM/GAMM) to model the outbreak, then using
 stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
-
+}
+\details{
 For example, this package can be used to model timing of outbreak onset, peak, or offset,
 as well as outbreak cumulative case count over time.
 
@@ -61,4 +37,27 @@ For convenience, this package also includes \code{\link{outbreak.calc.thresholds
 be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and offset, as well
 as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with \code{\link{outbreak.predict.timeseries}} to
 predict cumulative case count over time for the outbreak.
+}
+\examples{
+data = ... # Import data as newcases vs time
+
+# Generate GAM model for outbreak
+model = gam(newcases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
+
+# Generate time series at which model will be evaluated for predictions
+eps = .05
+modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
+
+# Predict cumulative case count time series
+thresholds = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
+  outbreak.calc.cum(model, params, newdata$time, timedelta=1)
+})
+
+# Predict time when outbreak crosses 5\% and 95\% of cumulative case count
+thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
+  outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
+})
+}
+\author{
+Ben Artin \email{ben@artins.org}
 }
