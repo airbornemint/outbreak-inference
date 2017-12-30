@@ -15,7 +15,7 @@ This package can handle two types of estimated characteristics:
  * Scalar estimates, in which a numerical descriptor is calculated from an outbreak (for example, time of outbreak peak, time of outbreak start, time of outbreak end, peak incidence, outbreak duration)
  * Time series estimates, in which a time series is calculated from the incidence time series of an outbreak (for example, cumulative incidence time series).
  
- See package documentation in R — `help(outbreakpredict)` — for more information.
+ See package documentation in R — `??"outbreakpredict-package"` — for more information.
  
 ## Installation
  
@@ -23,4 +23,5 @@ This package can handle two types of estimated characteristics:
 install.packages("devtools")
 library(devtools)
 install_github("airbornemint/outbreak-predict")
+??"outbreakpredict-package"
 ```
