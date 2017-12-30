@@ -2,8 +2,8 @@
 % Please edit documentation in R/outbreakpredict.R
 \name{outbreak.predict.timeseries.sim}
 \alias{outbreak.predict.timeseries.sim}
-\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
-time series outbreak parameters, and returns predicted time series parameter values for each simulation.}
+\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and 
+returns predicted time series parameter values for each simulation.}
 \usage{
 outbreak.predict.timeseries.sim(model, newdata, quant, nsim = 100)
 }

@@ -1,20 +1,21 @@
 #' Stochastic modeling of infectious disease outbreak characteristics
 #'
-#' This package allows modeling of characteristics of an infections disease outbreak
-#' by using generalized additive (mixed) models (GAM/GAMM) to model the outbreak, then using
-#' stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
+#' This package lets you made estimates (with confidence intervals) of characteristics of infectious
+#' disease outbreaks.
+#'
+#' It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
+#' using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
 #'
 #' For example, this package can be used to model timing of outbreak onset, peak, or offset,
-#' as well as outbreak cumulative case count over time.
+#' as well as outbreak cumulative incidence over time.
 #'
-#' The package can model two types of outbreak characteristics: scalars, which are single-value
-#' measures of an outbreak (for example, timing of peak) and time series, which are functions of
-#' time (for example, cumulative case count over time)
+#' The package can model two types of outbreak characteristics: scalar characteristics, which are single-value
+#' measures of an outbreak (for example, timing of peak) and time series characteristics, which are functions of
+#' time (for example, cumulative incidence count over time)
 #'
-#' For each outbreak characterisitcs, the package produces median and confidence interval
-#' estimates.
+#' For each outbreak characteristic, the package produces median and confidence interval estimates.
 #'
-#' Typical use of this package begins by using package \code{\link{mgcv}} to obtain
+#' Typical use of this package begins by using the package \code{\link{mgcv}} to obtain
 #' a GAM/GAMM model of the outbreak, followed by calling either \code{\link{outbreak.predict.scalars}} or
 #' \code{\link{outbreak.predict.timeseries}} to obtain confidence intervals on the
 #' desired scalar/timeseries parameters of the outbreak
@@ -24,18 +25,18 @@
 #' the desired characteristics into \code{\link{outbreak.predict.scalars}} or \code{\link{outbreak.predict.timeseries}}.
 #'
 #' For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-#' be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and offset, as well
-#' as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with \code{\link{outbreak.predict.timeseries}} to
-#' predict cumulative case count over time for the outbreak.
+#' be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and 
+#' offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
+#' \code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
 #'
 #' @name outbreakpredict-package
 #' @docType package
 #' @author Ben Artin \email{ben@@artins.org}
 #'
 #' @examples
-#' data = ... # Import data as newcases vs time
+#' data = ... # Import data as data frame of newcases vs time
 #'
-#' # Generate GAM model for outbreak
+#' # Generate GAM model for outbreak; see mgcv for details
 #' model = gam(newcases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 #'
 #' # Generate time series at which model will be evaluated for predictions
@@ -43,7 +44,7 @@
 #' modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
 #'
 #' # Predict cumulative case count time series
-#' thresholds = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
+#' cumCases = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
 #'   outbreak.calc.cum(model, params, newdata$time, timedelta=1)
 #' })
 #'
@@ -80,7 +81,6 @@ outbreak.predict.scalars.sim = function(model, newdata, quant, nsim=100) {
 
   predictions = bind_rows(apply(randomParams, 1, function(params) { quant(model, params, newdata) }))
   if (any(is.na(predictions))) {
-    browser()
     warning("Some predictions are NA")
     return()
   }
@@ -139,13 +139,14 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #'
 #' The data frame returned by \code{outbreak.predict.scalars} contains three columns for each
 #' parameter calculated by \code{quant}: for parameter \code{x} returned by \code{quant},
-#' \code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}.
+#' \code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}, corresponding
+#' to lower confidence limit, median, and upper confidence limit.
 #'
 #' @param model model returned by \code{\link{mgcv::gam}} or \code{\link{mgcv::gam}}, with a single parameter (time)
 #' @param newdata vector of time values at which the model will be evaluated
 #' @param quant function returning calculated scalar parameters, as described above
 #' @param nsim number of simulations to run
-#' @param level confidence level for returned predictions
+#' @param level confidence level for predictions
 #' @return data frame of predictions, as described above
 #' @export
 outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) {
@@ -154,8 +155,8 @@ outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) 
     outbreak.predict.scalars.confints(level)
 }
 
-#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
-#' time series outbreak parameters, and returns predicted time series parameter values for each simulation.
+#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and 
+#' returns predicted time series parameter values for each simulation.
 #'
 #' This is mainly used internally by \code{outbreak.predict.timeseries}, but
 #' it's useful if you want to calculate summary statistics of simulation results other
@@ -211,7 +212,7 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' For each simulated outbreak, it calls \code{quant} to calculate a time series  for the
 #' simulated outbreak (for example, the number of cumulative cases vs time).
 #' It then calculates and returns the confidence interval of the simulated time series at
-#' each time across all simulations
+#' each time point across all simulations
 #'
 #' The \code{quant} function must accept (\code{model}, \code{params}, \code{newdata}) and return a vector
 #' with the time series obtaines by evaluating the model at the time points given in \code{newdata} and
@@ -286,12 +287,15 @@ outbreak.calc.cum = function(model, params, time, timedelta=1) {
 #' @param time vector of time values at which the model will be evaluated
 #' @param onset onset threshold as fraction of total outbreak case count
 #' @param offset offset threshold as fraction of total outbreak case count
+#' @param timedelta time step of the data described by \code{model}; note that this is the
+#' time step of the original time series from which \code{model} was obtained, not the
+#' (potentially different) time step at which model predictions are being evaluated
 #' @return data frame with columns \code{onset} and \code{offset} representing time
 #' when the outbreak crossed onsed and offset thresholds
 #' @export
-outbreak.calc.thresholds = function(model, params, time, onset=0.05, offset=0.95) {
+outbreak.calc.thresholds = function(model, params, time, onset=0.05, offset=0.95, timedelta=1) {
   # Calculate cumulative case counts from the model and parameters
-  cumfit = outbreak.calc.cum(model, params, time)
+  cumfit = outbreak.calc.cum(model, params, time, timedelta)
 
   # Compare to thresholds
   onsetTime = function(threshold) {

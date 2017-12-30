@@ -9,22 +9,23 @@
 randomMVN(mu, sig, nsim)
 }
 \description{
-This package allows modeling of characteristics of an infections disease outbreak
-by using generalized additive (mixed) models (GAM/GAMM) to model the outbreak, then using
-stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
+This package lets you made estimates (with confidence intervals) of characteristics of infectious
+disease outbreaks.
 }
 \details{
+It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
+using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
+
 For example, this package can be used to model timing of outbreak onset, peak, or offset,
-as well as outbreak cumulative case count over time.
+as well as outbreak cumulative incidence over time.
 
-The package can model two types of outbreak characteristics: scalars, which are single-value
-measures of an outbreak (for example, timing of peak) and time series, which are functions of
-time (for example, cumulative case count over time)
+The package can model two types of outbreak characteristics: scalar characteristics, which are single-value
+measures of an outbreak (for example, timing of peak) and time series characteristics, which are functions of
+time (for example, cumulative incidence count over time)
 
-For each outbreak characterisitcs, the package produces median and confidence interval
-estimates.
+For each outbreak characteristic, the package produces median and confidence interval estimates.
 
-Typical use of this package begins by using package \code{\link{mgcv}} to obtain
+Typical use of this package begins by using the package \code{\link{mgcv}} to obtain
 a GAM/GAMM model of the outbreak, followed by calling either \code{\link{outbreak.predict.scalars}} or
 \code{\link{outbreak.predict.timeseries}} to obtain confidence intervals on the
 desired scalar/timeseries parameters of the outbreak
@@ -34,14 +35,14 @@ allow simulation of arbitrary outbreak characteristics, by passing a function th
 the desired characteristics into \code{\link{outbreak.predict.scalars}} or \code{\link{outbreak.predict.timeseries}}.
 
 For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and offset, as well
-as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with \code{\link{outbreak.predict.timeseries}} to
-predict cumulative case count over time for the outbreak.
+be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and 
+offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
+\code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
 }
 \examples{
-data = ... # Import data as newcases vs time
+data = ... # Import data as data frame of newcases vs time
 
-# Generate GAM model for outbreak
+# Generate GAM model for outbreak; see mgcv for details
 model = gam(newcases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 
 # Generate time series at which model will be evaluated for predictions
@@ -49,7 +50,7 @@ eps = .05
 modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
 
 # Predict cumulative case count time series
-thresholds = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
+cumCases = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
   outbreak.calc.cum(model, params, newdata$time, timedelta=1)
 })
 

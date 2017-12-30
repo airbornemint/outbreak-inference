@@ -15,7 +15,7 @@ outbreak.predict.scalars(model, newdata, quant, nsim = 100, level = 0.95)
 
 \item{nsim}{number of simulations to run}
 
-\item{level}{confidence level for returned predictions}
+\item{level}{confidence level for predictions}
 }
 \value{
 data frame of predictions, as described above
@@ -50,5 +50,6 @@ calc_peak(model, params, newdata) {
 
 The data frame returned by \code{outbreak.predict.scalars} contains three columns for each
 parameter calculated by \code{quant}: for parameter \code{x} returned by \code{quant},
-\code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}.
+\code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}, corresponding
+to lower confidence limit, median, and upper confidence limit.
 }

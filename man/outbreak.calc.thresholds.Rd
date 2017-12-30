@@ -4,7 +4,8 @@
 \alias{outbreak.calc.thresholds}
 \title{This is useful as \code{quant} for outbreak.predict.scalars.}
 \usage{
-outbreak.calc.thresholds(model, params, time, onset = 0.05, offset = 0.95)
+outbreak.calc.thresholds(model, params, time, onset = 0.05, offset = 0.95,
+  timedelta = 1)
 }
 \arguments{
 \item{model}{GAM/GAMM model for the outbreak}
@@ -16,6 +17,10 @@ outbreak.calc.thresholds(model, params, time, onset = 0.05, offset = 0.95)
 \item{onset}{onset threshold as fraction of total outbreak case count}
 
 \item{offset}{offset threshold as fraction of total outbreak case count}
+
+\item{timedelta}{time step of the data described by \code{model}; note that this is the
+time step of the original time series from which \code{model} was obtained, not the
+(potentially different) time step at which model predictions are being evaluated}
 }
 \value{
 data frame with columns \code{onset} and \code{offset} representing time

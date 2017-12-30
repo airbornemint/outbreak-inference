@@ -26,7 +26,7 @@ This function performs a series of Monte Carlo simulations of a GAM/GAMM outbrea
 For each simulated outbreak, it calls \code{quant} to calculate a time series  for the
 simulated outbreak (for example, the number of cumulative cases vs time).
 It then calculates and returns the confidence interval of the simulated time series at
-each time across all simulations
+each time point across all simulations
 }
 \details{
 The \code{quant} function must accept (\code{model}, \code{params}, \code{newdata}) and return a vector
