@@ -1,11 +1,11 @@
 # Copyright 2017 Ben Artin
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@
 #' the desired characteristics into \code{\link{outbreak.predict.scalars}} or \code{\link{outbreak.predict.timeseries}}.
 #'
 #' For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-#' be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and 
+#' be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and
 #' offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
 #' \code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
 #'
@@ -48,25 +48,45 @@
 #' @author Ben Artin \email{ben@@artins.org}
 #'
 #' @examples
-#' data = ... # Import data as data frame of newcases vs time
+#' # Simulate an outbreak for analysis
+#' cases = rpois(52, c(rep(1, 13), seq(1, 50, length.out=13), seq(50, 1, length.out=13), rep(1, 13)))
+#' data = data.frame(cases=cases, time=seq(0, 51))
 #'
 #' # Generate GAM model for outbreak; see mgcv for details
-#' model = gam(newcases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
+#' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 #'
 #' # Generate time series at which model will be evaluated for predictions
+#' # For the most part, you want the time span of the outbreak data divided into small increments (here, eps)
 #' eps = .05
 #' modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
 #'
-#' # Predict cumulative case count time series
+#' # Predict cumulative incidence count time series
 #' cumCases = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
 #'   outbreak.calc.cum(model, params, newdata$time, timedelta=1)
-#' })
+#' }, level=.95)
 #'
 #' # Predict time when outbreak crosses 5% and 95% of cumulative case count
 #' thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
 #'   outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
 #' })
-#' 
+#'
+#' # Plot cumulative incidence predictions and thresholds
+#' library(ggplot2)
+#' ggplot(cbind(cumCases, modelTime)) +
+#'   geom_ribbon(aes(x=time, ymin=lower, ymax=upper), fill=grey(.75)) +
+#'   geom_line(aes(x=time, y=median)) +
+#'   annotate("rect",
+#'     xmin=thresholds$onset.lower,
+#'     xmax=thresholds$onset.upper,
+#'     ymin=-Inf, ymax=Inf, alpha=.25) +
+#'   annotate("rect",
+#'     xmin=thresholds$offset.lower,
+#'     xmax=thresholds$offset.upper,
+#'     ymin=-Inf, ymax=Inf, alpha=.25) +
+#'   annotate("segment", x=-Inf, xend=Inf, y=0.05, yend=0.05) +
+#'   annotate("segment", x=-Inf, xend=Inf, y=0.95, yend=0.95) +
+#'  labs(x="Time", y="Relative cumulative incidence")
+#'
 #' @importFrom stats coef na.omit predict quantile rnorm
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
@@ -185,7 +205,7 @@ outbreak.predict.scalars = function(model, newdata, quant, nsim=100, level=.95) 
     outbreak.predict.scalars.confints(level)
 }
 
-#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and 
+#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and
 #' returns predicted time series parameter values for each simulation.
 #'
 #' This is mainly used internally by \code{outbreak.predict.timeseries}, but
