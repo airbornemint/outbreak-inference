@@ -17,3 +17,4 @@ data.frame of confidence intervals, as returned by \code{\link{outbreak.predict.
 \description{
 Calculates confidence intervals for results of simulation performed by \code{\link{outbreak.predict.timeseries.sim}}
 }
+\keyword{internal}

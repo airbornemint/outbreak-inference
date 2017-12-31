@@ -25,3 +25,4 @@ This is mainly used internally by \code{outbreak.predict.scalars}, but it's
 useful if you want to calculate summary statistics of simulation results other than
 the ones returned by \code{outbreak.predict.scalars}.
 }
+\keyword{internal}

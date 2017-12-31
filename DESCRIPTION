@@ -5,6 +5,7 @@ Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre
 Description: Stochastic predictions of non-linear characteristics of infectious disease outbreaks using generalized additive (mixed) models.
 Depends: R (>= 3.4.2)
 Imports: stats, utils, mgcv, dplyr, magrittr
+Suggests: ggplot2
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true

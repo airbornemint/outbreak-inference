@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreakpredict.R
 \name{outbreak.predict.timeseries.sim}
 \alias{outbreak.predict.timeseries.sim}
-\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and 
+\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and
 returns predicted time series parameter values for each simulation.}
 \usage{
 outbreak.predict.timeseries.sim(model, newdata, quant, nsim = 100)
@@ -25,3 +25,4 @@ This is mainly used internally by \code{outbreak.predict.timeseries}, but
 it's useful if you want to calculate summary statistics of simulation results other
 than the ones returned by \code{outbreak.predict.timeseries}.
 }
+\keyword{internal}

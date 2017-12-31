@@ -7,7 +7,7 @@
 outbreak.predict.scalars(model, newdata, quant, nsim = 100, level = 0.95)
 }
 \arguments{
-\item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gam}}, with a single parameter (time)}
+\item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
 \item{newdata}{vector of time values at which the model will be evaluated}
 

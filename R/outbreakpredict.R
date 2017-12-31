@@ -53,10 +53,12 @@
 #' data = data.frame(cases=cases, time=seq(0, 51))
 #'
 #' # Generate GAM model for outbreak; see mgcv for details
+#' library(mgcv)
 #' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 #'
 #' # Generate time series at which model will be evaluated for predictions
-#' # For the most part, you want the time span of the outbreak data divided into small increments (here, eps)
+#' # For the most part, you want the time span of the outbreak data divided into
+#' # small increments (here, eps)
 #' eps = .05
 #' modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
 #'
