@@ -3,22 +3,22 @@
 \name{outbreak.predict.scalars.sim}
 \alias{outbreak.predict.scalars.sim}
 \title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
-scalar outbreak parameters, and returns predicted scalar parameter values for each simulation.}
+scalar outbreak outcomes, and returns predicted scalar outcome values for each simulation.}
 \usage{
-outbreak.predict.scalars.sim(model, newdata, quant, nsim = 100)
+outbreak.predict.scalars.sim(model, time, outcomes, nsim = 100)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}}
 
-\item{newdata}{time values at which the model will be evaluated during simulation}
+\item{time}{time values at which the model will be evaluated during simulation}
 
-\item{quant}{scalar parameter generator function; see \code{\link{outbreak.predict.scalars}} for more info}
+\item{outcomes}{scalar outcome generator function; see \code{\link{outbreak.predict.scalars}} for more info}
 
 \item{nsim}{number of simulations to run}
 }
 \value{
 data frame with one row for each simulation; each row has \code{outbreak.sim} column giving
-a unique ID for the simulation, and one column for each scalar parameter returned by \code{quant}
+a unique ID for the simulation, and one column for each scalar outcome returned by \code{outcomes}
 }
 \description{
 This is mainly used internally by \code{outbreak.predict.scalars}, but it's

@@ -2,23 +2,23 @@
 % Please edit documentation in R/outbreakpredict.R
 \name{outbreak.predict.timeseries.sim}
 \alias{outbreak.predict.timeseries.sim}
-\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak parameters, and
-returns predicted time series parameter values for each simulation.}
+\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak outcomes, and
+returns predicted time series outcomes for each simulation.}
 \usage{
-outbreak.predict.timeseries.sim(model, newdata, quant, nsim = 100)
+outbreak.predict.timeseries.sim(model, time, outcome, nsim = 100)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}}
 
-\item{newdata}{time values at which the model will be evaluated during simulation}
+\item{time}{time values at which the model will be evaluated during simulation}
 
-\item{quant}{time series parameter generator function; see \code{\link{outbreak.predict.timeseries}} for more info}
+\item{outcome}{time series outcome generator function; see \code{\link{outbreak.predict.timeseries}} for more info}
 
 \item{nsim}{number of simulations to run}
 }
 \value{
 matrix with one row for each simulation; each row contains the
-time series calculated by \code{quant} for the corresponding simulation run
+time series calculated by \code{outcome} for the corresponding simulation run
 }
 \description{
 This is mainly used internally by \code{outbreak.predict.timeseries}, but

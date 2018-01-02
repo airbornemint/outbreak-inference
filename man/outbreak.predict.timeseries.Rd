@@ -4,15 +4,14 @@
 \alias{outbreak.predict.timeseries}
 \title{Calculates confidence intervals for time series predicted from generalized additive (mixed) model of an outbreak}
 \usage{
-outbreak.predict.timeseries(model, newdata, quant, nsim = 1000,
-  level = 0.95)
+outbreak.predict.timeseries(model, time, outcome, nsim = 1000, level = 0.95)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
-\item{newdata}{vector of time values at which the model will be evaluated}
+\item{time}{vector of time values at which the model will be evaluated}
 
-\item{quant}{function returning calculated time series, as described above}
+\item{outcome}{function returning calculated outcome time series, as described above}
 
 \item{nsim}{number of simulations to run}
 
@@ -23,37 +22,37 @@ data frame of predictions, as described above
 }
 \description{
 This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
-For each simulated outbreak, it calls \code{quant} to calculate a time series  for the
+For each simulated outbreak, it calls \code{outcome} to calculate a time series for the
 simulated outbreak (for example, the number of cumulative cases vs time).
 It then calculates and returns the confidence interval of the simulated time series at
 each time point across all simulations
 }
 \details{
-The \code{quant} function must accept (\code{model}, \code{params}, \code{newdata}) and return a vector
-with the time series obtaines by evaluating the model at the time points given in \code{newdata} and
+The \code{outcome} function must accept (\code{model}, \code{params}, \code{time}) and return a vector
+containing the outcome time series obtained by evaluating the model at the time points given in \code{time} and
 using the model parameters given in \code{params}.
 
-A typical implementation of the \code{quant} function would call \code{predict} on
-\code{model} and \code{newdata} to obtain the linear predictor matrix, and then post-multiply
+A typical implementation of the \code{outcome} function would call \code{predict} on
+\code{model} and \code{time} to obtain the linear predictor matrix, and then post-multiply
 that matrix by \code{params}. Having thus obtained model prediction at every time point,
-it would calculate the desired time series parameters and return it in a vector.
+it would calculate the desired time series outcome and return it in a vector.
 
 For example, to calculate the time series of the first derivative of incidence,
-you might use this function for \code{quant}:
+you might use this function for \code{outcome}:
 
 \code{
-calc_deriv(model, params, newdata) {
+calc_deriv(model, params, time) {
   eps = 0.001
-  predictors = predict(model, data.frame(time=newdata), type="lpmatrix")
+  predictors = predict(model, data.frame(time=time), type="lpmatrix")
   fit = model$family$linkinv(predictors %*% params)
-  predictors_eps = predict(model, data.frame(time=newdata + eps), type="lpmatrix")
+  predictors_eps = predict(model, data.frame(time=time + eps), type="lpmatrix")
   fit_eps = model$family$linkinv(predictors_eps %*% params)
   (fit_eps - fit) / eps
 }
 }
 
 The data frame returned by \code{outbreak.predict.timeseries} contains three columns and
-one row for each time point in \code{newdata}. The columns are \code{lower}, \code{median}, and
+one row for each time point in \code{time}. The columns are \code{lower}, \code{median}, and
 \code{upper}, containing the median and the confidence interval for the computed
-time series at each time point.
+outcome time series at each time point.
 }

@@ -4,15 +4,9 @@
 \alias{outbreak.calc.cum}
 \title{Predict cumulative case count for an outbreak}
 \usage{
-outbreak.calc.cum(model, params, time, timedelta = 1)
+outbreak.calc.cum(timedelta = 1)
 }
 \arguments{
-\item{model}{GAM/GAMM model for the outbreak}
-
-\item{params}{model parameters for the outbreak model}
-
-\item{time}{vector of time values at which the model will be evaluated}
-
 \item{timedelta}{time step of the data described by \code{model}; note that this is the
 time step of the original time series from which \code{model} was obtained, not the
 (potentially different) time step at which model predictions are being evaluated}
@@ -21,5 +15,5 @@ time step of the original time series from which \code{model} was obtained, not 
 time series of cumulative case counts
 }
 \description{
-This is useful as \code{quant} for outbreak.predict.timeseries.
+This is useful as \code{outcome} for outbreak.predict.timeseries.
 }

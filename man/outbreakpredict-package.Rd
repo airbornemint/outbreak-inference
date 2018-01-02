@@ -24,7 +24,7 @@ For each outbreak characteristic, the package produces median and confidence int
 Typical use of this package begins by using the package \code{\link{mgcv}} to obtain
 a GAM/GAMM model of the outbreak, followed by calling either \code{\link{outbreak.predict.scalars}} or
 \code{\link{outbreak.predict.timeseries}} to obtain confidence intervals on the
-desired scalar/timeseries parameters of the outbreak
+desired scalar/timeseries outcomes of the outbreak
 
 Both \code{\link{outbreak.predict.scalars}} and \code{\link{outbreak.predict.timeseries}}
 allow simulation of arbitrary outbreak characteristics, by passing a function that calculates
@@ -48,21 +48,23 @@ model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 # For the most part, you want the time span of the outbreak data divided into
 # small increments (here, eps)
 eps = .05
-modelTime = data.frame(time=seq(min(data$time) - 1 + eps, max(data$time), eps))
+modelTime = seq(min(data$time) - 1 + eps, max(data$time), eps)
 
 # Predict cumulative incidence count time series
-cumCases = outbreak.predict.timeseries(model, modelTime, function(model, params, newdata) {
-  outbreak.calc.cum(model, params, newdata$time, timedelta=1)
-}, level=.95)
+cumCases = outbreak.predict.timeseries(
+  model, modelTime,
+  outbreak.calc.cum(timedelta=1), level=.95
+)
 
 # Predict time when outbreak crosses 5\% and 95\% of cumulative case count
-thresholds = outbreak.predict.scalars(model, modelTime, function(model, params, newdata) {
-  outbreak.calc.thresholds(model, params, newdata$time, onset=0.05, offset=0.95)
-})
+thresholds = outbreak.predict.scalars(
+  model, modelTime,
+  outbreak.calc.thresholds(onset=0.05, offset=0.95), level=.95
+)
 
 # Plot cumulative incidence predictions and thresholds
 library(ggplot2)
-ggplot(cbind(cumCases, modelTime)) +
+ggplot(cbind(cumCases, data.frame(time=modelTime))) +
   geom_ribbon(aes(x=time, ymin=lower, ymax=upper), fill=grey(.75)) +
   geom_line(aes(x=time, y=median)) +
   annotate("rect",

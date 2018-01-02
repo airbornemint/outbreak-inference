@@ -4,14 +4,14 @@
 \alias{outbreak.predict.scalars}
 \title{Calculates confidence intervals for scalar predicted from generalized additive (mixed) model of an outbreak}
 \usage{
-outbreak.predict.scalars(model, newdata, quant, nsim = 100, level = 0.95)
+outbreak.predict.scalars(model, time, outcomes, nsim = 100, level = 0.95)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
-\item{newdata}{vector of time values at which the model will be evaluated}
+\item{time}{vector of time values at which the model will be evaluated}
 
-\item{quant}{function returning calculated scalar parameters, as described above}
+\item{outcomes}{function returning calculated scalar outcomes, as described above}
 
 \item{nsim}{number of simulations to run}
 
@@ -22,34 +22,34 @@ data frame of predictions, as described above
 }
 \description{
 This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
-For each simulated outbreak, it calls \code{quant} to calculate a scalar
-parameter for the simulated outbreak (for example, the time of outbreak peak).
+For each simulated outbreak, it calls \code{outcomess} to calculate scalar
+outcomes for the simulated outbreak (for example, the time of outbreak peak).
 It then calculates and returns the confidence interval of each simulated scalar
-parameter across all simulations.
+outcome across all simulations.
 }
 \details{
-The \code{quant} function must accept (\code{model}, \code{params}, \code{newdata}) and return a one-row data frame
-in which each column lists the value of a single scalar parameter calculated by the model
-evaluated at the time points given in \code{newdata} and using the model parameters
+The \code{outcomes} function must accept (\code{model}, \code{params}, \code{time}) and return a one-row data frame
+in which each column lists the value of a single scalar outcome calculated from the model
+evaluated at the time points given in \code{time} and using the model parameters
 given in \code{params}.
 
-A typical implementation of the \code{quant} function would call \code{predict} on
-\code{model} and \code{newdata} to obtain the linear predictor matrix, and then post-multiply
+A typical implementation of the \code{outcomes} function would call \code{predict} on
+\code{model} and \code{time} to obtain the linear predictor matrix, and then post-multiply
 that matrix by \code{params}. Having thus obtained model prediction at every time point,
-it would calculate the desired scalar parameters and return them in a data frame.
+it would calculate the desired scalar outcomes and return them in a data frame.
 
-For example, to calculate the time of outbreak peak, you might use this function for \code{quant}:
+For example, to calculate the time of outbreak peak, you might use this function for \code{outcomes}:
 
 \code{
-calc_peak(model, params, newdata) {
-  predictors = predict(model, data.frame(time=newdata), type="lpmatrix")
+calc_peak(model, params, time) {
+  predictors = predict(model, data.frame(time=time), type="lpmatrix")
   fit = model$family$linkinv(predictors %*% params)
-  data.frame(peak=newdata[which.max(fit)])
+  data.frame(peak=time[which.max(fit)])
 }
 }
 
 The data frame returned by \code{outbreak.predict.scalars} contains three columns for each
-parameter calculated by \code{quant}: for parameter \code{x} returned by \code{quant},
+outcome calculated by \code{outcomes}: for outcome \code{x} returned by \code{outcomes},
 \code{outbreak.predict.scalars} returns columns \code{x.lower}, \code{x.median}, and \code{x.upper}, corresponding
-to lower confidence limit, median, and upper confidence limit.
+to lower confidence limit, median, and upper confidence limit of \code{x}.
 }
