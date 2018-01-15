@@ -146,6 +146,7 @@ outbreak.predict.scalars.sim = function(model, time, outcomes, nsim=100) {
 #' @param predictions data frame of predictions as returned by \code{\link{outbreak.predict.scalars.sim}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.predict.scalars}}
+#' @export
 #' @keywords internal
 outbreak.predict.scalars.confints = function(predictions, level=.95) {
   confints = matrix(NA, nrow=1, ncol=0) %>% as.data.frame()
@@ -243,6 +244,7 @@ outbreak.predict.timeseries.sim = function(model, time, outcome, nsim=100) {
 #' @param predictions data frame of predictions as returned by \code{\link{outbreak.predict.timeseries.sim}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.predict.timeseries}}
+#' @export
 #' @keywords internal
 outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
   resultNames = c("lower", "median", "upper")
