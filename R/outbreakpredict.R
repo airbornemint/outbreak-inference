@@ -185,11 +185,10 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #' For example, to calculate the time of outbreak peak, you might use this function for \code{outcomes}:
 #'
 #' \code{
-#' calc_peak(model, params, time) {
+#' calc_peak = function(model, params, time) {
 #'   predictors = predict(model, data.frame(time=time), type="lpmatrix")
 #'   fit = model$family$linkinv(predictors %*% params)
 #'   data.frame(peak=time[which.max(fit)])
-#' }
 #' }
 #'
 #' The data frame returned by \code{outbreak.predict.scalars} contains three columns for each
@@ -285,14 +284,13 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #' you might use this function for \code{outcome}:
 #'
 #' \code{
-#' calc_deriv(model, params, time) {
+#' calc_deriv = function(model, params, time) {
 #'   eps = 0.001
 #'   predictors = predict(model, data.frame(time=time), type="lpmatrix")
 #'   fit = model$family$linkinv(predictors %*% params)
 #'   predictors_eps = predict(model, data.frame(time=time + eps), type="lpmatrix")
 #'   fit_eps = model$family$linkinv(predictors_eps %*% params)
 #'   (fit_eps - fit) / eps
-#' }
 #' }
 #'
 #' The data frame returned by \code{outbreak.predict.timeseries} contains three columns and
