@@ -43,7 +43,7 @@
 #' offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
 #' \code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
 #'
-#' @name outbreakpredict-package
+#' @name outbreakinference-package
 #' @docType package
 #' @author Ben Artin \email{ben@@artins.org}
 #'
