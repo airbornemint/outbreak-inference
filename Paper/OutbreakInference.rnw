@@ -47,7 +47,7 @@
 \newcommand\I{\ensuremath{\mathit{I}}}
 \newcommand\CI{\ensuremath{\mathit{CI}}}
 \newcommand\TI{\ensuremath{\mathit{TI}}}
-\newcommand\On{\ensuremath{\mathit{On}}}
+\newcommand\On{\ensuremath{\mathit{T_{on}}}}
 \newcommand\Ppx{\ensuremath{\mathit{Ppx}}}
 \newcommand\PF{\ensuremath{\mathit{PF}}}
 
@@ -160,7 +160,7 @@ A \textit{generalized linear model} (GLM) provides a means of estimating a respo
     g(\hat{y}) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_n x_n
 \end{equation*}
 
-where $g$ is a function such that $g(y)$ is normally distributed (``link function'').
+where $g$ is a function such that $g(y; x_1, x_2, \dots x_n)$ is normally distributed (``link function'').
 
 A \textit{generalized additive model} (GAM) generalizes GLMs by removing the linearity requirement:
 
@@ -172,7 +172,7 @@ where $f_i$ are, broadly, smooth functions, and $g$ is the link function. In GAM
 
 \subsection{Basis splines}
 
-A \textit{spline function} of order $n$ is a piecewise polynomial function $f = f(x)$ of degree $n - 1$. A spline function is determined by a vector $\vec t = (t_1, t_2, \dots, t_k)$, where $t_i \leq t_j$ for all $i < j$ (``knot vector''), and is continuous in derivatives up to that of degree $n - k + d - 1$, where $d$ is the number of distinct knots. If all knots are distinct, the spline function is continuous in all derivatives up to derivative of degree $n - 1$. 
+A \textit{spline function} of order $n$ is a piecewise polynomial function $f = f(x)$ of degree $n - 1$. A spline function is determined by a vector $\vec t = (t_1, t_2, \dots, t_k)$, where $t_i \leq t_j$ for all $i < j$ (``knot vector''), and is continuous in derivatives up to that of degree $n - k + d - 1$, where $d$ is the number of distinct knots. If all knots are distinct ($d = k$), the spline function is continuous in all derivatives up to derivative of degree $n - 1$. 
 
 The set of splines of order $n$ over the knot vector $\vec t$ is a linear space of dimension $k + n - 2$. Furthermore, it has a unique basis $B_i$ satisfying the criteria that $B_i(x) = 0$ for all $x \leq t_i$ and all $x \geq t_{i+n}$ (locality), and $\sum_i B_i(x) = 1$ for all $t_1 \leq x \leq t_n$ (scaling). This unique basis $B_i$ is known as the \textit{basis splines} (``B-splines'') of order $n$ over the knot vector $\vec t$.
 
@@ -182,31 +182,32 @@ B-spline smoothness properties are one-sided at the endpoints of their domain. A
 
 \subsection{Penalized B-splines in GAM}
 
-% TODO no 1-1 mapping between Bi and xi
-
 B-splines, by virtue of their smoothness, can be used as predictor functions $f_i$ in a GAM:
 
+\begin{align*}
+    g(\hat{y}) = \beta_0 &+ \beta_{1,1} B_{1,1}(x_1) + \beta_{1,2} B_{1,2}(x_1) + \dots \\
+    &+ \beta_{2,1} B_{2,1}(x_2) + \beta_{2,2} B_{2,2}(x_2) + \dots \\
+    &+ \dots \\
+    &+ \beta_{n,1} B_{n,1}(x_n) + \beta_{n,2} B_{n,2}(x_n) + \dots
+\end{align*}
+
+where $B_{i,j}$ are basis spline functions and $\beta_{i,j}$ are model parameters.
+
+However, it can be difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines constrained to guarantee smoothness across domain endpoints are known as cyclic P-splines.
+
+For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data.
+
+Consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by sampling each $\beta_{i,j}$ from its distribution (obtained from GAM), and then calculating 
+
 \begin{equation*}
-    g(\hat{y}) = \beta_0 + \beta_1 B_1(x_1) + \beta_2 B_2(x_2) + \dots + \beta_n B_n(x_n)
+    \hat z = z(\hat y) = z(g^{-1}(\beta_0 + \sum_{i,j} \beta_{i,j} B_{i,j}(x_i)))
 \end{equation*}
 
-where $B_i$ are basis spline functions and $\beta_i$ are model parameters.
-
-However, it is difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). As with B-splines, P-splines constrained to guarantee smoothness across domain endpoints are known as cyclic P-splines.
-
-For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_i$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data.
-
-Consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by repeatedly sampling each $\beta_i$ from its distribution (obtained from GAM), and then calculating 
-
-\begin{equation*}
-    \hat z = z(\hat y) = z(g^{-1}(\beta_0 + \beta_1 B_1(x_1) + \beta_2 B_2(x_2) + \dots + \beta_n B_n(x_n)))
-\end{equation*}
-
-thereby obtaining a distribution of $\hat z$, from which we can make point estimates, as well as interval estimates, of $z$. 
+thereby obtaining a sampling distribution of $\hat z$, from which we can make interval estimates of $z$. 
 
 \section{Example}
 
-In the analysis that motivated the development of this approach, we are concerned with the seasonal patterns of RSV infections. Consider the RSV season, based on real data from Connecticut, shown in Figure \ref{fig:sampleCases}.
+In the analysis that motivated the development of this approach, we were analyzing the seasonal patterns of RSV infections. Consider the RSV season, based on real data from Connecticut, shown in Figure \ref{fig:sampleCases}.
 
 <<sampleCases, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
@@ -280,20 +281,20 @@ where $B_i$ are cyclic basis splines. Using cubic splines with 20 knots for our 
 We now turn to the first outcome of interest in our analysis. We want to estimate when the RSV season begins, so we define season onset ($\On$) to be the point in time when the cumulative incidence of RSV to date ($\CI(t)$) rises above 2.5\% of the total cumulative incidence ($\TI$) of RSV for the season:
 
 \begin{align*}
-    \CI(t) &= \sum_{t_i \leq t} \I(t_i) \\
-    \TI &= \sum_t \I(t_i) \\
+    \CI(t) &= \sum_{\tau \leq t} \I(\tau) \\
+    \TI &= \sum \I(\tau) \\
     \On &= \min(t \, | \, \CI(t) \geq 0.025 \cdot \TI)
 \end{align*}
 
 To estimate season onset, we begin with estimated incidence ($\hat \I$) obtained from P-spline approximation, which we numerically integrate to obtain an estimate of cumulative incidence ($\widehat{\CI}$), and then define estimated season onset ($\widehat{\On}$) to be the point in time when estimated cumulative incidence rises above 2.5\% of the estimated total cumulative incidence ($\widehat{\TI}$) for the season:
 
 \begin{align*}
-    \widehat\CI(t) &= \int_{-0.5}^{t + 0.5} \hat\I(t_i) \, dt_i \\
-    \widehat\TI &= \int \hat\I(t_i) \, dt_i\\
+    \widehat\CI(t) &= \int_{-0.5}^{t + 0.5} \hat\I(\tau) \, d\tau \\
+    \widehat\TI &= \int \hat\I(\tau) \, d\tau\\
     \widehat\On &= \min(t \, | \, \widehat\CI(t) \geq 0.025 \cdot \widehat\TI)
 \end{align*}
 
-By sampling all $\beta_i$ from their distributions, numerically integrating the resultant $\hat\I(t)$ to obtain $\widehat{\CI}(t)$ and $\widehat{\TI}$ (Figure \ref{fig:samplePredCumMini}), and then calculating the onset estimate (Figure \ref{fig:samplePredOnsetMini}), we estimate the distribution of RSV season onset (Figure \ref{fig:sampleOnsetFull}).
+By sampling $\beta_{i,j}$ from their distributions, numerically integrating the resultant $\hat\I(t)$ to obtain $\widehat{\CI}(t)$ and $\widehat{\TI}$ (Figure \ref{fig:samplePredCumMini}), and then calculating the onset estimate $\widehat\On$ (Figure \ref{fig:samplePredOnsetMini}), we obtain a sampling distribution of $\widehat\On$ (Figure \ref{fig:sampleOnsetFull}) from which we can calculate interval estimates of $\On$.
 
 <<samplePredCumMini, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/samplePredCumMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
@@ -412,11 +413,11 @@ For simplicity, we assume that protection conferred by RSV prophylaxis is either
  1 & $t_\mathit{start} \leq t \leq t_\mathit{end}$ \\
  0 & otherwise
  \end{dcases*} \\
-    \PF &= \sum \Ppx(t_i) \I(t_i) / \TI = \CI(t_\mathit{end}) - \CI(t_\mathit{start}) \\
-    \widehat{\PF} &= \int \widehat{\Ppx}(t_i) \hat{\I}(t_i) / \widehat{\TI} \, dt_i = \widehat\CI(t_\mathit{end}) - \widehat\CI(t_\mathit{start})
+    \PF &= \sum \Ppx(\tau) \I(\tau) / \TI = \CI(t_\mathit{end}) - \CI(t_\mathit{start}) \\
+    \widehat{\PF} &= \int \Ppx(\tau) \hat{\I}(\tau) / \widehat{\TI} \, d\tau = \widehat\CI(t_\mathit{end}) - \widehat\CI(t_\mathit{start})
 \end{align*}
 
-As before, we sample $\beta_i$ to obtain interval estimates of $\PF$.
+As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\widehat\PF$ and thereby calculate interval estimates of $\PF$.
 
 <<samplePredSingle, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
