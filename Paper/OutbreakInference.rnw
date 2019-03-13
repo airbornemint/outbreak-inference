@@ -85,8 +85,8 @@ options(tikzMetricsDictionary='./tikzDictionary.dat')
 @
     
 \edef\figuresDir{\Sexpr{figuresDir}}
-\title{Use of penalized basis splines in estimation of seasonal and sporadic infectious disease outbreak outcomes}
-\def\headertitle{Use of P-splines in estimation of infectious disease outbreak outcomes}
+\title{Use of penalized basis splines in estimation of outcomes of seasonal and sporadic infectious disease outbreaks}
+\def\headertitle{Use of P-splines in estimation of outcomes of infectious disease outbreaks}
 
 \author{
     \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{1}}\\
