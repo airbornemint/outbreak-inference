@@ -28,15 +28,35 @@ randomMVN = function(mu, sig, nsim) {
   t(mu + L %*% matrix(rnorm(m * nsim), m, nsim))
 }
 
+calcFit = function(model, params, time) {
+  # Get model predictions for given (randomized) param values
+  predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
+  fit = predictors %*% params
+  
+  # Map spline fit back to data
+  fit = fit %>% model$family$linkinv()
+}
+
 sampleCalcPred = function(sampleParams, sampleNsim) {
   sampleParams %>%
-    apply(1, function(params) { outbreak.calc.cum(1)(sampleModel, params, modelTime) } ) %>%
+    apply(1, function(params) { calcFit(sampleModel, params, modelTime) } ) %>%
     data.frame() %>%
     setnames(as.character(seq(1:sampleNsim))) %>%
     cbind(time=modelTime) %>%
     melt(c("time")) %>%
-    rename(sim=variable, rsv.cum.frac=value) %>%
-    mutate(sim=as.numeric(sim))  
+    rename(sim=variable, rsv=value) %>%
+    mutate(sim=as.numeric(sim)) %>%  
+    inner_join(
+      sampleParams %>%
+        apply(1, function(params) { outbreak.calc.cum(1)(sampleModel, params, modelTime) } ) %>%
+        data.frame() %>%
+        setnames(as.character(seq(1:sampleNsim))) %>%
+        cbind(time=modelTime) %>%
+        melt(c("time")) %>%
+        rename(sim=variable, rsv.cum.frac=value) %>%
+        mutate(sim=as.numeric(sim)),
+      by=c("time", "sim")
+    )
 }
 
 sampleCalcOnset = function(sampleParams) {

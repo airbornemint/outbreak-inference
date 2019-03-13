@@ -91,7 +91,7 @@
 % Footers
 \lfoot{} % Left footer
 \cfoot{} % Center footer
-\fancyfoot[RO,LE]{\footnotesize Page \thepage\ of \pageref{LastPage}} % Right footer, "Page 1 of 2"
+\fancyfoot[R]{\footnotesize Page \thepage\ of \pageref{LastPage}} % Right footer, "Page 1 of 2"
 
 \fancypagestyle{firstpage}{ % Page style for the first page with the title
 	\fancyhf{}
@@ -157,7 +157,7 @@
 %\usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
 \usepackage[nottoc]{tocbibind}
 
-\addbibresource{../OutbreakInference.bib} % The filename of the bibliography
+\addbibresource{OutbreakInference.bib} % The filename of the bibliography
 \renewcommand{\cite}[1]{\autocite{#1}}
 
 \usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
