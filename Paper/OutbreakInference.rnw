@@ -114,23 +114,8 @@ options(tikzMetricsDictionary='./tikzDictionary.dat')
 \endgroup
 
 \section*{\centerline{Abstract}}
-\begin{hangparas}{\abstractindent}{1}
-\begin{onehalfspacing}
 
-TBD
-
-\abstractsection{Background}
-
-\abstractsection{Methods}
-
-\abstractsection{Results}
-
-\abstractsection{Conclusion}
-
-\abstractpara{}
-
-\end{onehalfspacing}
-\end{hangparas}
+Seasonal and sporadic outbreaks of infectious diseases are usually amenable to generalized linear modeling (GLM) and generalized additive modeling (GAM). The existing R packages for GAM and GLM provide a convenient means of making interval estimates of disease incidence at specific points in time. However, outbreak outcome measures that are of interest in clinical and public health practice often require estimation of incidence accumulated over periods of time. No comparably convenient R package exists for interval estimation of outcome measures that are derived from cumulative disease incidence. We describe a method of obtaining such estimates using GAM with penalized basis splines (P-splines), and an R package providing a convenient interface for performing such analysis.
 
 \clearpage
 
