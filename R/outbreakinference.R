@@ -313,6 +313,26 @@ outbreak.predict.timeseries = function(model, time, outcome, nsim=1000, level=.9
     outbreak.predict.timeseries.confints(level)
 }
 
+#' Predict case count for an outbreak
+#'
+#' This is useful as \code{outcome} for outbreak.predict.scalars.
+#'
+#' @param timedelta time step of the data described by \code{model}; note that this is the
+#' time step of the original time series from which \code{model} was obtained, not the
+#' (potentially different) time step at which model predictions are being evaluated
+#' @return time series of cumulative case counts
+#' @export
+outbreak.calc.cases = function(timedelta=1) {
+  function(model, params, time) {
+    # Get model predictions for given (randomized) param values
+    predictors = model %>% predict(data.frame(time=time + timedelta / 2), type="lpmatrix")
+    fit = predictors %*% params
+
+    # Map spline fit back to data
+    fit %>% model$family$linkinv()
+  }
+}
+
 #' Predict cumulative case count for an outbreak
 #'
 #' This is useful as \code{outcome} for outbreak.predict.timeseries.
