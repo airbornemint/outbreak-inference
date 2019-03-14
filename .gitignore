@@ -1,3 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+/Paper/cache
+/Paper/figures
+/Paper/tikzDictionary.dat
+/Paper/OutbreakInference.tex
