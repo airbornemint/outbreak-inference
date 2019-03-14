@@ -41,7 +41,7 @@
 #' For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
 #' be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and
 #' offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
-#' \code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
+#' \code{\link{outbreak.predict.timeseries}} to predict cumulative incidence vs time for the outbreak.
 #'
 #' @name outbreakinference-package
 #' @docType package
@@ -190,6 +190,7 @@ outbreak.predict.scalars.confints = function(predictions, level=.95) {
 #'   fit = model$family$linkinv(predictors %*% params)
 #'   data.frame(peak=time[which.max(fit)])
 #' }
+#' }
 #'
 #' The data frame returned by \code{outbreak.predict.scalars} contains three columns for each
 #' outcome calculated by \code{outcomes}: for outcome \code{x} returned by \code{outcomes},
@@ -291,6 +292,7 @@ outbreak.predict.timeseries.confints = function(predictions, level=0.95) {
 #'   predictors_eps = predict(model, data.frame(time=time + eps), type="lpmatrix")
 #'   fit_eps = model$family$linkinv(predictors_eps %*% params)
 #'   (fit_eps - fit) / eps
+#' }
 #' }
 #'
 #' The data frame returned by \code{outbreak.predict.timeseries} contains three columns and
