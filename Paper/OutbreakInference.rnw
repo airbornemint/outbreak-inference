@@ -58,7 +58,7 @@
 @
 
 <<load>>=
-knitr::read_chunk("./OutbreakInference.R")
+knitr::read_chunk("./OutbreakInferencePaper.R")
 @
 
 <<paper, warning=FALSE>>=
