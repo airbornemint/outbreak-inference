@@ -33,7 +33,7 @@ the desired characteristics into \code{\link{outbreak.predict.scalars}} or \code
 For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
 be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and
 offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
-\code{\link{outbreak.predict.timeseries}} to #' predict cumulative incidence vs time for the outbreak.
+\code{\link{outbreak.predict.timeseries}} to predict cumulative incidence vs time for the outbreak.
 }
 \examples{
 # Simulate an outbreak for analysis
