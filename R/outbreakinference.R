@@ -111,6 +111,16 @@ randomMVN = function(mu, sig, nsim) {
   t(mu + L %*% matrix(rnorm(m * nsim), m, nsim))
 }
 
+#' @keywords internal
+outbreak.predict.params = function(model, nsim=100) {
+  randomMVN(coef(model), model$Vp, nsim)
+}
+
+#' @keywords internal
+outbreak.predict.scalars.simapply = function(params, model, time, outcomes) {
+  params %>% apply(1, function(p) { outcomes(model, p, time) }) %>% bind_rows()
+}
+
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
 #' scalar outbreak outcomes, and returns predicted scalar outcome values for each simulation.
 #'
@@ -130,9 +140,9 @@ randomMVN = function(mu, sig, nsim) {
 outbreak.predict.scalars.sim = function(model, time, outcomes, nsim=100) {
   # Multivariate normal random generator
   # Generate random model parameters
-  randomParams = randomMVN(coef(model), model$Vp, nsim)
+  predictions = model %>% outbreak.predict.params(nsim) %>%
+    outbreak.predict.scalars.simapply(model, time, outcomes)
 
-  predictions = bind_rows(apply(randomParams, 1, function(params) { outcomes(model, params, time) }))
   if (any(is.na(predictions))) {
     warning("Some predictions are NA")
     return()
@@ -210,6 +220,11 @@ outbreak.predict.scalars = function(model, time, outcomes, nsim=100, level=.95) 
     outbreak.predict.scalars.confints(level)
 }
 
+#' @keywords internal
+outbreak.predict.timeseries.simapply = function(params, model, time, outcome) {
+  apply(params, 1, function(p) { outcome(model, p, time) })  
+}
+
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak outcomes, and
 #' returns predicted time series outcomes for each simulation.
 #'
@@ -228,9 +243,9 @@ outbreak.predict.scalars = function(model, time, outcomes, nsim=100, level=.95) 
 #' @keywords internal
 outbreak.predict.timeseries.sim = function(model, time, outcome, nsim=100) {
   # Generate random model parameters
-  randomParams = randomMVN(coef(model), model$Vp, nsim)
+  predictions = model %>% outbreak.predict.params(nsim) %>%
+    outbreak.predict.timeseries.simapply(model, time, outcome)
 
-  predictions = apply(randomParams, 1, function(params) { outcome(model, params, time) })
   if (any(is.na(predictions))) {
     warning("Model did not converge, try reducing the number of spline knots in GAM")
     return()

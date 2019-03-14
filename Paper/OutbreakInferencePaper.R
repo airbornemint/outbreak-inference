@@ -22,47 +22,39 @@ modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
 
 sampleModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=sampleObs)
 
-randomMVN = function(mu, sig, nsim) {
-  L = mroot(sig)
-  m = ncol(L)
-  t(mu + L %*% matrix(rnorm(m * nsim), m, nsim))
-}
+predCases = function(params, model) {
+  pred = params %>%
+    outbreakinference:::outbreak.predict.timeseries.simapply(model, modelTime, outbreak.calc.cases()) %>%
+    data.frame()
 
-calcFit = function(model, params, time) {
-  # Get model predictions for given (randomized) param values
-  predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
-  fit = predictors %*% params
-  
-  # Map spline fit back to data
-  fit = fit %>% model$family$linkinv()
-}
+  col = ncol(pred)
 
-sampleCalcPred = function(sampleParams, sampleNsim) {
-  sampleParams %>%
-    apply(1, function(params) { calcFit(sampleModel, params, modelTime) } ) %>%
-    data.frame() %>%
-    setnames(as.character(seq(1:sampleNsim))) %>%
+  pred = pred %>%
+    setnames(as.character(seq(1:col))) %>%
     cbind(time=modelTime) %>%
     melt(c("time")) %>%
     rename(sim=variable, rsv=value) %>%
-    mutate(sim=as.numeric(sim)) %>%  
-    inner_join(
-      sampleParams %>%
-        apply(1, function(params) { outbreak.calc.cum(1)(sampleModel, params, modelTime) } ) %>%
-        data.frame() %>%
-        setnames(as.character(seq(1:sampleNsim))) %>%
-        cbind(time=modelTime) %>%
-        melt(c("time")) %>%
-        rename(sim=variable, rsv.cum.frac=value) %>%
-        mutate(sim=as.numeric(sim)),
-      by=c("time", "sim")
-    )
+    mutate(sim=as.numeric(sim))
 }
 
-sampleCalcOnset = function(sampleParams) {
-  sampleParams %>% 
-    apply(1, function(params) { outbreakinference::outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)(sampleModel, params, modelTime) } ) %>%
-    bind_rows() %>%
+predCum = function(params, model) {
+  pred = params %>%
+    outbreakinference:::outbreak.predict.timeseries.simapply(model, modelTime, outbreak.calc.cum()) %>%
+    data.frame()
+
+  col = ncol(pred)
+
+  pred = pred %>%
+    setnames(as.character(seq(1:col))) %>%
+    cbind(time=modelTime) %>%
+    melt(c("time")) %>%
+    rename(sim=variable, rsv.cum.frac=value) %>%
+    mutate(sim=as.numeric(sim))
+}
+
+predOnset = function(params, model) {
+  params %>%
+    outbreakinference:::outbreak.predict.scalars.simapply(model, modelTime, outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)) %>%
     select(onset)
 }
 
@@ -94,42 +86,39 @@ monthBoundaries = breaks.df %>%
   ) %>%
   select(i, min, mid, max)
 
-sampleCalcFraction = function(samplePred) {
-  samplePred %>%
-    mutate(ppx=aapStrat(time)) %>%
-    filter(ppx > 0) %>%
-    group_by(sim) %>%
-    do((function(df) {
-      df = df %>% arrange(time)
-      data.frame(
-        ppx.start=min(df$time),
-        ppx.end=max(df$time),
-        unprotected.start=first(df$rsv.cum.frac),
-        unprotected.end=last(df$rsv.cum.frac)
-      ) %>% mutate(
-        unprotected=unprotected.end-unprotected.start
-      )
-    })(.)) %>%
-    ungroup() %>%
-    as.data.frame()  
+calcFraction = function(model, params, time) {
+  predictors = predict(model, data.frame(time=time), type="lpmatrix")
+  cases = model$family$linkinv(predictors %*% params)
+
+  cases = data.frame(time=time, cases=cases)
+  totalCases = sum(cases$cases)
+  preventableCases = sum(cases$cases[cases$time >= ppxStart & cases$time <= ppxEnd])
+
+  data.frame(preventable=c(preventableCases / totalCases))
 }
 
-sampleParamsSingle = randomMVN(coef(sampleModel), sampleModel$Vp, 1)
-samplePredSingle = sampleParamsSingle %>% sampleCalcPred(1)
-sampleFractionSingle = samplePredSingle %>% sampleCalcFraction()
+predFraction = function(params, model) {
+  params %>%
+    outbreakinference:::outbreak.predict.scalars.simapply(model, modelTime, calcFraction)
+}
+
+sampleParamsSingle = sampleModel %>% outbreakinference:::outbreak.predict.params(1)
+predCumSingle = sampleParamsSingle %>% predCum(sampleModel)
+predFractionSingle = sampleParamsSingle %>% predFraction(sampleModel)
 
 sampleNsimMini = 5
-sampleParamsMini = randomMVN(coef(sampleModel), sampleModel$Vp, sampleNsimMini)
-samplePredMini = sampleParamsMini %>% sampleCalcPred(sampleNsimMini)
-sampleOnsetMini = sampleParamsMini %>% sampleCalcOnset()
+sampleParamsMini = sampleModel %>% outbreakinference:::outbreak.predict.params(sampleNsimMini)
+predCasesMini = sampleParamsMini %>% predCases(sampleModel)
+predCumMini = sampleParamsMini %>% predCum(sampleModel)
+predOnsetMini = sampleParamsMini %>% predOnset(sampleModel)
 
 zoomedStartWeek = min(monthBoundaries$min) + 5
 zoomedEndWeek = zoomedStartWeek + 21
 
 sampleNsimFull = simulations
-sampleParamsFull = randomMVN(coef(sampleModel), sampleModel$Vp, sampleNsimFull)
-samplePredFull = sampleParamsFull %>% sampleCalcPred(sampleNsimFull)
-sampleOnsetFull = sampleParamsFull %>% sampleCalcOnset()
-sampleFractionFull = samplePredFull %>% sampleCalcFraction()
+sampleParamsFull = sampleModel %>% outbreakinference:::outbreak.predict.params(sampleNsimFull)
+predCumFull = sampleParamsFull %>% predCum(sampleModel)
+predOnsetFull = sampleParamsFull %>% predOnset(sampleModel)
+predFractionFull = sampleParamsFull %>% predFraction(sampleModel)
 
 sampleDisplayNsim = 100
