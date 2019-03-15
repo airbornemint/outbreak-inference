@@ -6,6 +6,7 @@ vignette: >
   %\VignetteIndexEntry{RSV example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{outbreakinference, reshape, mgcv, data.table, ggplot2, ggstance, knitr}
 ---
 ```{r libraries, include=TRUE}
 import::from(outbreakinference, outbreak.calc.cases, outbreak.calc.cum, outbreak.calc.thresholds, outbreak.predict.scalars, outbreak.predict.scalars.sim, outbreak.predict.timeseries, outbreak.predict.timeseries.sim)
