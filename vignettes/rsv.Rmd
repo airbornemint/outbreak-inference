@@ -9,15 +9,15 @@ vignette: >
   %\VignetteDepends{outbreakinference, reshape, mgcv, data.table, ggplot2, ggstance, knitr}
 ---
 ```{r libraries, include=TRUE}
-import::from(outbreakinference, outbreak.calc.cases, outbreak.calc.cum, outbreak.calc.thresholds, outbreak.predict.scalars, outbreak.predict.scalars.sim, outbreak.predict.timeseries, outbreak.predict.timeseries.sim)
+library(outbreakinference)
 
-import::from(reshape, melt)
-import::from(dplyr, "%>%", rename, mutate, bind_rows, select, filter, group_by, ungroup, do, arrange, first, last, inner_join, matches)
-import::from(mgcv, gam, mroot)
-import::from(data.table, setnames)
-import::from(ggplot2, ggplot, aes, theme_light, theme, element_blank, element_text, geom_ribbon, geom_point, geom_line, geom_segment, geom_violin, scale_x_continuous, scale_y_continuous, labs, coord_cartesian)
-import::from(ggstance, geom_violinh)
-import::from(knitr, kable)
+library(reshape)
+library(dplyr)
+library(mgcv)
+library(data.table)
+library(ggplot2)
+library(ggstance)
+library(knitr)
 ```
 
 Set up some utilities for plotting
