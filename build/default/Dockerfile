@@ -11,7 +11,7 @@ RUN apt-get update -y -qq
 # RUN apt-mark auto ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES="libcurl4-gnutls-dev gnutls-dev libssh2-1-dev libxml2-dev zlib1g-dev libgit2-dev libssl-dev"
+ARG R_APT_DEPENDENCIES="libcurl4-gnutls-dev gnutls-dev libssh2-1-dev libxml2-dev zlib1g-dev libgit2-dev libssl-dev pandoc pandoc-citeproc"
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
 ### Setup misc other packages needed to run our build
