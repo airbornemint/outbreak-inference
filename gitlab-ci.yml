@@ -20,7 +20,6 @@ variables:
     - echo "R_LIBS=${R_PACKAGE_CACHE}" > .Renviron
     - echo "R_LIBS_USER=${R_PACKAGE_CACHE}" >> .Renviron
     - echo "R_PACKAGE_CACHE=${R_PACKAGE_CACHE}" >> .Renviron
-    - install2.r -s -l "${R_PACKAGE_CACHE}" devtools
     - Rscript -e "devtools::install_dev_deps()"
   
   cache:
