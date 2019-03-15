@@ -56,5 +56,5 @@ docker-setup:
   tags: 
     - dind-mem:2
   variables:
-    BUILD_DOCKER_CONTEXT: gitlab/default
-    DOCKER_BOOTSTRAP_PATH: gitlab/docker
+    BUILD_DOCKER_CONTEXT: build/default
+    DOCKER_BOOTSTRAP_PATH: build/docker
