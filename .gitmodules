@@ -1,0 +1,3 @@
+[submodule "build/docker"]
+	path = build/docker
+	url = https://airbornemint@gitlab.com/airbornemint//gitlab-docker-bootstrap.git
