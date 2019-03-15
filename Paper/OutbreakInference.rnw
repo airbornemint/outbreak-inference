@@ -341,7 +341,7 @@ By sampling $\beta_{i,j}$ from their distributions, numerically integrating the 
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
       geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
       geom_violinh(
-        data=sampleOnsetFull,
+        data=predOnsetFull,
         aes(x=onset, y=seasonThreshold),
         width=.01,
         fill="gray50", color="black",

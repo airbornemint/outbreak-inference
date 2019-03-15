@@ -1,5 +1,5 @@
 # ---- paper ----
-import::from(outbreakinference, outbreak.calc.cum)
+import::from(outbreakinference, outbreak.calc.cum, outbreak.calc.cases, outbreak.calc.thresholds)
 
 import::from(reshape, melt)
 import::from(dplyr, "%>%", rename, mutate, bind_rows, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
@@ -58,12 +58,11 @@ predOnset = function(params, model) {
     select(onset)
 }
 
-evalStrategy = function(start, end, time) {
-  as.numeric((time >= start) & (time < end))
-}
-aapStart = 20
-aapStrat = function(time) {
-  evalStrategy(aapStart, aapStart + ppxDuration, time)
+ppxStart = 20
+ppxEnd = 20 + 24
+
+aapStrat = function(t) {
+  as.numeric(t >= ppxStart & t <= ppxEnd)
 }
 
 # .01 to let minor gridlines show through
