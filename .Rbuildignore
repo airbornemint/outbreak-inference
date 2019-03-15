@@ -5,3 +5,4 @@ LICENSE.md
 ^Paper
 ^build
 ^\.cache
+^\.gitlab-ci.yml
