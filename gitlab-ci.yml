@@ -66,6 +66,8 @@ knitr:
     - find "${R_BUILD_DIR}" -name "outbreakinference*.tar.gz" -exec install2.r {} \;
     - cd "${TEX_DIR}"
     - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('OutbreakInference.rnw')"
+  dependencies:
+    - build-release
   artifacts:
     paths:
       - "${TEX_DIR}/OutbreakInference.tex"
