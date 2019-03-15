@@ -1,4 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 LICENSE.md
-.git
+^\.git
+^Paper
+^build
+^\.cache
+^\.gitlab-ci.yml

@@ -1,0 +1,112 @@
+include:
+  - project: airbornemint/gitlab-docker-bootstrap
+    file: "docker-setup.yml"
+
+stages:
+  - docker-setup
+  - build
+  - check
+  - knitr
+  - overleaf
+  - tex
+
+variables:
+  R_BUILD_DIR: "build"
+  R_PACKAGE_CACHE: ".cache/r"
+  TEX_DIR: "Paper" # Relative to build root
+  OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
+  KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
+  
+.r:
+  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  before_script:
+    - mkdir -p /usr/local/lib/R/etc
+    - mkdir -p "${R_PACKAGE_CACHE}"
+    - echo "R_LIBS=${R_PACKAGE_CACHE}" > .Renviron
+    - echo "R_LIBS_USER=${R_PACKAGE_CACHE}" >> .Renviron
+    - echo "R_PACKAGE_CACHE=${R_PACKAGE_CACHE}" >> .Renviron
+    - Rscript -e "devtools::install_dev_deps()"
+  
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${R_PACKAGE_CACHE}"
+  
+build-release:
+  extends: .r
+  tags:
+    - docker
+  stage: build
+  script:
+    - mkdir -p "${R_BUILD_DIR}"
+    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = TRUE, binary = FALSE)"
+  artifacts:
+    paths:
+      - "${R_BUILD_DIR}/outbreakinference*.tar.gz"
+    when: always
+
+check-release:
+  extends: .r
+  tags:
+    - docker
+  stage: check
+  script:
+    - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='outbreakinference.*t.*gz')[1]))"
+    
+knitr:
+  stage: knitr
+  tags:
+    - docker-mem:3
+  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${TEX_DIR}/${KNITR_CACHE_DIR}"
+  script:
+    - find "${R_BUILD_DIR}" -name "outbreakinference*.tar.gz" -exec install2.r {} \;
+    - cd "${TEX_DIR}"
+    - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('OutbreakInference.rnw')"
+  dependencies:
+    - build-release
+  artifacts:
+    paths:
+      - "${TEX_DIR}/OutbreakInference.tex"
+      - "${TEX_DIR}/figures"
+
+overleaf:
+  stage: overleaf
+  tags:
+    - docker
+  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  script:
+    - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+  artifacts:
+    paths:
+      - "${OVERLEAF_ARTIFACTS_DIR}"
+
+tex:
+  stage: tex
+  tags:
+    - docker
+  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  script:
+    - cd "${OVERLEAF_ARTIFACTS_DIR}"
+    - lualatex "OutbreakInference.tex"
+    - bibtex "OutbreakInference"
+    - lualatex "OutbreakInference.tex"
+    - lualatex "OutbreakInference.tex"
+    - mv "OutbreakInference.pdf" "${CI_PROJECT_DIR}"
+  artifacts:
+    paths:
+      - "OutbreakInference.pdf"
+
+# Set up docker image for the rest of the build, keyed off commit ID
+docker-setup:
+  extends: .docker-setup
+  stage: docker-setup
+  tags: 
+    - dind-mem:2
+  variables:
+    BUILD_DOCKER_CONTEXT: build/default
+    DOCKER_BOOTSTRAP_PATH: build/docker
