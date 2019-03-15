@@ -180,9 +180,7 @@ where $B_{i,j}$ are basis spline functions and $\beta_{i,j}$ are model parameter
 
 However, it can be difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines constrained to guarantee smoothness across domain endpoints are known as cyclic P-splines.
 
-For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data.
-
-Consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by sampling each $\beta_{i,j}$ from its distribution (obtained from GAM), and then calculating
+For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data. For example, consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by sampling each $\beta_{i,j}$ from its distribution (obtained from GAM), and then calculating
 
 \begin{equation*}
     \hat z = z(\hat y) = z(g^{-1}(\beta_0 + \sum_{i,j} \beta_{i,j} B_{i,j}(x_i)))
@@ -192,7 +190,7 @@ thereby obtaining a sampling distribution of $\hat z$, from which we can make in
 
 \section{Example}
 
-In the analysis that motivated the development of this approach, we were analyzing the seasonal patterns of RSV infections. Consider the RSV season, based on real data from Connecticut, shown in Figure \ref{fig:sampleCases}.
+In the analysis that motivated the development of this approach, we were analyzing the seasonal patterns of RSV infections. For example, consider a hypothetical RSV season shown in Figure \ref{fig:sampleCases} (for privacy reasons, no actual patient data is used in our examples). 
 
 <<sampleCases, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
@@ -391,7 +389,7 @@ By sampling $\beta_{i,j}$ from their distributions, numerically integrating the 
 
 RSV prophylaxis is available today; due to its cost, the guidelines published by the American Academy of Pediatrics (AAP) limit its use to high-risk patients and high-incidence periods. In the second part of our analysis, we ask: what fraction of RSV cases occurs during the time when the AAP-recommended prophylaxis is administered to high-risk patients? We call this the ``preventable fraction'', $\PF$.
 
-For simplicity, we assume that protection conferred by RSV prophylaxis is either 100\% or none, and define $t_\mathit{start}$ to be the time at which prophylaxis begins to offer protection, and $t_\mathit{end}$ to be the time at which the protection ends. Then:
+For simplicity, we assume that protection conferred by RSV prophylaxis is either 100\% or none, and define $t_\mathit{start}$ to be the time at which prophylaxis begins to offer protection, and $t_\mathit{end}$ to be the time at which the protection ends. Then, as shown in Figure \ref{fig:samplePredSingle}:
 
 \begin{align*}
     \Ppx(t) &= \begin{dcases*}
@@ -402,7 +400,7 @@ For simplicity, we assume that protection conferred by RSV prophylaxis is either
     \widehat{\PF} &= \int \Ppx(\tau) \hat{\I}(\tau) / \widehat{\TI} \, d\tau = \widehat\CI(t_\mathit{end}) - \widehat\CI(t_\mathit{start})
 \end{align*}
 
-As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\widehat\PF$ and thereby calculate interval estimates of $\PF$.
+As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\widehat\PF$ and thereby calculate interval estimates of $\PF$ (Figure \ref{fig:samplePrevMini}).
 
 <<samplePredSingle, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
@@ -514,7 +512,7 @@ As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\wideha
     \begin{center}
     \input{\figuresDir/samplePreventableFractionFull}
     \caption[Distribution of estimates of RSV preventable fraction]{Distribution of estimates of cumulative incidence ($N=\Sexpr{sampleDisplayNsim}$) and preventable fraction ($N=\Sexpr{sampleNsimFull}$) under the AAP prophylaxis guidelines.}
-    \label{fig:sampleOnsetMini}
+    \label{fig:samplePrevMini}
     \end{center}
 \end{figure}
 
