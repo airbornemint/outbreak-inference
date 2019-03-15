@@ -7,8 +7,8 @@ stages:
   - build
   - check
   - knitr
-  - tex
   - overleaf
+  - tex
 
 variables:
   R_BUILD_DIR: "build"
@@ -89,12 +89,12 @@ tex:
     - docker
   image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
-    - cd "${TEX_DIR}"
-    - lualatex RSVOptimization.tex
-    - bibtex RSVOptimization
-    - lualatex RSVOptimization.tex
-    - lualatex RSVOptimization.tex
-    - mv "${TEX_DIR}/OutbreakInference.pdf" "${CI_PROJECT_DIR}"
+    - cd "${OVERLEAF_ARTIFACTS_DIR}"
+    - lualatex "OutbreakInference.tex"
+    - bibtex "OutbreakInference"
+    - lualatex "OutbreakInference.tex"
+    - lualatex "OutbreakInference.tex"
+    - mv "OutbreakInference.pdf" "${CI_PROJECT_DIR}"
   artifacts:
     paths:
       - "OutbreakInference.pdf"
