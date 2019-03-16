@@ -17,8 +17,13 @@ variables:
   OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
   KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
   
+.docker:
+  image: registry.gitlab.com/${CI_PROJECT_PATH}/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  tags:
+    - docker
+
 .r:
-  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  extends: .docker
   before_script:
     - mkdir -p /usr/local/lib/R/etc
     - mkdir -p "${R_PACKAGE_CACHE}"
@@ -54,10 +59,10 @@ check-release:
     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='outbreakinference.*t.*gz')[1]))"
     
 knitr:
+  extends: .docker
   stage: knitr
   tags:
     - docker-mem:3
-  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -74,10 +79,10 @@ knitr:
       - "${TEX_DIR}/figures"
 
 overleaf:
+  extends: .docker
   stage: overleaf
   tags:
     - docker
-  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
     - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
@@ -86,10 +91,8 @@ overleaf:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
 tex:
+  extends: .docker
   stage: tex
-  tags:
-    - docker
-  image: registry.gitlab.com/airbornemint/outbreak-inference/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - cd "${OVERLEAF_ARTIFACTS_DIR}"
     - lualatex "OutbreakInference.tex"
