@@ -161,9 +161,7 @@ A \textit{spline function} of order $n$ is a piecewise polynomial function $f = 
 
 The set of splines of order $n$ over the knot vector $\vec t$ is a linear space of dimension $k + n - 2$. Furthermore, it has a unique basis $B_i$ satisfying the criteria that $B_i(x) = 0$ for all $x \leq t_i$ and all $x \geq t_{i+n}$ (locality), and $\sum_i B_i(x) = 1$ for all $t_1 \leq x \leq t_n$ (scaling). This unique basis $B_i$ is known as the \textit{basis splines} (``B-splines'') of order $n$ over the knot vector $\vec t$.
 
-%TODO reword cyclic
-
-B-spline smoothness properties are one-sided at the endpoints of their domain. As a result, B-spline approximations of cyclic data (such as seasonal patterns in infectious diseases) can lack smoothness at the seams when the domain is mapped to a cycle. To address this, we can use cyclic B-splines, which are further constrained to guarantee smoothness not only at the interior points of the domain, but also when wrapping around between the ends of the domain.
+B-spline smoothness properties are one-sided at the endpoints of their domain. As a result, if B-spline approximation is applied to one period of the periodic function $y(t) = y(t - T)$ --- which often arises in analysis of seasonal infectious disease patterns --- $\hat y$ is not guaranteed to be smooth throughout its domain. We can regain smoothness in these situations by using \textit{cyclic} B-splines, which are B-splines additionally constrained to guarantee smoothness when the time domain is mapped to a cycle.
 
 \subsection{Penalized B-splines in GAM}
 
@@ -178,7 +176,7 @@ B-splines, by virtue of their smoothness, can be used as predictor functions $f_
 
 where $B_{i,j}$ are basis spline functions and $\beta_{i,j}$ are model parameters.
 
-However, it can be difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines constrained to guarantee smoothness across domain endpoints are known as cyclic P-splines.
+However, it can be difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines constrained to guarantee smoothness throughout the domain of a periodic function are known as \textit{cyclic} P-splines.
 
 For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data. For example, consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by sampling each $\beta_{i,j}$ from its distribution (obtained from GAM), and then calculating
 
