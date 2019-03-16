@@ -46,6 +46,7 @@ build-release:
     - mkdir -p "${R_BUILD_DIR}"
     - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = TRUE, binary = FALSE)"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-package"
     paths:
       - "${R_BUILD_DIR}/outbreakinference*.tar.gz"
     when: always
@@ -74,6 +75,7 @@ knitr:
   dependencies:
     - build-release
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
     paths:
       - "${TEX_DIR}/OutbreakInference.tex"
       - "${TEX_DIR}/figures"
@@ -87,6 +89,7 @@ overleaf:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
     - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
@@ -101,6 +104,7 @@ tex:
     - lualatex "OutbreakInference.tex"
     - mv "OutbreakInference.pdf" "${CI_PROJECT_DIR}"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "OutbreakInference.pdf"
 
