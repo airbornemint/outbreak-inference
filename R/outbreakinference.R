@@ -382,7 +382,7 @@ outbreak.calc.cum = function(timedelta=1) {
 #' @return data frame with columns \code{onset} and \code{offset} representing time
 #' when the outbreak crossed onsed and offset thresholds
 #' @export
-outbreak.calc.thresholds = function(onset=0.05, offset=0.95, timedelta=1) {
+outbreak.calc.thresholds = function(onset=NA, offset=NA) {
   function(model, params, time) {
     # Calculate cumulative case counts from the model and parameters
     cumfit = outbreak.calc.cum(timedelta)(model, params, time)
@@ -412,7 +412,13 @@ outbreak.calc.thresholds = function(onset=0.05, offset=0.95, timedelta=1) {
       }
     }
 
-    data.frame(onset=onsetTime(onset), offset=offsetTime(offset))
+		if (is.na(offset)) {
+	    data.frame(onset=onsetTime(onset))
+		} else if (is.na(onset)) {
+	    data.frame(offset=offsetTime(offset))
+		} else {
+	    data.frame(onset=onsetTime(onset), offset=offsetTime(offset))
+		}
   }
 }
 
