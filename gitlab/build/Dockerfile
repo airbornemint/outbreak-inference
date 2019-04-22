@@ -38,8 +38,8 @@ ARG BUILD_CRAN_DEPENDENCIES="zipcode dplyr knitr reshape mgcv data.table tikzDev
 RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
-ARG BUILD_R_GITHUB_DEPENDENCIES="airbornemint/outbreak-inference"
-RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
+# ARG BUILD_R_GITHUB_DEPENDENCIES="airbornemint/outbreak-inference"
+# RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
 ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-binaries texlive-luatex texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
