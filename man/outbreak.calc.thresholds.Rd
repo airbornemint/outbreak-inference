@@ -2,23 +2,19 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.calc.thresholds}
 \alias{outbreak.calc.thresholds}
-\title{This is useful as \code{outcomes} for outbreak.predict.scalars.}
+\title{This is useful as \code{outcomes} for outbreak.estimate.scalars.}
 \usage{
-outbreak.calc.thresholds(onset = 0.05, offset = 0.95, timedelta = 1)
+outbreak.calc.thresholds(onset = NA, offset = NA)
 }
 \arguments{
 \item{onset}{onset threshold as fraction of total outbreak case count}
 
 \item{offset}{offset threshold as fraction of total outbreak case count}
-
-\item{timedelta}{time step of the data described by \code{model}; note that this is the
-time step of the original time series from which \code{model} was obtained, not the
-(potentially different) time step at which model predictions are being evaluated}
 }
 \value{
 data frame with columns \code{onset} and \code{offset} representing time
 when the outbreak crossed onsed and offset thresholds
 }
 \description{
-This is useful as \code{outcomes} for outbreak.predict.scalars.
+This is useful as \code{outcomes} for outbreak.estimate.scalars.
 }

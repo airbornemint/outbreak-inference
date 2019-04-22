@@ -4,14 +4,14 @@
 \alias{randomMVN}
 \title{Sample from a multivariate normal distribution}
 \usage{
-randomMVN(mu, sig, nsim)
+randomMVN(mu, sig, samples)
 }
 \arguments{
 \item{mu}{matrix of means}
 
 \item{sig}{matrix of covariances}
 
-\item{nsim}{number of samples to draw}
+\item{samples}{number of samples to draw}
 }
 \value{
 matrix of sampled values

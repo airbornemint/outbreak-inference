@@ -22,18 +22,18 @@ time (for example, cumulative incidence count over time)
 For each outbreak characteristic, the package produces median and confidence interval estimates.
 
 Typical use of this package begins by using the package \code{\link{mgcv}} to obtain
-a GAM/GAMM model of the outbreak, followed by calling either \code{\link{outbreak.predict.scalars}} or
-\code{\link{outbreak.predict.timeseries}} to obtain confidence intervals on the
+a GAM/GAMM model of the outbreak, followed by calling either \code{\link{outbreak.estimate.scalars}} or
+\code{\link{outbreak.estimate.timeseries}} to obtain confidence intervals on the
 desired scalar/timeseries outcomes of the outbreak
 
-Both \code{\link{outbreak.predict.scalars}} and \code{\link{outbreak.predict.timeseries}}
+Both \code{\link{outbreak.estimate.scalars}} and \code{\link{outbreak.estimate.timeseries}}
 allow simulation of arbitrary outbreak characteristics, by passing a function that calculates
-the desired characteristics into \code{\link{outbreak.predict.scalars}} or \code{\link{outbreak.predict.timeseries}}.
+the desired characteristics into \code{\link{outbreak.estimate.scalars}} or \code{\link{outbreak.estimate.timeseries}}.
 
 For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-be use in conjunction with \code{\link{outbreak.predict.scalars}} to predict timing of outbreak onset and
-offset, as well as \code{\link{outbreak.calc.cum}}, which can be used in conjuction with
-\code{\link{outbreak.predict.timeseries}} to predict cumulative incidence vs time for the outbreak.
+be use in conjunction with \code{\link{outbreak.estimate.scalars}} to predict timing of outbreak onset and
+offset, as well as \code{\link{outbreak.calc.cumcases}}, which can be used in conjuction with
+\code{\link{outbreak.estimate.timeseries}} to predict cumulative incidence vs time for the outbreak.
 }
 \examples{
 # Simulate an outbreak for analysis
@@ -48,23 +48,23 @@ model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 # For the most part, you want the time span of the outbreak data divided into
 # small increments (here, eps)
 eps = .05
-modelTime = seq(min(data$time) - 1 + eps, max(data$time), eps)
+modelTime = seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, eps)
 
-# Predict cumulative incidence count time series
-cumCases = outbreak.predict.timeseries(
+# Estimate cumulative incidence count time series
+cumCases = outbreak.estimate.timeseries(
   model, modelTime,
-  outbreak.calc.cum(timedelta=1), level=.95
+  outbreak.calc.cumcases, level=.95
 )
 
-# Predict time when outbreak crosses 5\% and 95\% of cumulative case count
-thresholds = outbreak.predict.scalars(
+# Estimate time when outbreak crosses 5\% and 95\% of cumulative case count
+thresholds = outbreak.estimate.scalars(
   model, modelTime,
   outbreak.calc.thresholds(onset=0.05, offset=0.95), level=.95
 )
 
-# Plot cumulative incidence predictions and thresholds
+# Plot cumulative incidence estimates and threshold estimates
 library(ggplot2)
-ggplot(cbind(cumCases, data.frame(time=modelTime))) +
+ggplot(cumCases) +
   geom_ribbon(aes(x=time, ymin=lower, ymax=upper), fill=grey(.75)) +
   geom_line(aes(x=time, y=median)) +
   annotate("rect",
