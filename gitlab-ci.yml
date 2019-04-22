@@ -1,9 +1,9 @@
 include:
-  - project: airbornemint/gitlab-docker-bootstrap
-    file: "docker-setup.yml"
+  - project: airbornemint/gitlab-autodocker
+    file: "gitlab-autodocker.yml"
 
 stages:
-  - docker-setup
+  - autodocker
   - build
   - check
   - knitr
@@ -16,14 +16,10 @@ variables:
   TEX_DIR: "Paper" # Relative to build root
   OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
   KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
+  AUTODOCKER_CONTEXT_NAME: build
   
-.docker:
-  image: registry.gitlab.com/${CI_PROJECT_PATH}/commit/default:rev-${CI_COMMIT_SHORT_SHA}
-  tags:
-    - docker
-
 .r:
-  extends: .docker
+  extends: .use-autodocker
   before_script:
     - mkdir -p /usr/local/lib/R/etc
     - mkdir -p "${R_PACKAGE_CACHE}"
@@ -39,8 +35,6 @@ variables:
   
 build-release:
   extends: .r
-  tags:
-    - docker
   stage: build
   script:
     - mkdir -p "${R_BUILD_DIR}"
@@ -53,14 +47,12 @@ build-release:
 
 check-release:
   extends: .r
-  tags:
-    - docker
   stage: check
   script:
     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='outbreakinference.*t.*gz')[1]))"
     
 knitr:
-  extends: .docker
+  extends: .use-autodocker
   stage: knitr
   tags:
     - docker-mem:3
@@ -81,10 +73,8 @@ knitr:
       - "${TEX_DIR}/figures"
 
 overleaf:
-  extends: .docker
+  extends: .use-autodocker
   stage: overleaf
-  tags:
-    - docker
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
     - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
@@ -94,7 +84,7 @@ overleaf:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
 tex:
-  extends: .docker
+  extends: .use-autodocker
   stage: tex
   script:
     - cd "${OVERLEAF_ARTIFACTS_DIR}"
@@ -109,11 +99,7 @@ tex:
       - "OutbreakInference.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
-docker-setup:
-  extends: .docker-setup
-  stage: docker-setup
+autodocker:
+  extends: .autodocker
   tags: 
     - dind-mem:2
-  variables:
-    BUILD_DOCKER_CONTEXT: build/default
-    DOCKER_BOOTSTRAP_PATH: build/docker
