@@ -29,7 +29,7 @@ library(ggplot2)
 library(ggstance)
 library(knitr)
 
-opts_chunk$set(fig.width=4, fig.height=3)
+opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
 ```
 
 ```{r plot utilities, include=FALSE}
