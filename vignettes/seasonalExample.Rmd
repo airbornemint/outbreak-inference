@@ -28,6 +28,8 @@ library(data.table)
 library(ggplot2)
 library(ggstance)
 library(knitr)
+
+opts_chunk$set(fig.width=4, fig.height=3)
 ```
 
 ```{r plot utilities, include=FALSE}
@@ -173,11 +175,13 @@ casesEst <- casesSamples %>%
   outbreak.estimate.timeseries.confints(level=0.95)
 ```
 
-Here `casesSamples` is a 15-column matrix of sampled case count estimates (as in example 3 above), and `casesEst` is a data frame containing the median, the lowel CL, and the upper CL case count (as in example 2 above).
+Here `casesSamples` is a 15-column matrix of sampled case count estimates (as in example 3 above), and `casesEst` is a data frame containing the median, the lowel CL, and the upper CL of the case count (as in example 2 above) *for the same 15 samples*.
 
 ## Example 5: Estimation of a custom time series outcome
 
-Suppose that the infection we are investigating progresses to serious disease in 80% of cases, but that it can be treated — before it progresses — with a treatment that has a 90% success rate. Also suppose that our supply is limited to 100 treatments. Therefore, among the first 100 cases, 10% will fail treatment, of which 80% will progress to serious disease; among all subsequent cases, 80% will progress to serious disease. We are interested in an estimate of the number of cases of serious disease (as a function of time), based on our observations of the number of cases of the underlying infection.
+Suppose that the infection we are investigating progresses to serious disease in 80% of cases, but that it can be treated — before it progresses — with a treatment that has a 90% success rate. Also suppose that our supply is limited to 100 treatments, and that treatment is administered to all infected people until we run out of supply.
+
+Then, among the first 100 cases, 10% will fail treatment, of which 80% will progress to serious disease; for all subsequent cases, no treatment will be available, and 80% will progress to serious disease. We are interested in an estimate of the number of cases of serious disease (as a function of time), based on our observations of the number of cases of the underlying infection.
 
 The package does not include a built-in way to calculate this outcome, but we can write a custom function to do it. This function will take a model object (`model`, obtained from the call to `gam()` above), a model parameters matrix (`params`), and a vector of time values to sample (`time`). It will return a vector of sampled outcome estimates.
 
@@ -236,7 +240,12 @@ This is how we would use it:
 
 ```{r custom est parameterized, include=TRUE}
 seriousEst <- model %>%
-  outbreak.estimate.timeseries(modelTime, seriousDiseaseCases(progressionRate=0.8, treatmentSuccessRate=0.9, treatmentMax=100, sampleFreq=sampleFreq), samples=n, level=0.95)
+  outbreak.estimate.timeseries(
+    modelTime, 
+    seriousDiseaseCases(progressionRate=0.8, treatmentSuccessRate=0.9, treatmentMax=100, sampleFreq=sampleFreq), 
+    samples=n, 
+    level=0.95
+  )
 ```
 
 ## Example 6: Scalar outcome measures
@@ -279,7 +288,7 @@ basePlot(cumCasesEst) +
 
 ## Example 8: Estimation of a custom time series outcome
 
-Suppose this infectious disease can be mitigated by use of prophylaxis, but the prophylaxis — due to its cost — is only recommended for high-risk patients during peaks of disease activity. As a result, a potentially interesting outcome measure is the fraction of cases that occur while prophylaxis is active (“preventable fraction”). Let’s consider prophylaxis that provides 100% protection from infection starting in week 20 for 24 weeks, and estimate its preventable fraction.
+Suppose this infectious disease can be mitigated by use of prophylaxis, but the prophylaxis — due to its cost — is only recommended for high-risk patients during peaks of disease activity. As a result, a potentially interesting outcome measure is the fraction of cases that occur while prophylaxis is active (“preventable fraction”). Let’s consider prophylaxis that provides 100% protection from infection starting in week 20 and lasting 24 weeks, and estimate its preventable fraction.
 
 As with time series outcomes, we write a function that takes the GAM model, the parameter matrix, and the sampling time vector, and we return our outcome measure in a one-row data frame. (We can calculate multiple outcome measures, returning each in its own column of the data frame, although this is not shown here.)
 
@@ -287,27 +296,31 @@ As before, we can use function-in-function approach to allow the parameters of o
 
 ```{r custom outcome function, include=TRUE}
 preventableFraction <- function(ppxStart, ppxDuration) {
-	ppxEnd <- ppxStart + ppxDuration
-	function(model, params, time) {
-	  # Calculate estimate cases
-	  predictors <- predict(model, data.frame(time=time), type="lpmatrix")
-	  cases <- model$family$linkinv(predictors %*% params)
+    ppxEnd <- ppxStart + ppxDuration
+    function(model, params, time) {
+      # Calculate estimate cases
+      predictors <- predict(model, data.frame(time=time), type="lpmatrix")
+      cases <- model$family$linkinv(predictors %*% params)
 
-	  # Calculate preventable cases (occuring which prophylaxis is active)
-	  cases <- data.frame(time=time, cases=cases)
-	  totalCases <- sum(cases$cases)
-	  preventableCases <- sum(cases$cases[cases$time >= ppxStart & cases$time <= ppxEnd])
+      # Calculate preventable cases (occuring which prophylaxis is active)
+      cases <- data.frame(time=time, cases=cases)
+      totalCases <- sum(cases$cases)
+      preventableCases <- sum(cases$cases[cases$time >= ppxStart & cases$time <= ppxEnd])
 
-	  # Calculate and return preventable fraction
-	  data.frame(preventable=c(preventableCases / totalCases))
-	}
+      # Calculate and return preventable fraction
+      data.frame(preventable=c(preventableCases / totalCases))
+    }
 }
 ```
 
 Then we call the package to get an interval estimate of our custom outcome measure:
 
 ```{r custom outcome estimate, include=TRUE}
-preventableEst <- outbreak.estimate.scalars(model, modelTime, preventableFraction(ppxStart=20, ppxDuration=24))
+preventableEst <- outbreak.estimate.scalars(
+  model, 
+  modelTime, 
+  preventableFraction(ppxStart=20, ppxDuration=24)
+)
 
 kable(preventableEst, caption="Estimated preventable fraction", col.names=c("Lower CL", "Median", "Upper CL"))
 ```
@@ -316,24 +329,24 @@ kable(preventableEst, caption="Estimated preventable fraction", col.names=c("Low
 
 Direct access to samples from `outbreak.estimate.scalars.sample` can, of course, be combined with custom scalar outcome calculation, which — among other things — makes it easy to plot the distribution of a custom scalar outcome:
 
-```{r custom outcome distribution, include=TRUE, fig.width=2, fig.height=6}
+```{r custom outcome distribution, include=TRUE, fig.width=6, fig.height=2}
 preventableSamples <- outbreak.estimate.scalars.sample(model, modelTime, preventableFraction(ppxStart=20, ppxDuration=24), samples=n)
 
 ggplot(preventableSamples) +
   theme_light() +
   scale_y_continuous() +
   scale_x_continuous() + 
-  labs(x=NULL, y="Preventable fraction") + 
-  coord_cartesian(ylim=range(c(0, 1))) +
+  labs(x="Preventable fraction", y=NULL) + 
+  coord_cartesian(xlim=range(c(0, 1))) +
   theme(
-    panel.grid.major.x=element_blank(),
+    panel.grid.major.y=element_blank(),
     legend.title=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_blank(),
+    axis.ticks.y=element_blank(),
+    axis.text.y=element_blank(),
     legend.position="bottom"
   ) +
-  geom_violin(
-    aes(x=0, y=preventable),
+  geom_violinh(
+    aes(y=0, x=preventable),
     width=.1,
     fill="gray50", color="black",
     trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
