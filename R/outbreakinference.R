@@ -18,7 +18,7 @@
 #' disease outbreaks.
 #'
 #' It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
-#' using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
+#' using stochastic simulation based on the GAM/GAMM model to estimate outbreak characteristics.
 #'
 #' For example, this package can be used to model timing of outbreak onset, peak, or offset,
 #' as well as outbreak cumulative incidence over time.
@@ -39,9 +39,9 @@
 #' the desired characteristics into \code{\link{outbreak.estimate.scalars}} or \code{\link{outbreak.estimate.timeseries}}.
 #'
 #' For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-#' be use in conjunction with \code{\link{outbreak.estimate.scalars}} to predict timing of outbreak onset and
+#' be use in conjunction with \code{\link{outbreak.estimate.scalars}} to estimate timing of outbreak onset and
 #' offset, as well as \code{\link{outbreak.calc.cumcases}}, which can be used in conjuction with
-#' \code{\link{outbreak.estimate.timeseries}} to predict cumulative incidence vs time for the outbreak.
+#' \code{\link{outbreak.estimate.timeseries}} to estimate cumulative incidence vs time for the outbreak.
 #'
 #' @name outbreakinference-package
 #' @docType package
@@ -56,7 +56,7 @@
 #' library(mgcv)
 #' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 #'
-#' # Generate time series at which model will be evaluated for predictions
+#' # Generate time series at which model will be evaluated for estimates
 #' # For the most part, you want the time span of the outbreak data divided into
 #' # small increments (here, eps)
 #' eps = .05
@@ -121,8 +121,8 @@ outbreak.estimate.scalars.sampleapply = function(params, model, time, outcomes) 
   params %>% apply(1, function(p) { outcomes(model, p, time) }) %>% bind_rows()
 }
 
-#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
-#' scalar outbreak outcomes, and returns predicted scalar outcome values for each simulation.
+#' Runs simulations on an outbreak GAM/GAMM for the purpose of estimating
+#' scalar outbreak outcomes, and returns estimated scalar outcome values for each simulation.
 #'
 #' This is mainly used internally by \code{outbreak.estimate.scalars}, but it's
 #' useful if you want to calculate summary statistics of simulation results other than
@@ -140,41 +140,41 @@ outbreak.estimate.scalars.sampleapply = function(params, model, time, outcomes) 
 outbreak.estimate.scalars.sample = function(model, time, outcomes, samples=100) {
   # Multivariate normal random generator
   # Generate random model parameters
-  predictions = model %>% outbreak.estimate.params(samples) %>%
+  estimates = model %>% outbreak.estimate.params(samples) %>%
     outbreak.estimate.scalars.sampleapply(model, time, outcomes)
 
-  if (any(is.na(predictions))) {
-    warning("Some predictions are NA")
+  if (any(is.na(estimates))) {
+    warning("Some estimates are NA")
     return()
   }
 
-  predictions %>% cbind(data.frame(outbreak.sample=seq(1, samples)))
+  estimates %>% cbind(data.frame(outbreak.sample=seq(1, samples)))
 }
 
 #' Calculates confidence intervals for results of simulation performed by \code{\link{outbreak.estimate.scalars.sample}}
 #'
-#' @param predictions data frame of predictions as returned by \code{\link{outbreak.estimate.scalars.sample}}
+#' @param samples data frame of samples as returned by \code{\link{outbreak.estimate.scalars.sample}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.estimate.scalars}}
 #' @export
 #' @keywords internal
-outbreak.estimate.scalars.confints = function(predictions, level=.95) {
+outbreak.estimate.scalars.confints = function(samples, level=.95) {
   confints = matrix(NA, nrow=1, ncol=0) %>% as.data.frame()
 
-  for (name in names(predictions)) {
+  for (name in names(samples)) {
     if (name == "outbreak.sample") {
       next
     }
     nameConfInts = as.data.frame(matrix(NA, 1, 3))
     names(nameConfInts) = paste(name, c("lower", "median", "upper"), sep=".")
-    nameConfInts[1,] = quantile(predictions[[name]], c(1-level, 0.5, level), names=FALSE)
+    nameConfInts[1,] = quantile(samples[[name]], c(1-level, 0.5, level), names=FALSE)
     confints = confints %>% cbind(nameConfInts)
   }
 
   confints
 }
 
-#' Calculates confidence intervals for scalar predicted from generalized additive (mixed) model of an outbreak
+#' Calculates confidence intervals for scalar estimated from generalized additive (mixed) model of an outbreak
 #'
 #' This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
 #' For each simulated outbreak, it calls \code{outcomess} to calculate scalar
@@ -211,8 +211,8 @@ outbreak.estimate.scalars.confints = function(predictions, level=.95) {
 #' @param time vector of time values at which the model will be evaluated
 #' @param outcomes function returning calculated scalar outcomes, as described above
 #' @param samples number of simulations to run
-#' @param level confidence level for predictions
-#' @return data frame of predictions, as described above
+#' @param level confidence level for estimates
+#' @return data frame of estimates, as described above
 #' @export
 outbreak.estimate.scalars = function(model, time, outcomes, samples=100, level=.95) {
   model %>%
@@ -225,8 +225,8 @@ outbreak.estimate.timeseries.sampleapply = function(params, model, time, outcome
   apply(params, 1, function(p) { outcome(model, p, time) })
 }
 
-#' Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak outcomes, and
-#' returns predicted time series outcomes for each simulation.
+#' Runs simulations on an outbreak GAM/GAMM for the purpose of estimating time series outbreak outcomes, and
+#' returns estimated time series outcomes for each simulation.
 #'
 #' This is mainly used internally by \code{outbreak.estimate.timeseries}, but
 #' it's useful if you want to calculate summary statistics of simulation results other
@@ -243,35 +243,35 @@ outbreak.estimate.timeseries.sampleapply = function(params, model, time, outcome
 #' @keywords internal
 outbreak.estimate.timeseries.sample = function(model, time, outcome, samples=100) {
   # Generate random model parameters
-  predictions = model %>% outbreak.estimate.params(samples) %>%
+  estimates = model %>% outbreak.estimate.params(samples) %>%
     outbreak.estimate.timeseries.sampleapply(model, time, outcome)
 
-  if (any(is.na(predictions))) {
+  if (any(is.na(estimates))) {
     warning("Model did not converge, try reducing the number of spline knots in GAM")
     return()
   }
 
-  predictions
+  estimates
 }
 
 #' Calculates confidence intervals for results of simulation performed by \code{\link{outbreak.estimate.timeseries.sample}}
 #'
-#' @param predictions data frame of predictions as returned by \code{\link{outbreak.estimate.timeseries.sample}}
+#' @param samples data frame of samples as returned by \code{\link{outbreak.estimate.timeseries.sample}}
 #' @param level confidence level for calculated confidence intervals
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.estimate.timeseries}}
 #' @export
 #' @keywords internal
-outbreak.estimate.timeseries.confints = function(predictions, level=0.95) {
+outbreak.estimate.timeseries.confints = function(samplesions, level=0.95) {
   resultNames = c("lower", "median", "upper")
-  if (is.null(predictions)) {
+  if (is.null(samples)) {
     confints = as.data.frame(matrix(NA, 0, 3))
     names(confints) = resultNames
   } else {
-    confints = apply(predictions, 1, function(prediction) {
+    confints = apply(samples, 1, function(sample) {
       ci = as.data.frame(matrix(NA, 0, 3))
       names(ci) = resultNames
 
-      ci[1,] = quantile(prediction, c(1-level, 0.5, level), names=FALSE)
+      ci[1,] = quantile(sample, c(1-level, 0.5, level), names=FALSE)
       ci
     }) %>% bind_rows()
   }
@@ -279,7 +279,7 @@ outbreak.estimate.timeseries.confints = function(predictions, level=0.95) {
   confints
 }
 
-#' Calculates confidence intervals for time series predicted from generalized additive (mixed) model of an outbreak
+#' Calculates confidence intervals for time series sampled from generalized additive (mixed) model of an outbreak
 #'
 #' This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.
 #' For each simulated outbreak, it calls \code{outcome} to calculate a time series for the
@@ -319,8 +319,8 @@ outbreak.estimate.timeseries.confints = function(predictions, level=0.95) {
 #' @param time vector of time values at which the model will be evaluated
 #' @param outcome function returning calculated outcome time series, as described above
 #' @param samples number of simulations to run
-#' @param level confidence level for returned predictions
-#' @return data frame of predictions, as described above
+#' @param level confidence level for returned estimates
+#' @return data frame of estimates, as described above
 #' @export
 outbreak.estimate.timeseries = function(model, time, outcome, samples=1000, level=.95) {
   model %>%
@@ -329,7 +329,7 @@ outbreak.estimate.timeseries = function(model, time, outcome, samples=1000, leve
 		cbind(time=time)
 }
 
-#' Predict case count for an outbreak
+#' Calculate case count for an outbreak
 #'
 #' This is useful as \code{outcome} for outbreak.estimate.scalars.
 #'
@@ -347,7 +347,7 @@ outbreak.calc.cases = function(model, params, time) {
   fit %>% model$family$linkinv()
 }
 
-#' Predict cumulative case count for an outbreak
+#' Calculate cumulative case count for an outbreak
 #'
 #' This is useful as \code{outcome} for outbreak.estimate.timeseries.
 #'
@@ -368,7 +368,7 @@ outbreak.calc.cumcases = function(model, params, time) {
   cumsum(fit) / sum(fit)
 }
 
-# Predict outbreak thresholds for an outbreak
+# Calculate outbreak thresholds for an outbreak
 #' This is useful as \code{outcomes} for outbreak.estimate.scalars.
 #'
 #' @param onset onset threshold as fraction of total outbreak case count

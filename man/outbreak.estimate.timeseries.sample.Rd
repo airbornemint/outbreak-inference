@@ -2,8 +2,8 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.estimate.timeseries.sample}
 \alias{outbreak.estimate.timeseries.sample}
-\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting time series outbreak outcomes, and
-returns predicted time series outcomes for each simulation.}
+\title{Runs simulations on an outbreak GAM/GAMM for the purpose of estimating time series outbreak outcomes, and
+returns estimated time series outcomes for each simulation.}
 \usage{
 outbreak.estimate.timeseries.sample(model, time, outcome, samples = 100)
 }

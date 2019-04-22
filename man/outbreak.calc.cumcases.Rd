@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.calc.cumcases}
 \alias{outbreak.calc.cumcases}
-\title{Predict cumulative case count for an outbreak}
+\title{Calculate cumulative case count for an outbreak}
 \usage{
 outbreak.calc.cumcases(model, params, time)
 }

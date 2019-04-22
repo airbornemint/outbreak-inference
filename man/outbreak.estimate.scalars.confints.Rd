@@ -4,10 +4,10 @@
 \alias{outbreak.estimate.scalars.confints}
 \title{Calculates confidence intervals for results of simulation performed by \code{\link{outbreak.estimate.scalars.sample}}}
 \usage{
-outbreak.estimate.scalars.confints(predictions, level = 0.95)
+outbreak.estimate.scalars.confints(samples, level = 0.95)
 }
 \arguments{
-\item{predictions}{data frame of predictions as returned by \code{\link{outbreak.estimate.scalars.sample}}}
+\item{samples}{data frame of samples as returned by \code{\link{outbreak.estimate.scalars.sample}}}
 
 \item{level}{confidence level for calculated confidence intervals}
 }

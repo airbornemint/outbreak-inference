@@ -2,8 +2,8 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.estimate.scalars.sample}
 \alias{outbreak.estimate.scalars.sample}
-\title{Runs simulations on an outbreak GAM/GAMM for the purpose of predicting
-scalar outbreak outcomes, and returns predicted scalar outcome values for each simulation.}
+\title{Runs simulations on an outbreak GAM/GAMM for the purpose of estimating
+scalar outbreak outcomes, and returns estimated scalar outcome values for each simulation.}
 \usage{
 outbreak.estimate.scalars.sample(model, time, outcomes, samples = 100)
 }

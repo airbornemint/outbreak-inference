@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.calc.cases}
 \alias{outbreak.calc.cases}
-\title{Predict case count for an outbreak}
+\title{Calculate case count for an outbreak}
 \usage{
 outbreak.calc.cases(model, params, time)
 }

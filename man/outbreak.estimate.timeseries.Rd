@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.estimate.timeseries}
 \alias{outbreak.estimate.timeseries}
-\title{Calculates confidence intervals for time series predicted from generalized additive (mixed) model of an outbreak}
+\title{Calculates confidence intervals for time series sampled from generalized additive (mixed) model of an outbreak}
 \usage{
 outbreak.estimate.timeseries(model, time, outcome, samples = 1000,
   level = 0.95)
@@ -16,10 +16,10 @@ outbreak.estimate.timeseries(model, time, outcome, samples = 1000,
 
 \item{samples}{number of simulations to run}
 
-\item{level}{confidence level for returned predictions}
+\item{level}{confidence level for returned estimates}
 }
 \value{
-data frame of predictions, as described above
+data frame of estimates, as described above
 }
 \description{
 This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.

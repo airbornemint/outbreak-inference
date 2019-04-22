@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreakinference.R
 \name{outbreak.estimate.scalars}
 \alias{outbreak.estimate.scalars}
-\title{Calculates confidence intervals for scalar predicted from generalized additive (mixed) model of an outbreak}
+\title{Calculates confidence intervals for scalar estimated from generalized additive (mixed) model of an outbreak}
 \usage{
 outbreak.estimate.scalars(model, time, outcomes, samples = 100,
   level = 0.95)
@@ -16,10 +16,10 @@ outbreak.estimate.scalars(model, time, outcomes, samples = 100,
 
 \item{samples}{number of simulations to run}
 
-\item{level}{confidence level for predictions}
+\item{level}{confidence level for estimates}
 }
 \value{
-data frame of predictions, as described above
+data frame of estimates, as described above
 }
 \description{
 This function performs a series of Monte Carlo simulations of a GAM/GAMM outbreak model.

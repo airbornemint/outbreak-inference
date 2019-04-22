@@ -10,7 +10,7 @@ disease outbreaks.
 }
 \details{
 It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
-using stochastic simulation based on the GAM/GAMM model to predict outbreak characteristics.
+using stochastic simulation based on the GAM/GAMM model to estimate outbreak characteristics.
 
 For example, this package can be used to model timing of outbreak onset, peak, or offset,
 as well as outbreak cumulative incidence over time.
@@ -31,9 +31,9 @@ allow simulation of arbitrary outbreak characteristics, by passing a function th
 the desired characteristics into \code{\link{outbreak.estimate.scalars}} or \code{\link{outbreak.estimate.timeseries}}.
 
 For convenience, this package also includes \code{\link{outbreak.calc.thresholds}}, which can
-be use in conjunction with \code{\link{outbreak.estimate.scalars}} to predict timing of outbreak onset and
+be use in conjunction with \code{\link{outbreak.estimate.scalars}} to estimate timing of outbreak onset and
 offset, as well as \code{\link{outbreak.calc.cumcases}}, which can be used in conjuction with
-\code{\link{outbreak.estimate.timeseries}} to predict cumulative incidence vs time for the outbreak.
+\code{\link{outbreak.estimate.timeseries}} to estimate cumulative incidence vs time for the outbreak.
 }
 \examples{
 # Simulate an outbreak for analysis
@@ -44,7 +44,7 @@ data = data.frame(cases=cases, time=seq(0, 51))
 library(mgcv)
 model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 
-# Generate time series at which model will be evaluated for predictions
+# Generate time series at which model will be evaluated for estimates
 # For the most part, you want the time span of the outbreak data divided into
 # small increments (here, eps)
 eps = .05
