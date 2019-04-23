@@ -195,7 +195,7 @@ In the analysis that motivated the development of this approach, we were analyzi
 
     ggplot(sampleObs) +
         theme_light(base_size=plotTextBaseSize) +
-        geom_point(aes(x=time, y=rsv), size=.5) +
+        geom_point(aes(x=time, y=cases), size=.5) +
         scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
         scale_y_continuous() +
         coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
@@ -232,8 +232,8 @@ where $B_i$ are cyclic basis splines. Using cubic splines with 20 knots for our 
 
     ggplot(predCasesMini) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv, group=sim), color="grey") +
-      geom_point(data=sampleObs, aes(x=time, y=rsv), size=0.5) +
+      geom_line(aes(x=time, y=cases, group=sim), color="grey") +
+      geom_point(data=sampleObs, aes(x=time, y=cases), size=0.5) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
       scale_y_continuous() +
       coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
@@ -282,9 +282,9 @@ By sampling $\beta_{i,j}$ from their distributions, numerically integrating the 
 
     ggplot(predCumMini) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
+      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
       coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
       labs(x="Time", y="Relative cumulative incidence") +
@@ -304,9 +304,9 @@ By sampling $\beta_{i,j}$ from their distributions, numerically integrating the 
 
     ggplot(predCumMini) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
+      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
       geom_point(data=predOnsetMini, aes(x=onset, y=seasonThreshold), size=0.75, shape=17) +
       geom_segment(data=predOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") +
       scale_y_continuous() +
@@ -333,9 +333,9 @@ By sampling $\beta_{i,j}$ from their distributions, numerically integrating the 
 
     ggplot(predOnsetFull) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(data=splineData, aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_line(data=splineData, aes(x=time, y=cases.cum.frac, group=sim), color="gray") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
       geom_violinh(
         data=predOnsetFull,
         aes(x=onset, y=seasonThreshold),
@@ -413,8 +413,8 @@ As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\wideha
     		data.frame(
     			ppx.start=min(df$time),
     			ppx.end=max(df$time),
-    			unprotected.start=first(df$rsv.cum.frac),
-    			unprotected.end=last(df$rsv.cum.frac)
+    			unprotected.start=first(df$cases.cum.frac),
+    			unprotected.end=last(df$cases.cum.frac)
     		)
     	})(.)) %>%
     	ungroup() %>%
@@ -422,12 +422,12 @@ As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\wideha
 
     ggplot(data) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
+      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
       geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=ppx.start, yend=+Inf), linetype="11", size=.375) +
       geom_segment(data=thresholds, aes(x=ppx.end, y=unprotected.start, xend=ppx.end, yend=+Inf), linetype="11", size=.375) +
       geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=+Inf, yend=unprotected.start), linetype="11", size=.375) +
       geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.end, xend=+Inf, yend=unprotected.end), linetype="11", size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac, size=0.5), size=0.5) +
+      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac, size=0.5), size=0.5) +
     	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) +
     	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=3.5) +
     	geom_rect(data=thresholds, aes(xmin=max(monthBoundaries$max) - 3, xmax=max(monthBoundaries$max), ymin=unprotected.start, ymax=unprotected.end), size=.375) +
@@ -455,12 +455,12 @@ As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\wideha
 
     splinePlot = ggplot(data) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(data=splineData, aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_line(data=splineData, aes(x=time, y=cases.cum.frac, group=sim), color="gray") +
       geom_segment(data=thresholds, aes(x=ppx.start, y=-Inf, xend=ppx.start, yend=+Inf), linetype="11", size=.375) +
       geom_segment(data=thresholds, aes(x=ppx.end, y=-Inf, xend=ppx.end, yend=+Inf), linetype="11", size=.375) +
     	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) +
     	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=3.5) +
-      geom_point(data=sampleObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
       scale_y_continuous() +
       labs(x="Time", y="RSV relative cumulative incidence") +
