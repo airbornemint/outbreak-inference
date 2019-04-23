@@ -4,12 +4,12 @@
 \alias{outbreak.estimate.timeseries.confints}
 \title{Calculates confidence intervals for results of simulation performed by \code{\link{outbreak.estimate.timeseries.sample}}}
 \usage{
-outbreak.estimate.timeseries.confints(samplesions, level = 0.95)
+outbreak.estimate.timeseries.confints(samples, level = 0.95)
 }
 \arguments{
-\item{level}{confidence level for calculated confidence intervals}
-
 \item{samples}{data frame of samples as returned by \code{\link{outbreak.estimate.timeseries.sample}}}
+
+\item{level}{confidence level for calculated confidence intervals}
 }
 \value{
 data.frame of confidence intervals, as returned by \code{\link{outbreak.estimate.timeseries}}

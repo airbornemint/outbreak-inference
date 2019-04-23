@@ -261,7 +261,7 @@ outbreak.estimate.timeseries.sample = function(model, time, outcome, samples=100
 #' @return data.frame of confidence intervals, as returned by \code{\link{outbreak.estimate.timeseries}}
 #' @export
 #' @keywords internal
-outbreak.estimate.timeseries.confints = function(samplesions, level=0.95) {
+outbreak.estimate.timeseries.confints = function(samples, level=0.95) {
   resultNames = c("lower", "median", "upper")
   if (is.null(samples)) {
     confints = as.data.frame(matrix(NA, 0, 3))
