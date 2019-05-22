@@ -181,8 +181,10 @@ tryadj = function(delta) {
   data.frame(delta=delta, onset=mean(adj$onsetGood[!is.na(adj$onsetGood)]))
 }
 
-ldply(seq(-.1, .1, length.out=201), tryadj)
+# ldply(seq(-.1, .1, length.out=201), tryadj)
 
 #runRepeat = repeatRun(studyResults1, 1, 2)
+
+studyResults$summary
 
 saveRDS(studyResults, "studyResults.rds")
