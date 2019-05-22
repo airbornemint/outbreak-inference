@@ -64,24 +64,7 @@ knitr::read_chunk("./OutbreakInferencePaper.R")
 <<paper, warning=FALSE>>=
 @
 
-<<setup, warning=FALSE>>=
-import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, labs)
-import::from(ggstance, geom_violinh)
-import::from(gridExtra, grid.arrange)
-import::from(grDevices, dev.off)
-import::from(tikzDevice, tikz)
-
-inlinePlotWidth = 3.1
-inlinePlotHeight = 2.5
-pagePlotWidth = inlinePlotWidth * 2.1
-pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
-plotTextBaseSize = 8
-
-figuresDir = "./figures"
-if (!dir.exists(figuresDir)) {
-  dir.create(figuresDir, recursive=TRUE)
-}
-options(tikzMetricsDictionary='./tikzDictionary.dat')
+<<figures, warning=FALSE>>=
 @
 
 \edef\figuresDir{\Sexpr{figuresDir}}
@@ -91,7 +74,8 @@ options(tikzMetricsDictionary='./tikzDictionary.dat')
 \author{
     \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{1}}\\
     \authorstyle{Daniel Weinberger, PhD\textsuperscript{1}}\\
-    \authorstyle{Virginia Pitzer, ScD\textsuperscript{1}}
+    \authorstyle{Virginia Pitzer, ScD\textsuperscript{1}}\\
+    \authorstyle{Joshua Warren, PhD\textsuperscript{1}}
     \newline\newline
     \textsuperscript{1}\institution{Yale University, School of Public Health}
 }
@@ -115,7 +99,7 @@ options(tikzMetricsDictionary='./tikzDictionary.dat')
 
 \section*{\centerline{Abstract}}
 
-Seasonal and sporadic outbreaks of infectious diseases are usually amenable to generalized linear modeling (GLM) and generalized additive modeling (GAM). The existing R packages for GAM and GLM provide a convenient means of making interval estimates of disease incidence at specific points in time. However, outbreak outcome measures that are of interest in clinical and public health practice often require estimation of incidence accumulated over periods of time. No comparably convenient R package exists for interval estimation of outcome measures that are derived from cumulative disease incidence. We describe a method of obtaining such estimates using GAM with penalized basis splines (P-splines), and an R package providing a convenient interface for performing such analysis.
+Seasonal and sporadic outbreaks of infectious diseases are usually amenable to generalized linear modeling (GLM) and generalized additive modeling (GAM). Outcome measures of clinical and public health interest in outbreak analysis, however, often either do not follow an exponential family distribution, or follow an unknown distribution. As a result, the existing GAM and GLM estimation methods do not provide a means of interval estimation of any but the simplest of outbreak outcome measures. We developed a method of interval estimation of more elaborate outbreak outcome measures using random sampling of a penalized basis spline (P-spline) GAM model, and we implemented an R package providing a convenient interface for such analysis.
 
 \clearpage
 
@@ -129,17 +113,25 @@ Seasonal and sporadic outbreaks of infectious diseases are usually amenable to g
 
 \section{Introduction}
 
-Penalized basis splines (``P-splines'') provide a smoothing mechanism with several qualities desirable in analysis of experimental data, including computational compactness and efficiency and well-understood statistical behavior. \cite{Eilers:1996kz}
+Many widely used mathematical models of seasonal and sporadic outbreaks of infectious diseases treat disease incidence as a Poisson-distributed random variable, with the rate parameter of the Poisson distribution then modeled as a function of time and other predictors using a generalized linear model (GLM) or a generalized additive model (GAM). This approach has been thoroughly validated in clinical and public health practice, and it provides an efficient means of point and interval estimation of disease incidence.
 
-In our recent analysis of seasonal patterns of respiratory syncytial virus (RSV) infections and hospitalizations, we used P-splines to obtain interval estimates of outcome measures with unknown distributions. For example, we obtained interval estimates of the time at which the relative cumulative incidence of RSV rises above 2.5\% during the annual RSV season.
+While outcome measures of clinical and public health relevance in analysis of infectious disease outbreaks can usually be computed from estimates of disease incidence, this computation often departs from the realm of the exponential family of distributions, and therefore makes estimation (and particularly interval estimation) of relevant outcome measures impractical. A question as simple as ``given several years' observations about the incidence of a seasonal infection, when can we expect the next season to start'' is difficult to answer using the common GLM approaches; even when it can be answered (for example, using change point analysis), the answer is usually a point estimate, with no interval estimate available from the model.
 
-We generalized our methods to estimation of any outcome measure computable from variables that are amenable to generalized additive modeling, and we created the corresponding \texttt{outbreakinference} R package.
+Meanwhile, penalized basis splines (``P-splines'') provide a smoothing mechanism that can be used with GAM and has several qualities desirable in analysis of experimental data, including computational compactness and efficiency and well-understood statistical behavior. \cite{Eilers:1996kz} In particular, thanks to their statistical properties, P-splines offer a means of random sampling of disease incidence as part of an elaborate outcome measure computation, thereby allowing random sampling of outcome measures otherwise not amenable to interval estimation.
 
-\section{Overview}
+For example, in our recent analysis of seasonal patterns of respiratory syncytial virus (RSV) infections and hospitalizations, we used P-splines to obtain interval estimates of the time at which the cumulative incidence of RSV rises above 2.5\% of total incidence during the annual RSV season.
+
+We generalized our methods to estimation of any outcome measure computable from observations and predictors that are amenable to generalized additive modeling, and we created the corresponding \texttt{outbreakinference} R package.
+
+\section{Results}
+
+\section{Discussion}
+
+\section{Methods}
 
 \subsection{Generalized additive modeling}
 
-A \textit{generalized linear model} (GLM) provides a means of estimating a response variable $y$, whose distribution is in an exponential family (such as normal, Poisson, and gamma distributions), using multiple predictor variables $x_i$:
+A \textit{generalized linear model} (GLM) provides a means of estimating a response variable $y$, whose distribution is in an exponential family, using multiple predictor variables $x_i$:
 
 \begin{equation*}
     g(\hat{y}) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_n x_n
@@ -157,26 +149,34 @@ where $f_i$ are, broadly, smooth functions, and $g$ is the link function. In GAM
 
 \subsection{Basis splines}
 
-A \textit{spline function} of order $n$ is a piecewise polynomial function $f = f(x)$ of degree $n - 1$. A spline function is determined by a vector $\vec t = (t_1, t_2, \dots, t_k)$, where $t_i \leq t_j$ for all $i < j$ (``knot vector''), and is continuous in derivatives up to that of degree $n - k + d - 1$, where $d$ is the number of distinct knots. If all knots are distinct ($d = k$), the spline function is continuous in all derivatives up to derivative of degree $n - 1$.
+A \textit{spline function} of order $n$ is a piecewise polynomial function $f = f(x)$ of degree $n - 1$. A spline function is uniquely determined by 
 
-The set of splines of order $n$ over the knot vector $\vec t$ is a linear space of dimension $k + n - 2$. Furthermore, it has a unique basis $B_i$ satisfying the criteria that $B_i(x) = 0$ for all $x \leq t_i$ and all $x \geq t_{i+n}$ (locality), and $\sum_i B_i(x) = 1$ for all $t_1 \leq x \leq t_n$ (scaling). This unique basis $B_i$ is known as the \textit{basis splines} (``B-splines'') of order $n$ over the knot vector $\vec t$.
+\begin{itemize}
+\item a vector $\vec t = (x_1, x_2, \dots, x_k)$, where all $x_i$ are in the domain of $f$ and $x_i \leq x_j$ for all $i < j$ (``knot vector''), and
+\item a vector $\vec y = (y_1, y_2, \dots, y_{k - n - 1})$ where all $y_i$ are in the image of $f$ (``control vector'').
+\end{itemize}
 
-B-spline smoothness properties are one-sided at the endpoints of their domain. As a result, if B-spline approximation is applied to one period of the periodic function $y(t) = y(t - T)$ --- which often arises in analysis of seasonal infectious disease patterns --- $\hat y$ is not guaranteed to be smooth throughout its domain. We can regain smoothness in these situations by using \textit{cyclic} B-splines, which are B-splines additionally constrained to guarantee smoothness when the time domain is mapped to a cycle.
+A spline of order $n$ over the knot vector $\vec t$ is continuous in derivatives up to that of degree $n - k + d - 1$, where $d$ is the number of distinct knots. If all knots are distinct ($d = k$), the spline function is continuous in all derivatives up to derivative of degree $n - 1$.
+
+Spline functions, by virtue of their differentiability (and therefore smoothness), are a natural choice for fitting to a wide range of experimental data.
+
+The set of splines of order $n$ over the knot vector $\vec t$ is a linear space of dimension $n + k - 2$. Furthermore, it has a unique basis $B_i$ satisfying the criteria that $B_i(x) = 0$ for all $x \leq t_i$ and all $x \geq t_{i+n}$ (locality), and $\sum_i B_i(x) = 1$ for all $t_1 \leq x \leq t_n$ (scaling). This unique basis $B_i$ is known as the \textit{basis splines} (``B-splines'') of order $n$ over the knot vector $\vec t$.
+
+B-spline smoothness is one-sided at the endpoints of their domain. As a result, if B-spline approximation is applied to one period of the periodic function $y(t) = y(t - T)$ --- which naturally arises in analysis of seasonal infectious disease patterns --- $\hat y$ is not guaranteed to be smooth throughout its domain. We can regain smoothness in these situations by using \textit{cyclic} B-splines, which are B-splines extended to guarantee smoothness when the time domain is mapped to a cycle.
 
 \subsection{Penalized B-splines in GAM}
 
-B-splines, by virtue of their smoothness, can be used as predictor functions $f_i$ in a GAM:
+Splines, by virtue of their smoothness, can be used as predictor functions $f_i$ in a GAM. Expressed in terms of B-splines, $f_i =  \sum_j \beta_{i,j} B_{i,j}$, and the GAM takes the form:
 
 \begin{align*}
-    g(\hat{y}) = \beta_0 &+ \beta_{1,1} B_{1,1}(x_1) + \beta_{1,2} B_{1,2}(x_1) + \dots \\
+    g(\hat{y}) &= \beta_0 \\
+    &+ \beta_{1,1} B_{1,1}(x_1) + \beta_{1,2} B_{1,2}(x_1) + \dots \\
     &+ \beta_{2,1} B_{2,1}(x_2) + \beta_{2,2} B_{2,2}(x_2) + \dots \\
     &+ \dots \\
     &+ \beta_{n,1} B_{n,1}(x_n) + \beta_{n,2} B_{n,2}(x_n) + \dots
 \end{align*}
 
-where $B_{i,j}$ are basis spline functions and $\beta_{i,j}$ are model parameters.
-
-However, it can be difficult to avoid overfitting in this model. This can be addressed by adding a penalty term to the model, so that instead of simply maximizing fit by minimizing $\Vert y - \hat{y} \Vert^2$, the model balances fit and smoothness by minimizing $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model. B-splines used in this way are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines constrained to guarantee smoothness throughout the domain of a periodic function are known as \textit{cyclic} P-splines.
+This model can be fit to data simply by minimizing $\Vert y - \hat{y} \Vert^2$; however, this approach often leads to overfitting. To mitigate this risk, the model can be modified to instead minimize $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a function that measures non-smoothness of the model (``penalty function''). This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as penalized B-splines (``P-splines''). A variety of penalty functions have been defined; the most commonly used penalty functions use $k$-th order differences between the model and the data, for some small integer $k$. As with B-splines, P-splines extended to guarantee smoothness throughout the domain of a periodic function are known as \textit{cyclic} P-splines.
 
 For smooth estimation of experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed. This feature allows estimation of a wide range of outcome measures from the experimental data. For example, consider an outcome measure $z = z(y)$. We can obtain repeated estimates of $z$ simply by sampling each $\beta_{i,j}$ from its distribution (obtained from GAM), and then calculating
 
@@ -188,28 +188,7 @@ thereby obtaining a sampling distribution of $\hat z$, from which we can make in
 
 \section{Example}
 
-In the analysis that motivated the development of this approach, we were analyzing the seasonal patterns of RSV infections. For example, consider a hypothetical RSV season shown in Figure \ref{fig:sampleCases} (for privacy reasons, no actual patient data is used in our examples). 
-
-<<sampleCases, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-    ggplot(sampleObs) +
-        theme_light(base_size=plotTextBaseSize) +
-        geom_point(aes(x=time, y=cases), size=.5) +
-        scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-        scale_y_continuous() +
-        coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-        labs(x="Time", y="RSV incidence") +
-        theme(
-            panel.grid.major.x=element_blank(),
-            legend.title=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-            legend.position="bottom"
-        )
-
-    dev.off()
-@
+In the analysis that motivated the development of this approach, we were analyzing the seasonal patterns of RSV infections. For example, consider the RSV season shown in Figure \ref{fig:sampleCases}.
 
 \begin{figure}
 \begin{center}
@@ -226,28 +205,6 @@ We treat RSV incidence ($\I$) over time as a Poisson-distributed random variable
 \end{equation*}
 
 where $B_i$ are cyclic basis splines. Using cubic splines with 20 knots for our analysis, we obtain a cyclic P-spline model of our data. This model gives estimates of spline parameters $\beta_i$, which can be sampled to obtain a succession of smooth approximations to our data, some of which are shown in Figure \ref{fig:samplePredMini}.
-
-<<samplePredMini, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-    ggplot(predCasesMini) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=cases, group=sim), color="grey") +
-      geom_point(data=sampleObs, aes(x=time, y=cases), size=0.5) +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      scale_y_continuous() +
-      coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-      labs(x="Time", y="RSV incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-    dev.off()
-@
 
 \begin{figure}
 \begin{center}
@@ -276,87 +233,6 @@ To estimate season onset, we begin with estimated incidence ($\hat \I$) obtained
 \end{align*}
 
 By sampling $\beta_{i,j}$ from their distributions, numerically integrating the resultant $\hat\I(t)$ to obtain $\widehat{\CI}(t)$ and $\widehat{\TI}$ (Figure \ref{fig:samplePredCumMini}), and then calculating the onset estimate $\widehat\On$ (Figure \ref{fig:samplePredOnsetMini}), we obtain a sampling distribution of $\widehat\On$ (Figure \ref{fig:sampleOnsetFull}) from which we can calculate interval estimates of $\On$.
-
-<<samplePredCumMini, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePredCumMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-    ggplot(predCumMini) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
-      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-      labs(x="Time", y="Relative cumulative incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-    dev.off()
-@
-
-<<sampleOnsetMini, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-    ggplot(predCumMini) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
-      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-      geom_point(data=predOnsetMini, aes(x=onset, y=seasonThreshold), size=0.75, shape=17) +
-      geom_segment(data=predOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") +
-      scale_y_continuous() +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 2*seasonThreshold)) +
-      labs(x="Time", y="Relative cumulative incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.title.y=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-    dev.off()
-@
-
-<<sampleOnsetFull, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-    data = predCumFull
-    splineData = data %>% filter(sim < sampleDisplayNsim)
-
-    ggplot(predOnsetFull) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(data=splineData, aes(x=time, y=cases.cum.frac, group=sim), color="gray") +
-      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-      geom_violinh(
-        data=predOnsetFull,
-        aes(x=onset, y=seasonThreshold),
-        width=.01,
-        fill="gray50", color="black",
-        trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
-      ) +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      scale_y_continuous() +
-      coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
-      labs(x="Time", y="Relative cumulative incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-      dev.off()
-@
 
 \begin{figure}
 \begin{center}
@@ -399,104 +275,6 @@ For simplicity, we assume that protection conferred by RSV prophylaxis is either
 \end{align*}
 
 As before, we sample $\beta_{i,j}$ to obtain a sampling distribution of $\widehat\PF$ and thereby calculate interval estimates of $\PF$ (Figure \ref{fig:samplePrevMini}).
-
-<<samplePredSingle, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
-
-    data = predCumSingle
-
-    thresholds = data %>%
-    	mutate(ppx=aapStrat(time)) %>%
-    	filter(ppx > 0) %>%
-    	do((function(df) {
-    	  df = df %>% arrange(time)
-    		data.frame(
-    			ppx.start=min(df$time),
-    			ppx.end=max(df$time),
-    			unprotected.start=first(df$cases.cum.frac),
-    			unprotected.end=last(df$cases.cum.frac)
-    		)
-    	})(.)) %>%
-    	ungroup() %>%
-    	as.data.frame()
-
-    ggplot(data) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
-      geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=ppx.start, yend=+Inf), linetype="11", size=.375) +
-      geom_segment(data=thresholds, aes(x=ppx.end, y=unprotected.start, xend=ppx.end, yend=+Inf), linetype="11", size=.375) +
-      geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=+Inf, yend=unprotected.start), linetype="11", size=.375) +
-      geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.end, xend=+Inf, yend=unprotected.end), linetype="11", size=.375) +
-      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac, size=0.5), size=0.5) +
-    	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) +
-    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=3.5) +
-    	geom_rect(data=thresholds, aes(xmin=max(monthBoundaries$max) - 3, xmax=max(monthBoundaries$max), ymin=unprotected.start, ymax=unprotected.end), size=.375) +
-    	geom_text(data=thresholds, aes(x=max(monthBoundaries$max) - 1.5, y=mean(c(unprotected.start, unprotected.end)), label="$\\Delta$ = preventable fraction", angle=90, lineheight=0.5), color="white", size=3.5) +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-      labs(x="Time", y="RSV relative cumulative incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.title.y=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-    dev.off()
-@
-
-<<samplePreventableFractionFull, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/samplePreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
-
-    data = predCumFull
-    splineData = data %>% filter(sim < sampleDisplayNsim)
-
-    splinePlot = ggplot(data) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_line(data=splineData, aes(x=time, y=cases.cum.frac, group=sim), color="gray") +
-      geom_segment(data=thresholds, aes(x=ppx.start, y=-Inf, xend=ppx.start, yend=+Inf), linetype="11", size=.375) +
-      geom_segment(data=thresholds, aes(x=ppx.end, y=-Inf, xend=ppx.end, yend=+Inf), linetype="11", size=.375) +
-    	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) +
-    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=3.5) +
-      geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-      scale_y_continuous() +
-      labs(x="Time", y="RSV relative cumulative incidence") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-      )
-
-    violinPlot <- ggplot(predFractionFull) +
-      theme_light(base_size=plotTextBaseSize) +
-      geom_violin(
-        aes(x=0, y=preventable),
-        width=.01,
-        fill="gray50", color="black",
-        trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
-      ) +
-      scale_x_continuous() +
-      scale_y_continuous() +
-      coord_cartesian(ylim=c(0, 1)) +
-      labs(y="RSV preventable fraction") +
-      theme(
-        panel.grid.major.x=element_blank(),
-        panel.grid.minor.x=element_blank(),
-        legend.title=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_blank(),
-        legend.position="bottom"
-      )
-    grid.arrange(splinePlot, violinPlot, layout_matrix=rbind(c(rep(1, 4), 2)))
-
-    dev.off()
-@
 
 \begin{figure}
     \begin{center}
