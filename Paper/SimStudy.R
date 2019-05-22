@@ -168,7 +168,7 @@ plotRun = function(results, simIdx, runIdx) {
   points(observed$time, observed$cases, new=TRUE)
 }
 
-studyResults = simStudy(1, 5, 0.05)
+studyResults = simStudy(10, 10, 0.05)
 #studyResults = simStudy(60, 60, 0.05)
 
 onsetFailResults = studyResults$byRun %>% filter(!onsetGood) %>% mutate(onsetError=ifelse(onset > onset.upper, onset-onset.upper, onset-onset.lower))
