@@ -385,40 +385,43 @@ outbreak.calc.cumcases = function(model, params, time) {
 outbreak.calc.thresholds = function(onset=NA, offset=NA) {
   function(model, params, time) {
     # Calculate cumulative case counts from the model and parameters
-    cumfit = outbreak.calc.cumcases(model, params, time)
+    cumfrac = outbreak.calc.cumcases(model, params, time)
 
-    # Compare to thresholds
-    onsetTime = function(threshold) {
-      found = any(cumfit < threshold)
-      if (is.na(found)) {
-        browser()
-        head(time, 1)
-      } else if (found) {
-        tail(na.omit(time[cumfit < threshold]), 1)
-      } else {
-        head(time, 1)
-      }
-    }
-
-    offsetTime = function(threshold) {
-      found = any(cumfit > threshold)
-      if (is.na(found)) {
-        browser()
-        tail(time, 1)
-      } else if (found) {
-        head(na.omit(time[cumfit > threshold]), 1)
-      } else {
-        tail(time, 1)
-      }
+    # Compare to threshold
+    thresholdTime = function(threshold) {
+      # Linear interpolation across the time interval that where cumfit crosses threshold
+      idx = sum(cumfit < threshold)
+      timeLow = time[idx]
+      timeHigh = time[idx + 1]
+      cumLow = cumfit[idx]
+      cumHigh = cumfit[idx + 1]
+      return(timeLow + (timeHigh - timeLow) / (cumHigh - cumLow) * (threshold - cumLow))
     }
 
 		if (is.na(offset)) {
-	    data.frame(onset=onsetTime(onset))
+	    data.frame(
+	      onset=outbreak.calc.threshold.ts(time, cumfrac, onset)
+      )
 		} else if (is.na(onset)) {
-	    data.frame(offset=offsetTime(offset))
+	    data.frame(
+	      offset=outbreak.calc.threshold.ts(time, cumfrac, offset)
+      )
 		} else {
-	    data.frame(onset=onsetTime(onset), offset=offsetTime(offset))
+	    data.frame(
+	      onset=outbreak.calc.threshold.ts(time, cumfrac, onset),
+	      offset=outbreak.calc.threshold.ts(time, cumfrac, offset)
+      )
 		}
   }
+}
+
+outbreak.calc.threshold.ts = function(time, cumfrac, threshold) {
+  # Linear interpolation across the time interval that where cumfrac crosses threshold
+  idx = sum(cumfrac < threshold)
+  timeLow = time[idx]
+  timeStep = time[idx + 1] - time[idx]
+  cumLow = cumfrac[idx]
+  cumStep = cumfrac[idx + 1] - cumfrac[idx]
+  return(timeLow + timeStep / cumStep * (threshold - cumLow))
 }
 
