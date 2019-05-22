@@ -104,7 +104,7 @@ sim:
     AUTODOCKER_CONTEXT_NAME: sim
   stage: sim
   tags:
-    - docker-mem:3
+    - docker-cpu:4
   script:
     - Rscript -e "devtools::install()"
     - time Rscript Paper/SimStudy.R
