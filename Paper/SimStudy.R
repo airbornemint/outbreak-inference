@@ -9,6 +9,7 @@ import::from(doParallel, registerDoParallel)
 import::from(parallel, detectCores)
 
 registerDoParallel(detectCores())
+print(paste("foreach::dopar", foreach::getDoParRegistered(), foreach::getDoParName(), foreach::getDoParVersion(), foreach::getDoParWorkers(), detectCores()))
 set.seed(NULL)
 
 source("./Paper/Common.R")
