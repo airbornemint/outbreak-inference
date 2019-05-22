@@ -9,6 +9,7 @@ import::from(doParallel, registerDoParallel)
 import::from(parallel, detectCores)
 
 registerDoParallel(detectCores())
+set.seed(NULL)
 
 source("./Paper/Common.R")
 
@@ -170,10 +171,10 @@ studyResults = simStudy(1, 5, 0.05)
 #studyResults = simStudy(60, 60, 0.05)
 
 onsetFailResults = studyResults$byRun %>% filter(!onsetGood) %>% mutate(onsetError=ifelse(onset > onset.upper, onset-onset.upper, onset-onset.lower))
-hist(onsetFailResults$onset - onsetFailResults$onset.median, breaks=40)
+# hist(onsetFailResults$onset - onsetFailResults$onset.median, breaks=40)
 
 offsetFailResults = studyResults$byRun %>% filter(!offsetGood) %>% mutate(offsetError=ifelse(offset > offset.upper, offset-offset.upper, offset-offset.lower))
-hist(offsetFailResults$offset - offsetFailResults$offset.median, breaks=40)
+# hist(offsetFailResults$offset - offsetFailResults$offset.median, breaks=40)
 
 tryadj = function(delta) {
   adj = studyResults$byRun %>% mutate(onset.lower=onset.lower+delta, onset.upper=onset.upper+delta) %>% mutate(onsetGood=(onset>=onset.lower & onset<=onset.upper))
@@ -183,3 +184,5 @@ tryadj = function(delta) {
 ldply(seq(-.1, .1, length.out=201), tryadj)
 
 #runRepeat = repeatRun(studyResults1, 1, 2)
+
+saveRDS(studyResults, "studyResults.rds")
