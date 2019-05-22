@@ -365,7 +365,13 @@ outbreak.calc.cumcases = function(model, params, time) {
   fit = fit %>% model$family$linkinv()
 
   # Calculate cumulative case fraction
-  cumsum(fit) / sum(fit)
+  result = cumsum(fit) / sum(fit)
+
+  if (any(is.nan(result))) {
+    stop("cumcases diverged")
+  }
+
+  result
 }
 
 # Calculate outbreak thresholds for an outbreak
