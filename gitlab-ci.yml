@@ -107,7 +107,7 @@ sim:
     - docker-mem:3
   script:
     - Rscript -e "devtools::install()"
-    - Rscript Paper/SimStudy.R
+    - time Rscript Paper/SimStudy.R
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-sim"
     paths: 
