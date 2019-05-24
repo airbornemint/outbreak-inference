@@ -1,6 +1,6 @@
 # ---- sim ----
 
-import::from(outbreakinference, outbreak.calc.cumcases, outbreak.calc.cases, outbreak.calc.thresholds, outbreak.estimate.scalars)
+import::from(outbreakinference, outbreak.calc.cumcases, outbreak.calc.cases, outbreak.calc.thresholds, outbreak.estimate.scalars, outbreak.estimate.scalars.confints)
 
 import::from(dplyr, "%>%", rename, mutate, bind_rows, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
 import::from(plyr, rlply, llply, ldply)
@@ -158,6 +158,22 @@ repeatRun = function(results, simIdx, runIdx) {
   c(list(expected=expected), observedDetail)
 }
 
+plotSplines = function(results, simIdx, runIdx, runDetails, idxs) {
+  results = results$results
+  study = results[[simIdx]]
+  run = study$runs[[runIdx]]
+
+  plot(study$truth$time, study$truth$cases, type="l", col="red")
+  observed = run$observedCases
+
+  for (idx in idxs) {
+    spline = runDetails$cases %>% filter(sim == idx)
+    lines(spline$time, spline$cases, new=TRUE)
+  }
+  lines(study$truth$time, study$truth$cases, new=TRUE, col="red")
+  points(observed$time, observed$cases, new=TRUE, col="red")
+}
+
 plotRun = function(results, simIdx, runIdx) {
   results = results$results
   study = results[[simIdx]]
@@ -183,6 +199,29 @@ tryadj = function(delta) {
 }
 
 # ldply(seq(-.1, .1, length.out=201), tryadj)
+
+altModel = function(results, simIdx, runIdx, makeModel) {
+  results = results$results
+  sim = results[[simIdx]]
+  run = sim$runs[[runIdx]]
+
+  observed = run$observedCases
+
+  model = makeModel(observed)
+
+  plot(sim$truth$time, sim$truth$cases, type="l", col="red")
+
+  expected = sim$truth %>% simExpectedOutcome(sim$onsetThreshold, sim$offsetThreshold)
+  observed = model %>% runObsOutcome(sim$truth$time, sim$onsetThreshold, sim$offsetThreshold, run$n, run$cl)
+
+  casesPred = model %>% predict(data.frame(time=sim$truth$time), type="response")
+  lines(sim$truth$time, casesPred, new=TRUE)
+
+  lines(sim$truth$time, sim$truth$cases, new=TRUE, col="red")
+  points(observed$time, observed$cases, new=TRUE, col="red")
+
+  expected %>% cbind(observed)
+}
 
 #runRepeat = repeatRun(studyResults1, 1, 2)
 
