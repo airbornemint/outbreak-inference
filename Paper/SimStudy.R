@@ -95,7 +95,7 @@ simResults = function(simRunCount, simTime, obsTime) {
       mutate(cases=rpois(length(cases), cases))
   }
 
-  onsetThreshold = 0.025
+  onsetThreshold = 0.05
   offsetThreshold = 1 - onsetThreshold
   n = 2000
   cl = 0.95
