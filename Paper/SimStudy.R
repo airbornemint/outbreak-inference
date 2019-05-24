@@ -46,7 +46,7 @@ runObsOutcomeDetail = function(model, modelTime, onsetThreshold, offsetThreshold
   list(cases=cases, cumcases=cumcases, estimates=estimates, outcome=outcome)
 }
 
-simResults = function(simRunCount, simTime, obsTime) {
+simResults = function(simRunCount, simTime, obsTime, onsetThreshold) {
   # Generate something that is roughly outbreak-shaped. We'll smooth it with splines and then use it as outbreak truth.
   outbreakTemplate = function(simTime) {
     # For our purposes, pick a random onset/offset time and peak amplitude
@@ -95,7 +95,6 @@ simResults = function(simRunCount, simTime, obsTime) {
       mutate(cases=rpois(length(cases), cases))
   }
 
-  onsetThreshold = 0.05
   offsetThreshold = 1 - onsetThreshold
   n = 2000
   cl = 0.95
@@ -122,12 +121,12 @@ simResults = function(simRunCount, simTime, obsTime) {
   c(sim, list(onsetThreshold=onsetThreshold, offsetThreshold=offsetThreshold, runs=results))
 }
 
-simStudy = function(simCount, simRunCount, eps) {
+simStudy = function(simCount, simRunCount, dt, onsetThreshold) {
 	obsTime = seq(1, 52)
-	simTime = seq(min(obsTime), max(obsTime) + 1 - eps, by=eps)
+	simTime = seq(min(obsTime), max(obsTime) + 1 - dt, by=dt)
 
 	# Main result calculation
-	results = llply(1:simCount, function(idx) { c(list(simIdx=idx), simResults(simRunCount, simTime, obsTime)) }, .progress="text")
+	results = llply(1:simCount, function(idx) { c(list(simIdx=idx), simResults(simRunCount, simTime, obsTime, onsetThreshold)) }, .progress="text")
 
 	# Some useful summaries of results
 	byRun = results %>%
@@ -184,8 +183,8 @@ plotRun = function(results, simIdx, runIdx) {
   points(observed$time, observed$cases, new=TRUE)
 }
 
-#studyResults = simStudy(10, 10, 0.05)
-studyResults = simStudy(60, 60, 0.05)
+#studyResults = simStudy(10, 10, dt=0.05, onsetThreshold=0.5)
+studyResults = simStudy(60, 60, dt=0.05, onsetThreshold=0.5)
 
 onsetFailResults = studyResults$byRun %>% filter(!onsetGood) %>% mutate(onsetError=ifelse(onset > onset.upper, onset-onset.upper, onset-onset.lower))
 # hist(onsetFailResults$onset - onsetFailResults$onset.median, breaks=40)
