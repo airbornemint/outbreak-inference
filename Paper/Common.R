@@ -1,3 +1,7 @@
+import::from(dplyr, rename, mutate)
+import::from(data.table, setnames)
+import::from(reshape, melt)
+
 predCases = function(params, model, modelTime) {
   pred = params %>%
     outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, modelTime, outbreak.calc.cases) %>%
@@ -9,8 +13,8 @@ predCases = function(params, model, modelTime) {
     setnames(as.character(seq(1:col))) %>%
     cbind(time=modelTime) %>%
     melt(c("time")) %>%
-    rename(sim=variable, cases=value) %>%
-    mutate(sim=as.numeric(sim))
+    dplyr::rename(sim=variable, cases=value) %>%
+    dplyr::mutate(sim=as.numeric(sim))
 }
 
 predCum = function(params, model, modelTime) {
@@ -24,11 +28,11 @@ predCum = function(params, model, modelTime) {
     setnames(as.character(seq(1:col))) %>%
     cbind(time=modelTime) %>%
     melt(c("time")) %>%
-    rename(sim=variable, cases.cum.frac=value) %>%
-    mutate(sim=as.numeric(sim))
+    dplyr::rename(sim=variable, cases.cum.frac=value) %>%
+    dplyr::mutate(sim=as.numeric(sim))
 }
 
-predOnset = function(params, model, modelTime) {
+predOnset = function(params, model, modelTime, seasonThreshold) {
   params %>%
     outbreakinference:::outbreak.estimate.scalars.sampleapply(model, modelTime, outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)) %>%
     select(onset)

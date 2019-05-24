@@ -54,7 +54,7 @@ sampleNsimMini = 5
 sampleParamsMini = sampleModel %>% outbreakinference:::outbreak.estimate.params(sampleNsimMini)
 predCasesMini = sampleParamsMini %>% predCases(sampleModel, modelTime)
 predCumMini = sampleParamsMini %>% predCum(sampleModel, modelTime)
-predOnsetMini = sampleParamsMini %>% predOnset(sampleModel, modelTime)
+predOnsetMini = sampleParamsMini %>% predOnset(sampleModel, modelTime, seasonThreshold)
 
 zoomedStartWeek = min(monthBoundaries$min) + 5
 zoomedEndWeek = zoomedStartWeek + 21
@@ -62,7 +62,7 @@ zoomedEndWeek = zoomedStartWeek + 21
 sampleNsimFull = simulations
 sampleParamsFull = sampleModel %>% outbreakinference:::outbreak.estimate.params(sampleNsimFull)
 predCumFull = sampleParamsFull %>% predCum(sampleModel, modelTime)
-predOnsetFull = sampleParamsFull %>% predOnset(sampleModel, modelTime)
+predOnsetFull = sampleParamsFull %>% predOnset(sampleModel, modelTime, seasonThreshold)
 predFractionFull = sampleParamsFull %>% predFraction(sampleModel, modelTime)
 
 sampleDisplayNsim = 100
