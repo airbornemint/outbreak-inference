@@ -167,7 +167,7 @@ outbreak.estimate.scalars.confints = function(samples, level=.95) {
     }
     nameConfInts = as.data.frame(matrix(NA, 1, 3))
     names(nameConfInts) = paste(name, c("lower", "median", "upper"), sep=".")
-    nameConfInts[1,] = quantile(samples[[name]], c(1-level, 0.5, level), names=FALSE)
+    nameConfInts[1,] = quantile(samples[[name]], c((1 - level) / 2, 0.5, (1 + level) / 2), names=FALSE)
     confints = confints %>% cbind(nameConfInts)
   }
 
