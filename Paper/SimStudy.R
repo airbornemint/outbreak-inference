@@ -63,7 +63,7 @@ simResults = function(simRunCount, simTime, obsTime, onsetThreshold) {
   }
 
   makeModel = function(data) {
-    gam(cases ~ s(time, k=4, bs="cp", m=3), family=poisson, data=data)
+    gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
   }
 
   trueCases = function(simTime) {
