@@ -112,7 +112,7 @@ randomMVN = function(mu, sig, samples) {
 }
 
 #' @keywords internal
-outbreak.estimate.params = function(model, samples=100) {
+outbreak.estimate.params = function(model, samples) {
   randomMVN(coef(model), model$Vp, samples)
 }
 

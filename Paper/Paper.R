@@ -1,5 +1,5 @@
 # ---- paper ----
-import::from(outbreakinference, outbreak.calc.cumcases, outbreak.calc.cases, outbreak.calc.thresholds, outbreak.estimate.scalars)
+import::from(outbreakinference, outbreak.calc.cumcases, outbreak.calc.cases, outbreak.calc.thresholds, outbreak.estimate.scalars, outbreak.estimate.scalars.confints)
 
 import::from(reshape, melt)
 import::from(dplyr, "%>%", rename, mutate, bind_rows, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
@@ -20,6 +20,7 @@ seasonThreshold = 0.025
 ppxDuration = 24 # weeks
 startYear = 1996
 endYear = 2013
+level = 0.95
 
 obsTime = sampleObs$time
 modelTime = seq(min(obsTime) - 1 + eps, max(obsTime), eps)
@@ -46,6 +47,8 @@ monthBoundaries = breaks.df %>%
   ) %>%
   select(i, min, mid, max)
 
+predCasesBest = sampleModel %>% predict(data.frame(time=modelTime), type="response") %>% data.frame(cases=., time=modelTime)
+
 sampleParamsSingle = sampleModel %>% outbreakinference:::outbreak.estimate.params(1)
 predCumSingle = sampleParamsSingle %>% predCum(sampleModel, modelTime)
 predFractionSingle = sampleParamsSingle %>% predFraction(sampleModel, modelTime)
@@ -54,7 +57,7 @@ sampleNsimMini = 5
 sampleParamsMini = sampleModel %>% outbreakinference:::outbreak.estimate.params(sampleNsimMini)
 predCasesMini = sampleParamsMini %>% predCases(sampleModel, modelTime)
 predCumMini = sampleParamsMini %>% predCum(sampleModel, modelTime)
-predOnsetMini = sampleParamsMini %>% predOnset(sampleModel, modelTime, seasonThreshold)
+predThresholdsMini = sampleParamsMini %>% predThresholds(sampleModel, modelTime, seasonThreshold)
 
 zoomedStartWeek = min(monthBoundaries$min) + 5
 zoomedEndWeek = zoomedStartWeek + 21
@@ -62,14 +65,16 @@ zoomedEndWeek = zoomedStartWeek + 21
 sampleNsimFull = simulations
 sampleParamsFull = sampleModel %>% outbreakinference:::outbreak.estimate.params(sampleNsimFull)
 predCumFull = sampleParamsFull %>% predCum(sampleModel, modelTime)
-predOnsetFull = sampleParamsFull %>% predOnset(sampleModel, modelTime, seasonThreshold)
+predThresholdsFull = sampleParamsFull %>% predThresholds(sampleModel, modelTime, seasonThreshold)
+estThresholdsFull = predThresholdsFull %>% outbreak.estimate.scalars.confints(level)
 predFractionFull = sampleParamsFull %>% predFraction(sampleModel, modelTime)
+estFractionFull = predFractionFull %>% outbreak.estimate.scalars.confints(level)
 
 sampleDisplayNsim = 100
 
 # ---- figures ----
 
-import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, labs)
+import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs)
 import::from(ggstance, geom_violinh)
 import::from(gridExtra, grid.arrange)
 import::from(grDevices, dev.off)
@@ -106,6 +111,26 @@ ggplot(sampleObs) +
 
 dev.off()
 
+tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+ggplot(sampleObs) +
+  theme_light(base_size=plotTextBaseSize) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases), color="grey") +
+  geom_point(aes(x=time, y=cases), size=.5) +
+  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
+  scale_y_continuous() +
+  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
+  labs(x="Time", y="RSV incidence") +
+  theme(
+    panel.grid.major.x=element_blank(),
+    legend.title=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+    legend.position="bottom"
+  )
+
+dev.off()
+
 tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
 
 ggplot(predCasesMini) +
@@ -126,39 +151,19 @@ ggplot(predCasesMini) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePredCumMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
-
-ggplot(predCumMini) +
-  theme_light(base_size=plotTextBaseSize) +
-  geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
-  geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-  geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-  labs(x="Time", y="Relative cumulative incidence") +
-  theme(
-    panel.grid.major.x=element_blank(),
-    legend.title=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
-  )
-
-dev.off()
-
 tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
 
-ggplot(predCumMini) +
+ggplot(predCasesMini) +
   theme_light(base_size=plotTextBaseSize) +
-  geom_line(aes(x=time, y=cases.cum.frac, group=sim), color="grey") +
-  geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-  geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-  geom_point(data=predOnsetMini, aes(x=onset, y=seasonThreshold), size=0.75, shape=17) +
-  geom_segment(data=predOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") +
+  geom_line(aes(x=time, y=cases, group=sim), color="grey") +
+  geom_point(data=predThresholdsMini, aes(x=onset, y=0), size=0.75, shape=17) +
+  geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), linetype="11") +
+  geom_point(data=predThresholdsMini, aes(x=offset, y=0), size=0.75, shape=17) +
+  geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), linetype="11") +
   scale_y_continuous() +
   scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 2*seasonThreshold)) +
-  labs(x="Time", y="Relative cumulative incidence") +
+  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
+  labs(x="Time", y="RSV incidence") +
   theme(
     panel.grid.major.x=element_blank(),
     legend.title=element_blank(),
@@ -175,21 +180,29 @@ tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.
 data = predCumFull
 splineData = data %>% filter(sim < sampleDisplayNsim)
 
-ggplot(predOnsetFull) +
+ggplot(predThresholdsFull) +
   theme_light(base_size=plotTextBaseSize) +
-  geom_line(data=splineData, aes(x=time, y=cases.cum.frac, group=sim), color="gray") +
-  geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-  geom_point(data=sampleObs, aes(x=time, y=cases.cum.frac), size=0.5) +
-  geom_violinh(
-    data=predOnsetFull,
-    aes(x=onset, y=seasonThreshold),
-    width=.01,
-    fill="gray50", color="black",
-    trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
+  # geom_line(data=splineData, aes(x=time, y=cases, group=sim), color="gray") +
+  # geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
+  geom_point(data=sampleObs, aes(x=time, y=cases), size=0.5) +
+  geom_density(
+    data=predThresholdsFull,
+    aes(x=onset, y=5 * ..density..),
+    # width=1,
+    fill="gray50", color=NA, trim=TRUE
+    # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
+  ) +
+  geom_density(
+    data=predThresholdsFull,
+    aes(x=offset, y=5 * ..density..),
+    # width=1,
+    fill="gray50", color=NA, trim=TRUE
+    # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
   scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
   scale_y_continuous() +
-  coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
+  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
+  # coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
   labs(x="Time", y="Relative cumulative incidence") +
   theme(
     panel.grid.major.x=element_blank(),

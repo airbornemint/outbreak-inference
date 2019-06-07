@@ -32,10 +32,17 @@ predCum = function(params, model, modelTime) {
     dplyr::mutate(sim=as.numeric(sim))
 }
 
-predOnset = function(params, model, modelTime, seasonThreshold) {
-  params %>%
+predThresholds = function(params, model, modelTime, seasonThreshold) {
+  thresholds = params %>%
     outbreakinference:::outbreak.estimate.scalars.sampleapply(model, modelTime, outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)) %>%
-    select(onset)
+    select(onset, offset)
+  thresholds$onset.cases = params %>%
+    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, thresholds$onset, outbreak.calc.cases) %>%
+    diag()
+  thresholds$offset.cases = params %>%
+    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, thresholds$offset, outbreak.calc.cases) %>%
+    diag()
+  thresholds
 }
 
 ppxStart = 20
