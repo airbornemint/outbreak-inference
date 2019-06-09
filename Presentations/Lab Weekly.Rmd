@@ -448,5 +448,7 @@ y2 = f(x)
 
 plot_ly() %>% 
   add_psplines(x, y, 4, 2, 2, cyclic=TRUE, show.splines=FALSE, show.knots=TRUE)
+  # add_func(c(0, 1), 0.001, f) %>%
+  config(mathjax="cdn")
 ```
 

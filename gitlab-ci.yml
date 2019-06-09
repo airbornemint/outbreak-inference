@@ -42,14 +42,14 @@ variables:
 #   artifacts:
 #     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-package"
 #     paths:
-#       - "${R_BUILD_DIR}/outbreakinference*.tar.gz"
+#       - "${R_BUILD_DIR}/pspline.inference*.tar.gz"
 #     when: always
 #
 # check-release:
 #   extends: .r
 #   stage: check
 #   script:
-#     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='outbreakinference.*t.*gz')[1]))"
+#     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
 #
 # knitr:
 #   extends: .use-autodocker
@@ -61,15 +61,15 @@ variables:
 #     paths:
 #       - "${TEX_DIR}/${KNITR_CACHE_DIR}"
 #   script:
-#     - find "${R_BUILD_DIR}" -name "outbreakinference*.tar.gz" -exec install2.r {} \;
+#     - find "${R_BUILD_DIR}" -name "pspline.inference*.tar.gz" -exec install2.r {} \;
 #     - cd "${TEX_DIR}"
-#     - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('OutbreakInference.rnw')"
+#     - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
 #   dependencies:
 #     - build-release
 #   artifacts:
 #     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
 #     paths:
-#       - "${TEX_DIR}/OutbreakInference.tex"
+#       - "${TEX_DIR}/PSplineInference.tex"
 #       - "${TEX_DIR}/figures"
 #
 # overleaf:
@@ -77,7 +77,7 @@ variables:
 #   stage: overleaf
 #   script:
 #     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-#     - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+#     - cp -r "${TEX_DIR}/PSplineInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/PSplineInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
 #   artifacts:
 #     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
 #     paths:
@@ -88,15 +88,15 @@ variables:
 #   stage: tex
 #   script:
 #     - cd "${OVERLEAF_ARTIFACTS_DIR}"
-#     - lualatex "OutbreakInference.tex"
-#     - bibtex "OutbreakInference"
-#     - lualatex "OutbreakInference.tex"
-#     - lualatex "OutbreakInference.tex"
-#     - mv "OutbreakInference.pdf" "${CI_PROJECT_DIR}"
+#     - lualatex "PSplineInference.tex"
+#     - bibtex "PSplineInference"
+#     - lualatex "PSplineInference.tex"
+#     - lualatex "PSplineInference.tex"
+#     - mv "PSplineInference.pdf" "${CI_PROJECT_DIR}"
 #   artifacts:
 #     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
 #     paths:
-#       - "OutbreakInference.pdf"
+#       - "PSplineInference.pdf"
       
 sim:
   extends: .use-autodocker

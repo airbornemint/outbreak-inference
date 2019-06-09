@@ -6,3 +6,4 @@ LICENSE.md
 ^gitlab
 ^\.cache
 ^gitlab-ci.yml
+^Presentations$
