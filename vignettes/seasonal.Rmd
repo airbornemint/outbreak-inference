@@ -21,7 +21,7 @@ library(pspline.inference)
 ```
 
 ```{r libraries, include=FALSE}
-library(reshape)
+library(reshape2)
 library(dplyr)
 library(mgcv)
 library(data.table)
