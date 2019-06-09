@@ -52,26 +52,26 @@ quantile.outcomes = function(data, model, probs, prob.names) {
 
   confints = function(samples) {
     outcomes = samples %>% select(-pspline.sample)
-    if (!is.null(predictors)) {
+    if (length(predictors) > 0) {
       common = outcomes %>% select(predictors) %>% first()
       outcomes %<>% select(-predictors)
     }
     outcomes %<>% quantile.multi(probs, prob.names)
 
-    if (!is.null(predictors)) {
+    if (length(predictors) > 0) {
       outcomes %<>% cbind(common)
     }
 
     return(outcomes)
   }
 
-  if (is.null(predictors)) {
-    data %>% do(confints(.))
-  } else {
+  if (length(predictors) > 0) {
     data %>%
       group_by_at(predictors) %>%
       do(confints(.)) %>%
       ungroup()
+  } else {
+    data %>% do(confints(.))
   }
 }
 
