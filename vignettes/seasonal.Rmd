@@ -132,7 +132,7 @@ basePlot(casesEst) +
 
 Another simple outcome measure that the package can calculate for us is the relative cumulative incidence, using the `pspline.outbreak.cumcases.relative` function. Here we estimate and plot cumulative incidence at the 95% confidence level:
 
-```{r estimate cum cases, include=TRUE}
+```{r estimate cum cases, message=FALSE, include=TRUE}
 cumCasesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases.relative, samples=n, level=0.95)
 
@@ -199,7 +199,7 @@ seriousDiseaseCases <- function(model, params, predictors) {
 
 We can now combine our custom outcome measure calculation with time series estimation:
 
-```{r custom time series est, include=TRUE}
+```{r custom time series est, message=FALSE, include=TRUE}
 seriousEst <- model %>%
   pspline.estimate.timeseries(predictors, seriousDiseaseCases, samples=n, level=0.95)
 
@@ -238,7 +238,7 @@ seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatment
 
 This is how we would use it:
 
-```{r custom est parameterized, include=TRUE}
+```{r custom est parameterized, message=FALSE, include=TRUE}
 seriousEst <- model %>%
   pspline.estimate.timeseries(
     predictors, 
@@ -262,7 +262,7 @@ This is a scalar outcome measure, and we can estimate it using the `pspline.esti
 
 For this particular outcome measure, we need to write a function to calculate it. We'll use the same function-in-function technique to allow us to customize the number of medication doses as needed:
 
-```{r estimate supply duration, include=TRUE}
+```{r estimate supply duration, message=FALSE, warning=FALSE, include=TRUE}
 medicationSupplyEnd <- function(medicationQuantity) {
   function(model, params, predictors) {
     # Get predicted cumulative incidence for the given param values
@@ -287,7 +287,7 @@ kable(supplyDurationEst, caption="Estimated time before medication supply is exh
 
 Similar to time series outcomes, we can obtain the individual samples of a scalar outcome using the `pspline.sample.scalars` function. This is useful for visualization -- in this example, we show the density plot of the estimated time when medication supply will run out:
 
-```{r plot supply duration, include=TRUE}
+```{r plot supply duration, warning=FALSE, include=TRUE}
 supplyDurationSamples <- model %>% 
   pspline.sample.scalars(predictors, medicationSupplyEnd(medicationQuantity=100), samples=n)
 
