@@ -92,7 +92,7 @@ pspline.confints.timeseries = function(samples, model, level=0.95) {
 #' outcome time series at each time point.
 #'
 #' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
-#' @param time vector of time values at which the model will be evaluated
+#' @param predictors data frame of predictor values at which the model will be evaluated
 #' @param outcome function returning calculated outcome time series, as described above
 #' @param samples number of simulations to run
 #' @param level confidence level for returned estimates

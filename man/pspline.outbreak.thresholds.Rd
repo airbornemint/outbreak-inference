@@ -2,19 +2,18 @@
 % Please edit documentation in R/outbreak.R
 \name{pspline.outbreak.thresholds}
 \alias{pspline.outbreak.thresholds}
-\title{This is useful as \code{outcomes} for pspline.estimate.scalars.}
+\title{Calculate outbreak thresholds for an outbreak}
 \usage{
 pspline.outbreak.thresholds(onset = NA, offset = NA)
 }
 \arguments{
-\item{onset}{onset threshold as fraction of total outbreak case count}
+\item{onset}{onset threshold (as fraction of total outbreak case count)}
 
-\item{offset}{offset threshold as fraction of total outbreak case count}
+\item{offset}{offset threshold (as fraction of total outbreak case count)}
 }
 \value{
-data frame with columns \code{onset} and \code{offset} representing time
-when the outbreak crossed onsed and offset thresholds
+function suitable as outcome estimator parameter of \code{\link{pspline.estimate.scalars}}
 }
 \description{
-This is useful as \code{outcomes} for pspline.estimate.scalars.
+The result of calling this is useful as \code{outcomes} for \code{\link{pspline.estimate.scalars}}.
 }

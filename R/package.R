@@ -12,36 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' Stochastic modeling of infectious disease outbreak characteristics
+#' Inference using penalized basis splines (P-splines) in a generalized additive model (GAM), with applications in
+#' infectious disease outbreak modeling
 #'
-#' This package lets you made estimates (with confidence intervals) of characteristics of infectious
-#' disease outbreaks.
+#' This package lets you make point and interval estimates of outcomes modeled with a non-linear P-spline GAM.
 #'
-#' It does this by modeling disease outbreaks using generalized additive (mixed) models (GAM/GAMM), then
-#' using stochastic simulation based on the GAM/GAMM model to estimate outbreak characteristics.
-#'
-#' For example, this package can be used to model timing of outbreak onset, peak, or offset,
+#' Applications in infectious disease outbreak modeling include estimating of outbreak onset, peak, or offset,
 #' as well as outbreak cumulative incidence over time.
 #'
-#' The package can model two types of outbreak characteristics: scalar characteristics, which are single-value
-#' measures of an outbreak (for example, timing of peak) and time series characteristics, which are functions of
-#' time (for example, cumulative incidence count over time)
+#' The package can model two types of outcomes: scalar outcomes, which are single-value
+#' outcome measures (for example, timing of outbreak peak) and time series characteristics, which are functions of
+#' time (for example, infection incidence over time)
 #'
-#' For each outbreak characteristic, the package produces median and confidence interval estimates.
+#' For each outcome measure, the package produces median and confidence interval estimates.
 #'
 #' Typical use of this package begins by using the package \code{\link{mgcv}} to obtain
-#' a GAM/GAMM model of the outbreak, followed by calling either \code{\link{pspline.estimate.scalars}} or
-#' \code{\link{pspline.estimate.timeseries}} to obtain confidence intervals on the
-#' desired scalar/timeseries outcomes of the outbreak
+#' a GAM/GAMM model of the process under investigation (such as an infectious disease outbreak), followed by
+#' calling either \code{\link{pspline.estimate.scalars}} or \code{\link{pspline.estimate.timeseries}} to
+#' obtain confidence intervals on the desired outcome measure
 #'
 #' Both \code{\link{pspline.estimate.scalars}} and \code{\link{pspline.estimate.timeseries}}
-#' allow simulation of arbitrary outbreak characteristics, by passing a function that calculates
-#' the desired characteristics into \code{\link{pspline.estimate.scalars}} or \code{\link{pspline.estimate.timeseries}}.
+#' allow computation of arbitrary outcome measures, by passing a function that calculates
+#' the desired outcome measure into \code{\link{pspline.estimate.scalars}} or \code{\link{pspline.estimate.timeseries}}.
 #'
-#' For convenience, this package also includes \code{\link{pspline.calc.thresholds}}, which can
-#' be use in conjunction with \code{\link{pspline.estimate.scalars}} to estimate timing of outbreak onset and
-#' offset, as well as \code{\link{pspline.calc.cumcases}}, which can be used in conjuction with
-#' \code{\link{pspline.estimate.timeseries}} to estimate cumulative incidence vs time for the pspline.
+#' For convenience, this package also includes several utilities specifically aimed at modeling of
+#' infectious disease outbreaks, such as \code{\link{pspline.outbreak.cases}} and \code{\link{pspline.outbreak.cumcases}}
+#' (for estimation of incidence and cumulative incidence), and \code{\link{pspline.outbreak.thresholds}}, for estimation
+#' of outbreak onset and offset.
 #'
 #' @name pspline.inference
 #' @docType package
@@ -57,28 +54,30 @@
 #' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 #'
 #' # Generate time series at which model will be evaluated for estimates
-#' # For the most part, you want the time span of the outbreak data divided into
-#' # small increments (here, eps)
+#' # Usually you want this to be the same as the time interval that your observations are in, except
+#' # divided into small increments (here, eps)
 #' eps = .05
-#' modelTime = seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, eps)
+#' predictors = data.frame(time=seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, by=eps))
 #'
-#' # Estimate cumulative incidence count time series
+#' # Estimate cumulative incidence
 #' cumCases = pspline.estimate.timeseries(
-#'   model, modelTime,
-#'   pspline.calc.cumcases, level=.95
+#'   model, predictors,
+#'   pspline.outbreak.cumcases, level=.95
 #')
 #'
 #' # Estimate time when outbreak crosses 5% and 95% of cumulative case count
+#' onsetThreshold = 0.05
+#' offsetThreshold = 1 - onsetThreshold
 #' thresholds = pspline.estimate.scalars(
-#'   model, modelTime,
-#'   pspline.calc.thresholds(onset=0.05, offset=0.95), level=.95
+#'   model, predictors,
+#'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), level=.95
 #' )
 #'
 #' # Plot cumulative incidence estimates and threshold estimates
 #' library(ggplot2)
 #' ggplot(cumCases) +
-#'   geom_ribbon(aes(x=time, ymin=lower, ymax=upper), fill=grey(.75)) +
-#'   geom_line(aes(x=time, y=median)) +
+#'   geom_ribbon(aes(x=time, ymin=cumcases.lower, ymax=cumcases.upper), fill=grey(.75)) +
+#'   geom_line(aes(x=time, y=cumcases.median)) +
 #'   annotate("rect",
 #'     xmin=thresholds$onset.lower,
 #'     xmax=thresholds$onset.upper,
@@ -87,8 +86,8 @@
 #'     xmin=thresholds$offset.lower,
 #'     xmax=thresholds$offset.upper,
 #'     ymin=-Inf, ymax=Inf, alpha=.25) +
-#'   annotate("segment", x=-Inf, xend=Inf, y=0.05, yend=0.05) +
-#'   annotate("segment", x=-Inf, xend=Inf, y=0.95, yend=0.95) +
+#'   annotate("segment", x=-Inf, xend=Inf, y=onsetThreshold, yend=onsetThreshold) +
+#'   annotate("segment", x=-Inf, xend=Inf, y=offsetThreshold, yend=offsetThreshold) +
 #'  labs(x="Time", y="Relative cumulative incidence")
 #'
 #' @importFrom stats coef na.omit predict quantile rnorm

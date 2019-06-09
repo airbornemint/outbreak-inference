@@ -10,13 +10,13 @@ pspline.estimate.timeseries(model, predictors, outcome, samples = 1000,
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
+\item{predictors}{data frame of predictor values at which the model will be evaluated}
+
 \item{outcome}{function returning calculated outcome time series, as described above}
 
 \item{samples}{number of simulations to run}
 
 \item{level}{confidence level for returned estimates}
-
-\item{time}{vector of time values at which the model will be evaluated}
 }
 \value{
 data frame of estimates, as described above

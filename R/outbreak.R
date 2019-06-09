@@ -16,14 +16,14 @@
 ### Outbreak inference
 ######################################################################
 
-#' Calculate case count for an outbreak
+#' Calculate incidence for an outbreak
 #'
-#' This is useful as \code{outcome} for pspline.estimate.scalars.
+#' This is useful as \code{outcome} for \code{\link{pspline.estimate.scalars}}.
 #'
 #' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}
 #' @param params model parameter matrix
-#' @param time vector of time values at which the model will be evaluated
-#' @return time series of cumulative case counts
+#' @param predictors data frame of predictor values at which the model will be evaluated
+#' @return data frame of predictor values with corresponding incidence estimates in \code{$cases}
 #' @export
 pspline.outbreak.cases = function(model, params, predictors) {
   # Get model predictions for given param values
@@ -33,14 +33,14 @@ pspline.outbreak.cases = function(model, params, predictors) {
   data.frame(cases=model$family$linkinv(fit)) %>% cbind(predictors)
 }
 
-#' Calculate cumulative case count for an outbreak
+#' Calculate cumulative incidence for an outbreak
 #'
-#' This is useful as \code{outcome} for pspline.estimate.timeseries.
+#' This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
 #'
 #' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
 #' @param params model parameter matrix
-#' @param time vector of time values at which the model will be evaluated
-#' @return time series of relative cumulative cases
+#' @param predictors data frame of predictor values at which the model will be evaluated
+#' @return data frame of predictor values with corresponding cumulative incidence estimates in \code{$cumcases}
 #' @export
 pspline.outbreak.cumcases = function(model, params, predictors) {
   assert_that(length(all.vars(model$pred.formula)) == 1, msg="Cumulative incidence currently requires time as the only predictor")
@@ -54,6 +54,14 @@ pspline.outbreak.cumcases = function(model, params, predictors) {
     rename_at("pspline.time", function(.) pred.time)
 }
 
+#' Calculate relative incidence for an outbreak
+#'
+#' This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
+#'
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
+#' @param params model parameter matrix
+#' @param predictors data frame of predictor values at which the model will be evaluated
+#' @return data frame of predictor values with corresponding relative cumulative incidence estimates in \code{$cumcases.relative}
 #' @export
 pspline.outbreak.cumcases.relative = function(model, params, predictors) {
   model %>%
@@ -62,22 +70,22 @@ pspline.outbreak.cumcases.relative = function(model, params, predictors) {
     select(-cumcases)
 }
 
-# Calculate outbreak thresholds for an outbreak
-#' This is useful as \code{outcomes} for pspline.estimate.scalars.
+#' Calculate outbreak thresholds for an outbreak
 #'
-#' @param onset onset threshold as fraction of total outbreak case count
-#' @param offset offset threshold as fraction of total outbreak case count
-#' @return data frame with columns \code{onset} and \code{offset} representing time
-#' when the outbreak crossed onsed and offset thresholds
+#' The result of calling this is useful as \code{outcomes} for \code{\link{pspline.estimate.scalars}}.
+#'
+#' @param onset onset threshold (as fraction of total outbreak case count)
+#' @param offset offset threshold (as fraction of total outbreak case count)
+#' @return function suitable as outcome estimator parameter of \code{\link{pspline.estimate.scalars}}
 #' @export
 pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
   function(model, params, predictors) {
     # Calculate cumulative case counts from the model and parameters
-    cumfrac = pspline.outbreak.cumcases.relative(model, params, predictors)
+    cum.rel = pspline.outbreak.cumcases.relative(model, params, predictors)
 
     data.frame(
-      onset=threshold.ts(predictors$time, cumfrac, onset),
-      offset=threshold.ts(predictors$time, cumfrac, offset)
+      onset=threshold.ts(cum.rel$time, cum.rel$cumcases.relative, onset),
+      offset=threshold.ts(cum.rel$time, cum.rel$cumcases.relative, offset)
     )
   }
 }
@@ -97,6 +105,13 @@ threshold.ts = function(time, cumfrac, threshold) {
   return(timeLow + timeStep / cumStep * (threshold - cumLow))
 }
 
+#' Calculate cumulative incidence time series from incidence time series
+#'
+#' Correctly handles accumulating over time intervals different from 1
+#'
+#' @param time vector of times
+#' @param cases vector of corresponding incidences
+#' @return vector of corresponding cumulative incidences
 #' @export
 pspline.outbreak.calc.cumcases = function(time, cases) {
   cumsum(c(1, diff(time)) * cases)

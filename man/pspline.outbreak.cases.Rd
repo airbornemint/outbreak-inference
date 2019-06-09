@@ -2,7 +2,7 @@
 % Please edit documentation in R/outbreak.R
 \name{pspline.outbreak.cases}
 \alias{pspline.outbreak.cases}
-\title{Calculate case count for an outbreak}
+\title{Calculate incidence for an outbreak}
 \usage{
 pspline.outbreak.cases(model, params, predictors)
 }
@@ -11,11 +11,11 @@ pspline.outbreak.cases(model, params, predictors)
 
 \item{params}{model parameter matrix}
 
-\item{time}{vector of time values at which the model will be evaluated}
+\item{predictors}{data frame of predictor values at which the model will be evaluated}
 }
 \value{
-time series of cumulative case counts
+data frame of predictor values with corresponding incidence estimates in \code{$cases}
 }
 \description{
-This is useful as \code{outcome} for pspline.estimate.scalars.
+This is useful as \code{outcome} for \code{\link{pspline.estimate.scalars}}.
 }
