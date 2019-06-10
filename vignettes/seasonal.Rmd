@@ -3,10 +3,10 @@ author: "Ben Artin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Seasonal infection example}
+  %\VignetteIndexEntry{Example of applying p-spline inference to seasonal infections}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{pspline.inference, mgcv, data.table, ggplot2, ggstance, knitr}
+  %\VignetteDepends{pspline.inference, mgcv, data.table, ggplot2, ggstance, knitr, import}
 ---
 # Disease outbreak outcome estimation using penalized splines
 
@@ -21,13 +21,14 @@ library(pspline.inference)
 ```
 
 ```{r libraries, include=FALSE}
-library(reshape2)
-library(dplyr)
-library(mgcv)
-library(data.table)
-library(ggplot2)
-library(ggstance)
-library(knitr)
+# import::from(reshape2)
+import::from(dplyr, mutate, inner_join, rename, select, arrange)
+import::from(mgcv, gam)
+# import::from(data.table)
+import::from(ggplot2, ggplot, aes, geom_ribbon, geom_line, geom_point, geom_density, theme_light, scale_y_continuous, scale_x_continuous, labs, coord_cartesian, theme, element_blank, element_text)
+import::from(ggstance, geom_violinh)
+import::from(knitr, opts_chunk, kable)
+import::from(magrittr, "%>%")
 
 opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
 ```
@@ -114,14 +115,14 @@ In this simple example, we estimate the 95% confidence interval for infection ca
 
 We will see examples later of how to estimate custom outcomes, but for this simple example we can use the `outbreak.calc.cases` function (which is built into the package) to calculate our outcome of interest. 
 
-```{r estimate cases, include=TRUE}
+```{r estimated cases, include=TRUE}
 casesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cases, samples=n, level=0.95)
 ```
 
 The result of calling `pspline.estimate.timeseries` includes predictors, point estimates of our desired outcome (`median`), as well as an upper and lower confidence level (`upper` and `lower`), which we can plot:
 
-```{r plot cases, include=TRUE}
+```{r estimated cases plot, include=TRUE}
 basePlot(casesEst) +
   geom_ribbon(aes(x=time, ymin=cases.lower, ymax=cases.upper), fill=grey(.75)) +
   geom_point(data=obs, aes(x=time, y=cases)) +
@@ -132,10 +133,12 @@ basePlot(casesEst) +
 
 Another simple outcome measure that the package can calculate for us is the relative cumulative incidence, using the `pspline.outbreak.cumcases.relative` function. Here we estimate and plot cumulative incidence at the 95% confidence level:
 
-```{r estimate cum cases, message=FALSE, include=TRUE}
+```{r estimate cum cases}
 cumCasesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases.relative, samples=n, level=0.95)
+```
 
+```{r estimate cum cases plot}
 basePlot(cumCasesEst) +
   geom_ribbon(aes(x=time, ymin=cumcases.relative.lower, ymax=cumcases.relative.upper), fill=grey(.75)) +
   geom_point(data=obs, aes(x=time, y=cases.cum.frac)) +
@@ -178,7 +181,7 @@ Then, among the first 100 cases, 10% will fail treatment, of which 80% will prog
 
 The `pspline.inference` package does not include a built-in way to calculate this outcome, but we can write our own function to do it. This function will take a model object (`model`, obtained from the call to `gam()` above), a model parameters matrix (`params`), and a data frame of predictors (`predictors`). It will return a data frame of calculate outcome estimates.
 
-```{r custom time series calc, include=TRUE}
+```{r custom time series calc}
 seriousDiseaseCases <- function(model, params, predictors) {
   # Get predicted incidence and cumulative incidence for the given param values
   cases = pspline.outbreak.cases(model, params, predictors)
@@ -199,13 +202,15 @@ seriousDiseaseCases <- function(model, params, predictors) {
 
 We can now combine our custom outcome measure calculation with time series estimation:
 
-```{r custom time series est, message=FALSE, include=TRUE}
+```{r custom time series est}
 seriousEst <- model %>%
   pspline.estimate.timeseries(predictors, seriousDiseaseCases, samples=n, level=0.95)
 
 cumCasesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases, samples=n, level=0.95)
+```
 
+```{r custom time series est plot}
 basePlot(seriousEst) +
   geom_line(aes(x=time, y=cumseriouscases.median), color=grey(.75)) +
   geom_line(data=cumCasesEst, aes(x=time, y=cumcases.median), color=grey(.75)) +
@@ -238,7 +243,7 @@ seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatment
 
 This is how we would use it:
 
-```{r custom est parameterized, message=FALSE, include=TRUE}
+```{r custom est parameterized}
 seriousEst <- model %>%
   pspline.estimate.timeseries(
     predictors, 
@@ -246,7 +251,9 @@ seriousEst <- model %>%
     samples=n, 
     level=0.95
   )
+```
 
+```{r custom est parameterized plot}
 basePlot(seriousEst) +
   geom_line(aes(x=time, y=cumseriouscases.median), color=grey(.75)) +
   geom_line(data=cumCasesEst, aes(x=time, y=cumcases.median), color=grey(.75)) +
