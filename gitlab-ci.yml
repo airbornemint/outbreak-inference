@@ -31,6 +31,9 @@ variables:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${R_PACKAGE_CACHE}"
+      
+autodocker:
+  extends: .autodocker
 
 build-release:
   extends: .r
