@@ -1,12 +1,8 @@
 # ---- paper ----
 import::from(pspline.inference, pspline.outbreak.cumcases.relative, pspline.outbreak.cases, pspline.outbreak.thresholds, pspline.estimate.scalars, pspline.estimate.timeseries, pspline.confints.scalars)
 
-import::from(reshape, melt)
-import::from(dplyr, "%>%", rename, mutate, bind_rows, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
-import::from(plyr, rlply, llply)
-import::from(mgcv, gam, mroot)
-import::from(data.table, setnames)
-import::from(tidyr, unnest)
+import::from(dplyr, "%>%", rename, mutate, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
+import::from(mgcv, gam)
 
 source("./Common.R")
 
