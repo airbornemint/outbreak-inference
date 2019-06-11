@@ -72,7 +72,7 @@ quantile.outcomes = function(data, model, probs, prob.names) {
   confints = function(samples) {
     outcomes = samples %>% select(-pspline.sample)
     if (length(predictors) > 0) {
-      common = outcomes %>% select(predictors) %>% first()
+      common = outcomes %>% select(predictors) %>% summarize_all(first)
       outcomes %<>% select(-predictors)
     }
     outcomes %<>% quantile.multi(probs, prob.names)
