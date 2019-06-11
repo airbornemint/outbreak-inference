@@ -62,7 +62,7 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 
-  saveRDS(validationResults, "Paper/ValidationResults.rds")
+  saveRDS(validationResults, "ValidationResults.rds")
 } else {
   # Even when skipping full validation, run one cycle of it just to make sure it still works
   pspline.validate.scalars(
@@ -71,5 +71,5 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 
-  validationResults = readRDS("Paper/ValidationResults.rds")
+  validationResults = readRDS("ValidationResults.rds")
 }
