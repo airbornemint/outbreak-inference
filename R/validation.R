@@ -58,8 +58,9 @@ check.scalars <- function(estimates, expected) {
 #' Run simulation study on one set of observations
 #' @keywords internal
 observed.results.scalars <- function(observed, truth, expected, fun.model, fun.outcome, n.samples, level) {
+  model = observed %>% fun.model()
   truth %<>% select_at(pred.vars(model))
-  fun.model(observed) %>%
+  model %>%
     pspline.estimate.scalars(truth, fun.outcome, n.samples, level) %>%
     check.scalars(expected)
 }
@@ -67,7 +68,8 @@ observed.results.scalars <- function(observed, truth, expected, fun.model, fun.o
 #' Run simulation study on one truth
 #' @keywords internal
 truth.results.scalars <- function(truth, fun.observations, n.observations, fun.model, fun.outcome, n.samples, level) {
-  expected = truth %>% fun.outcome(model, .)
+  # This model and set of observations are just used for looking up variables in fun.outcome
+  expected = truth %>% fun.observations() %>% fun.model() %>% fun.outcome(truth)
   1:n.observations %>%
     ldply(function(idx) {
       truth %>%
