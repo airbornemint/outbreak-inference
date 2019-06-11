@@ -26,14 +26,19 @@ library(pspline.inference)
 # I know I did this above already, but that was for demo purposes. This here is to make sure it's always run.
 library(pspline.inference)
 
-import::from(dplyr, mutate, inner_join, rename, select)
-import::from(mgcv, gam)
-import::from(ggplot2, ggplot, aes, geom_ribbon, geom_line, geom_point, geom_density, theme_light, scale_y_continuous, scale_x_continuous, scale_colour_manual, scale_fill_manual, scale_size_manual, scale_linetype_manual, labs, coord_cartesian, theme, element_blank, element_text, element_rect, guide_legend)
-import::from(knitr, opts_chunk, kable)
-import::from(kableExtra, kable_styling)
-import::from(magrittr, "%>%", "%<>%")
-import::from(doParallel, registerDoParallel)
-import::from(parallel, detectCores)
+library(mgcv)
+
+library(magrittr)
+library(plyr)
+library(dplyr)
+
+library(knitr)
+library(kableExtra)
+
+library(ggplot2)
+
+library(doParallel)
+library(parallel)
 
 # Set up parallel processing, used for simulation study
 registerDoParallel(detectCores())
