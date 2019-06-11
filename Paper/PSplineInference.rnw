@@ -53,7 +53,7 @@
 @
 
 <<load>>=
-    knitr::read_chunk("./Paper.R")
+    knitr::read_chunk("./PSplineInference.R")
 @
 
 <<paper, warning=FALSE>>=
