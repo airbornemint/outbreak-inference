@@ -25,7 +25,7 @@ variables:
     - echo "R_LIBS=${R_PACKAGE_CACHE}" > .Renviron
     - echo "R_LIBS_USER=${R_PACKAGE_CACHE}" >> .Renviron
     - echo "R_PACKAGE_CACHE=${R_PACKAGE_CACHE}" >> .Renviron
-    - Rscript -e "devtools::install_dev_deps()"
+    - Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
 
   cache:
     key: "$CI_COMMIT_REF_SLUG"
