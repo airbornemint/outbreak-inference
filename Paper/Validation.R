@@ -11,7 +11,7 @@ registerDoParallel(detectCores())
 print(paste("foreach::dopar", foreach::getDoParRegistered(), foreach::getDoParName(), foreach::getDoParVersion(), foreach::getDoParWorkers(), detectCores()))
 set.seed(NULL)
 
-source("./Paper/Common.R")
+source("./Common.R")
 
 # Calculate estimates of outcome measures
 outcomes = function(onsetThreshold, offsetThreshold) {

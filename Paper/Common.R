@@ -1,48 +1,28 @@
 import::from(dplyr, rename, mutate)
+import::from(plyr, adply)
 import::from(data.table, setnames)
 import::from(reshape, melt)
 
-predCases = function(params, model, modelTime) {
-  pred = params %>%
-    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, modelTime, outbreak.calc.cases) %>%
-    data.frame()
-
-  col = ncol(pred)
-
-  pred = pred %>%
-    setnames(as.character(seq(1:col))) %>%
-    cbind(time=modelTime) %>%
-    melt(c("time")) %>%
-    dplyr::rename(sim=variable, cases=value) %>%
-    dplyr::mutate(sim=as.numeric(sim))
+predCases = function(params, model, predictors) {
+  params %>%
+    pspline.inference:::pspline.calc.timeseries(model, predictors, pspline.outbreak.cases)
 }
 
-predCum = function(params, model, modelTime) {
-  pred = params %>%
-    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, modelTime, outbreak.calc.cumcases) %>%
-    data.frame()
-
-  col = ncol(pred)
-
-  pred = pred %>%
-    setnames(as.character(seq(1:col))) %>%
-    cbind(time=modelTime) %>%
-    melt(c("time")) %>%
-    dplyr::rename(sim=variable, cases.cum.frac=value) %>%
-    dplyr::mutate(sim=as.numeric(sim))
+predCum = function(params, model, predictors) {
+  params %>%
+    pspline.inference:::pspline.calc.timeseries(model, predictors, pspline.outbreak.cumcases.relative)
 }
 
-predThresholds = function(params, model, modelTime, seasonThreshold) {
+predThresholds = function(params, model, predictors, seasonThreshold) {
   thresholds = params %>%
-    outbreakinference:::outbreak.estimate.scalars.sampleapply(model, modelTime, outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)) %>%
-    select(onset, offset)
-  thresholds$onset.cases = params %>%
-    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, thresholds$onset, outbreak.calc.cases) %>%
-    diag()
-  thresholds$offset.cases = params %>%
-    outbreakinference:::outbreak.estimate.timeseries.sampleapply(model, thresholds$offset, outbreak.calc.cases) %>%
-    diag()
-  thresholds
+    pspline.inference:::pspline.calc.scalars(model, predictors, pspline.outbreak.thresholds(seasonThreshold, 1 - seasonThreshold)) %>%
+    adply(1, function(row) {
+      cases = params[1,] %>%
+        t() %>%
+        pspline.inference:::pspline.calc.timeseries(model, data.frame(time=c(row$onset, row$offset)), pspline.outbreak.cases)
+      data.frame(onset.cases=cases$cases[1], offset.cases=cases$cases[2]) %>%
+        cbind(row %>% select(onset, offset))
+    })
 }
 
 ppxStart = 20
@@ -52,19 +32,14 @@ aapStrat = function(t) {
   as.numeric(t >= ppxStart & t <= ppxEnd)
 }
 
-calcFraction = function(model, params, time) {
-  predictors = predict(model, data.frame(time=time), type="lpmatrix")
-  cases = model$family$linkinv(predictors %*% params)
-
-  cases = data.frame(time=time, cases=cases)
-  totalCases = sum(cases$cases)
-  preventableCases = sum(cases$cases[cases$time >= ppxStart & cases$time <= ppxEnd])
-
+calcFraction = function(model, data) {
+  totalCases = sum(data$cases)
+  preventableCases = sum(data$cases[data$time >= ppxStart & data$time <= ppxEnd])
   data.frame(preventable=c(preventableCases / totalCases))
 }
 
-predFraction = function(params, model, modelTime) {
+predFraction = function(params, model, predictors) {
   params %>%
-    outbreakinference:::outbreak.estimate.scalars.sampleapply(model, modelTime, calcFraction)
+    pspline.inference:::pspline.calc.scalars(model, predictors, calcFraction)
 }
 
