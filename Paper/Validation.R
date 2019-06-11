@@ -55,8 +55,21 @@ makeModel = function(data) {
   gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 }
 
-studyResults = pspline.validate.scalars(
-  generateTruth(1, 52, 0.05), 60,
-  generateObservations, 60,
-  makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
-)
+if(getOption("pspline.paper.validation.run", FALSE)) {
+  validationResults = pspline.validate.scalars(
+    generateTruth(1, 52, 0.05), 60,
+    generateObservations, 60,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
+  )
+
+  saveRDS(validationResults, "Paper/ValidationResults.rds")
+} else {
+  # Even when skipping full validation, run one cycle of it just to make sure it still works
+  pspline.validate.scalars(
+    generateTruth(1, 52, 0.05), 1,
+    generateObservations, 1,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
+  )
+
+  validationResults = readRDS("Paper/ValidationResults.rds")
+}
