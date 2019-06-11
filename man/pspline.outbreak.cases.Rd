@@ -2,20 +2,18 @@
 % Please edit documentation in R/outbreak.R
 \name{pspline.outbreak.cases}
 \alias{pspline.outbreak.cases}
-\title{Calculate incidence for an outbreak}
+\title{Calculate cumulative incidence for an outbreak}
 \usage{
-pspline.outbreak.cases(model, params, predictors)
+pspline.outbreak.cases(model, data)
 }
 \arguments{
-\item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}}
+\item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
-\item{params}{model parameter matrix}
-
-\item{predictors}{data frame of predictor values at which the model will be evaluated}
+\item{data}{data frame of predictor values at which the model will be evaluated}
 }
 \value{
-data frame of predictor values with corresponding incidence estimates in \code{$cases}
+data frame of predictor values with corresponding cumulative incidence estimates in \code{$cumcases}
 }
 \description{
-This is useful as \code{outcome} for \code{\link{pspline.estimate.scalars}}.
+This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
 }

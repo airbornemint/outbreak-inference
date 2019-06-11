@@ -57,11 +57,11 @@
 #' # Usually you want this to be the same as the time interval that your observations are in, except
 #' # divided into small increments (here, eps)
 #' eps = .05
-#' predictors = data.frame(time=seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, by=eps))
+#' data = data.frame(time=seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, by=eps))
 #'
 #' # Estimate cumulative incidence
 #' cumCases = pspline.estimate.timeseries(
-#'   model, predictors,
+#'   model, data,
 #'   pspline.outbreak.cumcases, level=.95
 #')
 #'
@@ -69,15 +69,15 @@
 #' onsetThreshold = 0.05
 #' offsetThreshold = 1 - onsetThreshold
 #' thresholds = pspline.estimate.scalars(
-#'   model, predictors,
+#'   model, data,
 #'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), level=.95
 #' )
 #'
 #' # Plot cumulative incidence estimates and threshold estimates
 #' library(ggplot2)
 #' ggplot(cumCases) +
-#'   geom_ribbon(aes(x=time, ymin=cumcases.lower, ymax=cumcases.upper), fill=grey(.75)) +
-#'   geom_line(aes(x=time, y=cumcases.median)) +
+#'   geom_ribbon(aes(x=time, ymin=cases.cum.lower, ymax=cases.cum.upper), fill=grey(.75)) +
+#'   geom_line(aes(x=time, y=cases.cum.median)) +
 #'   annotate("rect",
 #'     xmin=thresholds$onset.lower,
 #'     xmax=thresholds$onset.upper,
@@ -93,7 +93,7 @@
 #' @importFrom stats coef na.omit predict quantile rnorm
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
-#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first
+#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at
 #' @importFrom reshape2 melt dcast
 #' @importFrom plyr adply ldply
 #' @importFrom stats setNames

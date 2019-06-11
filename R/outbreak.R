@@ -16,21 +16,16 @@
 ### Outbreak inference
 ######################################################################
 
-#' Calculate incidence for an outbreak
+#' Calculate cumulative incidence for an outbreak
 #'
-#' This is useful as \code{outcome} for \code{\link{pspline.estimate.scalars}}.
+#' This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
 #'
-#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}
-#' @param params model parameter matrix
-#' @param predictors data frame of predictor values at which the model will be evaluated
-#' @return data frame of predictor values with corresponding incidence estimates in \code{$cases}
+#' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
+#' @param data data frame of predictor values at which the model will be evaluated
+#' @return data frame of predictor values with corresponding cumulative incidence estimates in \code{$cumcases}
 #' @export
-pspline.outbreak.cases = function(model, params, predictors) {
-  # Get model predictions for given param values
-  fit = predict(model, predictors, type="lpmatrix") %*% params
-
-  # Map spline fit back to data
-  data.frame(cases=model$family$linkinv(fit)) %>% cbind(predictors)
+pspline.outbreak.cases = function(model, data) {
+  data
 }
 
 #' Calculate cumulative incidence for an outbreak
@@ -38,20 +33,22 @@ pspline.outbreak.cases = function(model, params, predictors) {
 #' This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
 #'
 #' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
-#' @param params model parameter matrix
-#' @param predictors data frame of predictor values at which the model will be evaluated
+#' @param data data frame of predictor values at which the model will be evaluated
 #' @return data frame of predictor values with corresponding cumulative incidence estimates in \code{$cumcases}
 #' @export
-pspline.outbreak.cumcases = function(model, params, predictors) {
-  assert_that(length(all.vars(model$pred.formula)) == 1, msg="Cumulative incidence currently requires time as the only predictor")
-  pred.time = all.vars(model$pred.formula)[1]
-  model %>%
-    pspline.outbreak.cases(params, predictors) %>%
-    rename(pspline.time=pred.time) %>%
+pspline.outbreak.cumcases = function(model, data) {
+  time.name = pred.var(model)
+  cases.name = model.var(model)
+  cumcases.name = sprintf("%s.cum", cases.name)
+
+  data %>%
+    rename_at(time.name, function(x) "pspline.time") %>%
+    rename_at(cases.name, function(x) "pspline.cases") %>%
     arrange(pspline.time) %>%
-    mutate(cumcases=pspline.outbreak.calc.cumcases(pspline.time, cases)) %>%
-    select(-cases) %>%
-    rename_at("pspline.time", function(.) pred.time)
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
+    select(-pspline.cases) %>%
+    rename_at("pspline.cumcases", function(x) cumcases.name) %>%
+    rename_at("pspline.time", function(x) time.name)
 }
 
 #' Calculate relative incidence for an outbreak
@@ -59,15 +56,23 @@ pspline.outbreak.cumcases = function(model, params, predictors) {
 #' This is useful as \code{outcome} for \code{\link{pspline.estimate.timeseries}}.
 #'
 #' @param model model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)
-#' @param params model parameter matrix
-#' @param predictors data frame of predictor values at which the model will be evaluated
+#' @param data data frame of predictor values at which the model will be evaluated
 #' @return data frame of predictor values with corresponding relative cumulative incidence estimates in \code{$cumcases.relative}
 #' @export
-pspline.outbreak.cumcases.relative = function(model, params, predictors) {
-  model %>%
-    pspline.outbreak.cumcases(params, predictors) %>%
-    mutate(cumcases.relative=cumcases / max(cumcases)) %>%
-    select(-cumcases)
+pspline.outbreak.cumcases.relative = function(model, data) {
+  time.name = pred.var(model)
+  cases.name = model.var(model)
+  cumcases.name = sprintf("%s.cumrel", cases.name)
+
+  data %>%
+    rename_at(time.name, function(x) "pspline.time") %>%
+    rename_at(cases.name, function(x) "pspline.cases") %>%
+    arrange(pspline.time) %>%
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
+    mutate(pspline.cumcases=pspline.cumcases / max(pspline.cumcases)) %>%
+    select(-pspline.cases) %>%
+    rename_at("pspline.cumcases", function(x) cumcases.name) %>%
+    rename_at("pspline.time", function(x) time.name)
 }
 
 #' Calculate outbreak thresholds for an outbreak
@@ -79,13 +84,13 @@ pspline.outbreak.cumcases.relative = function(model, params, predictors) {
 #' @return function suitable as outcome estimator parameter of \code{\link{pspline.estimate.scalars}}
 #' @export
 pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
-  function(model, params, predictors) {
+  function(model, data) {
     # Calculate cumulative case counts from the model and parameters
-    cum.rel = pspline.outbreak.cumcases.relative(model, params, predictors)
+    cum.rel = pspline.outbreak.cumcases.relative(model, data)
 
     data.frame(
-      onset=threshold.ts(cum.rel$time, cum.rel$cumcases.relative, onset),
-      offset=threshold.ts(cum.rel$time, cum.rel$cumcases.relative, offset)
+      onset=threshold.ts(cum.rel$time, cum.rel$cases.cumrel, onset),
+      offset=threshold.ts(cum.rel$time, cum.rel$cases.cumrel, offset)
     )
   }
 }

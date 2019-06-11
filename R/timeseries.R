@@ -17,8 +17,11 @@
 ######################################################################
 
 #' @keywords internal
-pspline.calc.timeseries = function(paramSamples, model, predictors, outcome) {
-  paramSamples %>% adply(1, function(params) { outcome(model, params, predictors) }, .id="pspline.sample")
+pspline.calc.timeseries = function(samples, model, predictors, outcome) {
+  samples %>% adply(1, function(params) {
+    params %>%
+      eval.model(model, predictors, outcome)
+  }, .id="pspline.sample")
 }
 
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of estimating time series outbreak outcomes, and

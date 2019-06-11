@@ -17,8 +17,10 @@
 ######################################################################
 
 #' @keywords internal
-pspline.calc.scalars = function(paramSamples, model, predictors, outcomes) {
-  paramSamples %>% apply(1, function(params) { outcomes(model, params, predictors) }) %>% bind_rows()
+pspline.calc.scalars = function(samples, model, predictors, outcomes) {
+  samples %>% adply(1, function(params) {
+    eval.model(params, model, predictors, outcomes)
+  }, .id="pspline.sample")
 }
 
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of estimating
@@ -39,11 +41,9 @@ pspline.calc.scalars = function(paramSamples, model, predictors, outcomes) {
 #' @keywords internal
 pspline.sample.scalars = function(model, predictors, calc.outcomes, samples=100) {
   # Sample model params -> calculate outcomes
-  estimates = model %>%
+  model %>%
     sample.params(samples) %>%
     pspline.calc.scalars(model, predictors, calc.outcomes)
-
-  estimates %>% cbind(data.frame(pspline.sample=seq(1, samples)))
 }
 
 #' Calculates confidence intervals and medians for scalar samples obtained from \code{\link{pspline.sample.scalars}}

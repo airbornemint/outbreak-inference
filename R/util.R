@@ -25,6 +25,25 @@ sample.params = function(model, samples) {
   t(mu + sigL %*% matrix(rnorm(colL * samples), colL, samples))
 }
 
+#' Eval model prediction with given model params at given predictors
+#' @param params model params
+#' @param model model to evaluate
+#' @param predictors predictor values at which to evaluate
+#' @param outcome outcome function
+#' @return data frame of model evaluated with params at predictors
+#' @keywords internal
+eval.model = function(params, model, predictors, outcome) {
+  # Get model predictions for given param values
+  fit = predict(model, predictors, type="lpmatrix") %*% params
+
+  predictors %>%
+    mutate(
+      pspline.out=model$family$linkinv(fit)
+    ) %>%
+    rename_at("pspline.out", function(x) model.var(model)) %>%
+    outcome(model, .)
+}
+
 #' @keywords internal
 quantile.multi = function(data, probs, prob.names) {
   names(data) %>%
@@ -48,7 +67,7 @@ quantile.multi = function(data, probs, prob.names) {
 #' @return data frame of predictors and associated outcome quantiles.
 #' @keywords internal
 quantile.outcomes = function(data, model, probs, prob.names) {
-  predictors = intersect(names(data), all.vars(model$pred.formula))
+  predictors = intersect(names(data), pred.vars(model))
 
   confints = function(samples) {
     outcomes = samples %>% select(-pspline.sample)
@@ -87,4 +106,24 @@ confints.outcomes = function(data, model, level) {
     c((1 - level) / 2, .5, (1 + level) / 2),
     c("%s.lower", "%s.median", "%s.upper")
   )
+}
+
+pred.vars = function(model) {
+  all.vars(model$pred.formula)
+}
+
+pred.var = function(model) {
+  vars = pred.vars(model)
+  assert_that(length(vars) == 1, msg="Exactly one predictor is required for this computation")
+  vars[1]
+}
+
+model.vars = function(model) {
+  setdiff(all.vars(model$formula), all.vars(model$pred.formula))
+}
+
+model.var = function(model) {
+  vars = model.vars(model)
+  assert_that(length(vars) == 1, msg="Exactly one model variable is required for this computation")
+  vars[1]
 }

@@ -4,14 +4,12 @@
 \alias{pspline.outbreak.cumcases}
 \title{Calculate cumulative incidence for an outbreak}
 \usage{
-pspline.outbreak.cumcases(model, params, predictors)
+pspline.outbreak.cumcases(model, data)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
 
-\item{params}{model parameter matrix}
-
-\item{predictors}{data frame of predictor values at which the model will be evaluated}
+\item{data}{data frame of predictor values at which the model will be evaluated}
 }
 \value{
 data frame of predictor values with corresponding cumulative incidence estimates in \code{$cumcases}
