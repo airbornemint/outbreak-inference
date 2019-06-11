@@ -86,23 +86,23 @@ pspline.outbreak.cumcases.relative = function(model, data) {
 pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
   function(model, data) {
     # Calculate cumulative case counts from the model and parameters
-    cum.rel = pspline.outbreak.cumcases.relative(model, data)
+    data.cumrel = pspline.outbreak.cumcases.relative(model, data)
 
     data.frame(
-      onset=threshold.ts(cum.rel$time, cum.rel$cases.cumrel, onset),
-      offset=threshold.ts(cum.rel$time, cum.rel$cases.cumrel, offset)
+      onset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, onset),
+      offset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, offset)
     )
   }
 }
 
 #' @keywords internal
 threshold.ts = function(time, cumfrac, threshold) {
-  if (is.na(threshold)) {
+  if (is.na(threshold) || threshold < min(cumfrac)) {
     return(NA)
   }
 
-    # Linear interpolation across the time interval that where cumfrac crosses threshold
-  idx = sum(cumfrac < threshold)
+  # Linear interpolation across the time interval that where cumfrac crosses threshold
+  idx = sum(cumfrac <= threshold)
   timeLow = time[idx]
   timeStep = time[idx + 1] - time[idx]
   cumLow = cumfrac[idx]
