@@ -53,7 +53,7 @@ build:
     BUILD_VIGNETTES: "TRUE"
   except: 
     - /^paper(-.*)?$/
-    - validation-*
+    - /^validation(-.*)?$/
   
 ⚡️ build:
   extends: .build
@@ -67,7 +67,7 @@ check:
     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
   except:
     - /^paper(-.*)?$/
-    - validation-*
+    - /^validation(-.*)?$/
 
 .knitr:
   extends: .use-autodocker
