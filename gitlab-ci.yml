@@ -79,7 +79,7 @@ check:
   script:
     - find "${R_BUILD_DIR}" -name "pspline.inference*.tar.gz" -exec install2.r {} \;
     - cd "${TEX_DIR}"
-    - Rscript -e "options('pspline.paper.validation.run', ${RUN_VALIDATION}); knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
+    - Rscript -e "options(pspline.paper.validation.run=${RUN_VALIDATION}); knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
   dependencies:
     - ⚡️ build
   artifacts:
