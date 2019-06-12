@@ -23,7 +23,7 @@
 \SetWatermarkHorCenter{12ex}
 \SetWatermarkVerCenter{12ex}
 \SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 2}
+\SetWatermarkText{DRAFT 1}
 
 \input{structure.tex}
 \usepackage{amssymb}
@@ -114,15 +114,13 @@ Once an infectious disease reaches a period of stability within a population, it
 
 Many widely used mathematical models of seasonal and sporadic outbreaks of infectious diseases treat disease incidence as a Poisson-distributed random variable, with the rate parameter of the Poisson distribution then modeled as a function of time and other predictors using a generalized linear model (GLM). These models perform well during steady-state periods --- when behavior of infectious diseases is asymptotically linear --- and have been amply validated in clinical and public health practice. 
 
-However, during periods of transition, infectious diseases exhibit non-linear behavior; this can occur at predictable times (for example, with the introduction of a new preventative measure) or unpredictably (for example, due to ecological disruption caused by climate change). Infectious diseases with well-circumscribed periods of transition can still be analyzed with GLMs, provided that the analysis is aimed at the steady-state response. For example, time surrounding the introduction of a new vaccine might be subdivided into three periods: the stable period before the vaccine is introduced, the transition period shortly after the vaccine is introduced, and the stable period after the vaccine is established. Estimates from a GLM applied to this vaccine would likely be robust only during the two stable periods.
+However, during periods of transition, infectious diseases exhibit non-linear behavior; this can occur at predictable times (for example, with the introduction of a new preventative measure) or unpredictably (for example, due to ecological disruption caused by climate change). Infectious diseases with well-circumscribed periods of transition can still be analyzed with GLMs, provided that the analysis is aimed at the steady-state response. For example, time surrounding the introduction of a new vaccine might be subdivided into three periods: the stable period before the vaccine is introduced, the transition period shortly after the vaccine is introduced, and the stable period after the vaccine is established. Estimates from a GLM applied to this disease/vaccine combination would likely be robust only during the two stable periods.
 
 When an infection is dominated by transients, as is the case for seasonal diseases and for sporadic outbreaks, other approaches are necessary, and many such have been devised --- each with its own tradeoffs. For our analysis of respiratory syncytial virus (RSV) --- a respiratory infection with annual or biennial seasonal pattern, and a major infectious cause of infant morbidity and mortality in developed countries --- we used generalized additive modeling (GAM). GAM is an extension of GLM, and allows modeling of non-linear phenomena, while retaining many of the desirable statistical and computational features of GLM. 
 
 In particular, we used GAM with penalized basis splines (P-splines), which are smoothing curves with several qualities desirable in analysis of experimental data, including computational compactness and efficiency and well-understood statistical behavior. \cite{Eilers:1996kz} Combining the smoothness of P-splines with multivariate sampling of GAM model parameters gave us a way to make robust interval estimates of complex outcome measures of seasonal RSV outbreaks.
 
 For example, we used GAM with P-splines to obtain an interval estimate of RSV season onset, defined as the time at which the cumulative incidence of RSV rises above 2.5\% of total incidence during the annual RSV season. This particular outcome measure --- difficult to estimate through other means --- has considerable practical significance, as it can directly inform both efforts aimed at prevention and resources allocated to treatment or RSV. 
-
-We generalized our methods to interval estimation of any outcome measure computable from a GAM P-spline model, and we created the corresponding \texttt{pspline.inference} R package to facilitate use and validation of this method in other research areas.
 
 \section{Results}
 
@@ -138,6 +136,8 @@ For our RSV study we investigated two outcome measures:
 \end{itemize}
 
 We conducted a simulation study to validate our estimation of both outcome measures, with the true values of onset time, offset time, and protected fraction being included in the 95\% confidence interval in $\Sexpr{round(100*validationResults["onset.good"], 2)}$\%, $\Sexpr{round(100*validationResults["offset.good"], 2)}$\% and TODO \% of simulations (respectively).
+
+We generalized our methods to interval estimation of any outcome measure computable from a GAM P-spline model, and we created the corresponding \texttt{pspline.inference} R package to facilitate use and validation of this method in other research areas.
 
 \section{Discussion}
 
@@ -197,11 +197,11 @@ B_i(x) = 0 \quad \forall x : x \leq t_i \vee x \geq t_{i+n} \quad \forall i : 1 
 \end{equation*}
 \end{itemize}
 
-This unique basis $B_i$ is known as the \textit{basis splines} (B-splines) of order $n$ over the knot vector $\vec t$.
+This unique basis $B_i$ is known as the \textit{basis splines} (B-splines) of order $n$ (or dimension $k - n$) over the knot vector $\vec t$. 
 
 \subsubsection{Cyclic splines}
 
-A \textit{cyclic spline} of order $n$ is a piecewise polynomial function $f = f(x) = f(x - T) : \mathds{R} \Rightarrow \mathds{R}$, with knots at $t_a = t_1 \leq t_2 \leq \dots \leq t_k = t_a + T = t_b$. A maximally smooth cyclic spline is continuous in $n - 1$ derivatives throughout $\mathds{R}$. Use of cyclic splines is often necessary in infectious disease modeling because non-cycling splines do not guarantee smoothness at $T_a \pm k T$ when extended to $\mathds{R}$.
+A \textit{cyclic spline} of order $n$ is a piecewise polynomial function $f = f(x) = f(x - T) : \mathds{R} \Rightarrow \mathds{R}$, with knots at $t_a = t_1 \leq t_2 \leq \dots \leq t_k = t_a + T = t_b$. A maximally smooth cyclic spline is continuous in $n - 1$ derivatives throughout $\mathds{R}$. Use of cyclic splines is often necessary in infectious disease modeling because non-cyclic splines do not guarantee smoothness at $t_a \pm k T$ when extended to $\mathds{R}$.
 
 \subsubsection{Penalized B-splines in GAM}
 
@@ -221,7 +221,7 @@ For smooth estimation of non-linear experimental data, P-splines have desirable 
 
 \subsection{Model response sampling}
 
-By way of example, consider the (hypothetical) RSV season shown in Figure \ref{fig:sampleCases}.
+By way of example, consider the (hypothetical) RSV season shown in Figure \ref{fig:sampleCases}, with the goal to estimate when the season started and ended.
 
 \begin{figure}
 \begin{center}
@@ -231,13 +231,13 @@ By way of example, consider the (hypothetical) RSV season shown in Figure \ref{f
 \end{center}
 \end{figure}
 
-We begin by fitting a P-spline GAM to these observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-dimensional cubic basis spline with 2nd degree smoothing penalty as the only model term:
+We began by fitting a P-spline GAM to these observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-dimensional cubic basis spline with 2nd degree smoothing penalty as the only model term:
 
 \begin{align*}
-    \log(\hat{I}(t)) &= \beta_0 + \beta_1 B_1(t) + \beta_2 B_2(t) + \dots + \beta_20 B_20(t)
+    \log(\hat{I}(t)) &= \beta_0 + \beta_1 B_1(t) + \beta_2 B_2(t) + \dots + \beta_{20} B_{20}(t)
 \end{align*}
 
-The best fit curve produced by this model is shown in Figure \ref{fig:sampleBestFit}
+The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
@@ -247,7 +247,7 @@ The best fit curve produced by this model is shown in Figure \ref{fig:sampleBest
 \end{center}
 \end{figure}
 
-In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit curve being described by $\beta_i = \mu_i$. Since $\hat{I}$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. In Figure \ref{fig:samplePredMini}, we show $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$.
+In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $\hat{I}$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$.
 
 \begin{figure}
 \begin{center}
@@ -259,14 +259,14 @@ In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit curve being d
 
 \subsection{Outcome measure sampling}
 
-Now we turn to our outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), which we define as the point in time where the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season:
+Next we turned to our outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), which we defined as the point in time where the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season:
 
 \begin{align*}
 \int_{t_\mathit{min}}^{t_\mathit{on}} I(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt \\
 \int_{t_\mathit{min}}^{t_\mathit{off}} I(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt
 \end{align*}
 
-Given any $I(t)$ sampled via $\beta_i$ sampling, we can numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their unknown distributions. The same $\Sexpr{sampleNsimMini}$ sampled $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Figure \ref{fig:samplePredOnsetMini}.
+Given any $I(t)$ sampled via $\beta_i$ sampling, we numericallyd solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their unknown distributions. The same $\Sexpr{sampleNsimMini}$ $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Figure \ref{fig:samplePredOnsetMini}.
 
 \begin{figure}
 \begin{center}
@@ -276,7 +276,7 @@ Given any $I(t)$ sampled via $\beta_i$ sampling, we can numerically solve for th
 \end{center}
 \end{figure}
 
-Finally, by sampling a large number ($N = \Sexpr{sampleNsimFull}$) of $t_\mathit{on}$ and $t_\mathit{on}$, we asymptotically obtain the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$, shown in Figure \ref{fig:samplePredOnsetFull}, from which we then calculate the desired point estimates (median) and interval estimates: $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
+Finally, we sampled a large number ($N = \Sexpr{sampleNsimFull}$) of $t_\mathit{on}$ and $t_\mathit{on}$, thereby approximately obtainin the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$, as shown in Figure \ref{fig:samplePredOnsetFull}. From these distributions, we calculated the desired point estimates (median) and interval estimates: $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
 \begin{figure}
 \begin{center}
@@ -292,7 +292,7 @@ We repeated this process for our other outcome measure of interest, preventable 
     f_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} I(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} I(t)
 \end{equation*}
 
-where $(t_\mathit{start}, t_\mathit{end})$ is a time interval during which a prophylaxis regimen provides protection against RSV. For the prophylaxis regimen recommended by the American Academy of Pediatrics, which was taken to begin with epidemiological week 20 and last for 24 weeks, we found $\hat{f}_p(20, 44) = \Sexpr{round(100 * estFractionFull['preventable.median'], 2)}\%$ ($\Sexpr{level*100}$\% CI: $\Sexpr{round(100 * estFractionFull['preventable.lower'], 2)}\%$ - $\Sexpr{round(100 * estFractionFull['preventable.upper'], 2)}\%$).
+where $(t_\mathit{start}, t_\mathit{end})$ is a time interval during which a prophylaxis regimen provides protection against RSV. For this hypothetical RSV season and the prophylaxis regimen recommended by the American Academy of Pediatrics -- which was taken to begin with epidemiological week 20 and last for 24 weeks -- we found $\hat{f}_p(20, 44) = \Sexpr{round(100 * estFractionFull['preventable.median'], 2)}\%$ ($\Sexpr{level*100}$\% CI: $\Sexpr{round(100 * estFractionFull['preventable.lower'], 2)}\%$ - $\Sexpr{round(100 * estFractionFull['preventable.upper'], 2)}\%$).
 
 \subsection{Validation via simulation study}
 
@@ -304,8 +304,8 @@ To demonstrate the validity of our method, and specifically that the 95\% CI est
  {1 \over 2} (1 + \cos(2 \pi {t - t_\mathit{start} \over t_\mathit{end} - t_\mathit{start}})) \cdot I_\mathit{max} &\text{for } t_\mathit{start} \leq t \leq t_\mathit{end} \\
  0 &\text{otherwise}
  \end{cases}
-\end{equation*} This gives us an easy way to roughly control the overall shape of the simulated season, after which we
-\item Fit a $\log$-linked P-spline GAM to $I^*(t)$ and used its best-fit spline as the true value $I_0(t)$. 
+\end{equation*} This gave us an easy way to roughly control the overall shape of the simulated season, after which we
+\item Fit a $\log$-linked P-spline GAM to $I^*(t)$ and used its best-fit spline as the true value $I_0(t)$. This was a simple means of correcting for the fact that a single period of $\cos(t)$ is not a realistic approximation of an infectious disease outbreak, partly due to the fact that it lacks 2nd order smoothness. 
 \end{enumerate}
 
 For each season, we then generated $N_\mathit{obs} = 60$ sets of observations by sampling observed incidence at $I(t) \sim \mathit{Poisson}(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I(t)$ for each season.
@@ -314,16 +314,16 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 
 \subsection{R package}
 
-The full documentation for our \texttt{pspline.inference} R package, including detailed examples, is available as part of the package, which is available at (TODO: release on CRAN, currently at gitlab.com/airbornemint/pspline.inference); here we only present a brief overview of the two main functions in the package to highlight its ease of use.
+The full documentation for our \texttt{pspline.inference} R package, including detailed examples, is included with the package, and available at (TODO: release on CRAN, currently at gitlab.com/airbornemint/pspline.inference); here we only present a brief overview of the two main functions in the package in order to highlight its ease of use.
 
 \subsubsection{Outcome estimation}
 
 Given 
 
 \begin{enumerate}
-\item \texttt{model}: a GAM model, 
-\item \texttt{predictors}, a data frame of predictor values
-\item \texttt{fun.outcome(data)}: a function which receives a data frame \texttt{data} containing the model-predicted time series of disease incidence and computes a scalar outcome measure $O$ for the given time series
+\item \texttt{model}: a P-spline GAM model, 
+\item \texttt{predictors}: a data frame of predictor values
+\item \texttt{fun.outcome(data)}: a function that receives a data frame (\texttt{data}) containing time series of disease incidence sampled from the model, and computes a scalar outcome measure $O$ for the given time series
 \end{enumerate}
 
 the point and interval estimates of $O$ over the given predictors can be obtained by calling:
@@ -337,10 +337,10 @@ the point and interval estimates of $O$ over the given predictors can be obtaine
 Given 
 
 \begin{enumerate}
-\item \texttt{fun.truth()}: a function which generates a true time series of disease incidence,
-\item \texttt{fun.obs(truth)}: a function which receives a data frame \texttt{truth} containing a true time series of disease incidence and returns a data frame of observed incidences
-\item \texttt{fun.model(observations)}: a function which receives a data frame \texttt{observations} of observed values of disease incidence and returns a GAM model for those observations, and
-\item \texttt{fun.outcome(data)}: a function which receives a data frame \texttt{data} containing a time series of disease incidence (true or observed) and returns the scalar outcome measure $O$ for the given time series
+\item \texttt{fun.truth()}: a function which generates a simulated time series of true disease incidence,
+\item \texttt{fun.obs(truth)}: a function which receives a data frame (\texttt{truth}) containing a time series of true disease incidence and returns a data frame of observed disease incidence
+\item \texttt{fun.model(observations)}: a function which receives a data frame (\texttt{observations}) of observed disease incidence, and returns a GAM model for those observations; and
+\item \texttt{fun.outcome(data)}: a function which receives a data frame (\texttt{data}) containing a time series of (true or observed) disease incidence, and returns the scalar outcome measure $O$ for the given time series
 \end{enumerate}
 
 a simulation study can be run by calling
@@ -349,7 +349,7 @@ a simulation study can be run by calling
 \texttt{pspline.validate.scalars\allowbreak(fun.truth, n.truth, fun.obs, n.obs, fun.model, fun.outcome)}
 \end{center}
 
-where \texttt{n.truth} is the number of true time series generated for the simulation study and \texttt{n.obs} is the number of observed time series generated for each true time series. 
+where \texttt{n.truth} is the number of time series of true disease incidence generated for the simulation study and \texttt{n.obs} is the number of time series of observed disease incidence generated from each time series of true disease incidence. 
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
