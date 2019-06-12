@@ -97,7 +97,7 @@ pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
 
 #' @keywords internal
 threshold.ts = function(time, cumfrac, threshold) {
-  if (is.na(threshold) || threshold < min(cumfrac)) {
+  if (is.na(threshold) || is.nan(min(cumfrac)) || threshold < min(cumfrac)) {
     return(NA)
   }
 
