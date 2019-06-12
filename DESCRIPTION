@@ -1,11 +1,11 @@
-Package: outbreakinference
-Title: Predicting Non-Linear Outcomes of Infectious Disease Outbreaks 
-Version: 0.6
+Package: pspline.inference
+Title: Estimation of Non-Linear Outcomes of Infectious Disease Outbreaks using Generalized Additive Modeling with Penalized Basis Splines 
+Version: 0.8
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre"))
 Description: Stochastic inference of non-linear outcomes of infectious disease outbreaks using generalized additive (mixed) models.
 Depends: R (>= 3.4.0)
-Imports: stats, utils, mgcv, dplyr, magrittr
-Suggests: import, ggplot2, reshape, data.table, ggstance, knitr, rmarkdown
+Imports: stats, utils, mgcv, dplyr, magrittr, assertthat, plyr, reshape2
+Suggests: import, ggplot2, data.table, ggstance, knitr, rmarkdown, roxygen2, kableExtra, doParallel, parallel
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true

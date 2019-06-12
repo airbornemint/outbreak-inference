@@ -34,7 +34,7 @@ RUN echo "options(Ncpus = $(nproc --all))" >> "/usr/local/lib/R/etc/Rprofile.sit
 RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 
 # These come from CRAN
-ARG BUILD_CRAN_DEPENDENCIES="zipcode dplyr knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2 ggstance gridExtra devtools import"
+ARG BUILD_CRAN_DEPENDENCIES="zipcode dplyr knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2 ggstance gridExtra devtools import doParallel kableExtra rmarkdown"
 RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
@@ -42,7 +42,7 @@ RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPEN
 # RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
-ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-binaries texlive-luatex texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
+ARG TEX_APT_DEPENDENCIES="wget xzdec lmodern texlive texlive-binaries texlive-luatex texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
 RUN apt-get install -y -qq --no-install-recommends ${TEX_APT_DEPENDENCIES}
 
 RUN tlmgr init-usertree

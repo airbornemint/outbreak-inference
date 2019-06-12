@@ -1,6 +1,5 @@
 include:
-  - project: airbornemint/gitlab-autodocker
-    file: "gitlab-autodocker.yml"
+  - remote: https://gitlab.com/cirecipes/autodocker/raw/v1.0b2/gitlab-autodocker.yml
 
 stages:
   - autodocker
@@ -26,50 +25,91 @@ variables:
     - echo "R_LIBS=${R_PACKAGE_CACHE}" > .Renviron
     - echo "R_LIBS_USER=${R_PACKAGE_CACHE}" >> .Renviron
     - echo "R_PACKAGE_CACHE=${R_PACKAGE_CACHE}" >> .Renviron
-    - Rscript -e "devtools::install_dev_deps()"
-  
+    - Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
+
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${R_PACKAGE_CACHE}"
-  
-build-release:
+      
+autodocker:
+  extends: .autodocker
+
+.build:
   extends: .r
   stage: build
   script:
     - mkdir -p "${R_BUILD_DIR}"
-    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = TRUE, binary = FALSE)"
+    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = ${BUILD_VIGNETTES}, binary = FALSE)"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-package"
     paths:
-      - "${R_BUILD_DIR}/outbreakinference*.tar.gz"
+      - "${R_BUILD_DIR}/pspline.inference*.tar.gz"
     when: always
+  
+build:
+  extends: .build
+  variables:
+    BUILD_VIGNETTES: "TRUE"
+  except: 
+    - /^paper(-.*)?$/
+    - /^validation(-.*)?$/
+  
+⚡️ build:
+  extends: .build
+  variables:
+    BUILD_VIGNETTES: "FALSE"
 
-check-release:
+check:
   extends: .r
   stage: check
   script:
-    - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='outbreakinference.*t.*gz')[1]))"
-    
-knitr:
+    - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
+  except:
+    - /^paper(-.*)?$/
+    - /^validation(-.*)?$/
+
+.knitr:
   extends: .use-autodocker
   stage: knitr
-  tags:
-    - docker-mem:3
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${TEX_DIR}/${KNITR_CACHE_DIR}"
   script:
-    - find "${R_BUILD_DIR}" -name "outbreakinference*.tar.gz" -exec install2.r {} \;
+    - find "${R_BUILD_DIR}" -name "pspline.inference*.tar.gz" -exec install2.r {} \;
     - cd "${TEX_DIR}"
-    - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('OutbreakInference.rnw')"
+    - Rscript -e "options(pspline.paper.validation.run=${RUN_VALIDATION}); knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
   dependencies:
-    - build-release
+    - ⚡️ build
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
+    
+knitr:
+  extends: .knitr
+  tags:
+    - docker-cpu:comp8
+  variables:
+    RUN_VALIDATION: "TRUE"
+  only:
+    - /^validation(-.*)?$/
+  artifacts:
     paths:
-      - "${TEX_DIR}/OutbreakInference.tex"
+      - "${TEX_DIR}/ValidationResults.rds"
+      - "${TEX_DIR}/PSplineInference.tex"
+      - "${TEX_DIR}/figures"
+
+⚡️ knitr:
+  extends: .knitr
+  tags:
+    - docker-mem:3
+  variables:
+    RUN_VALIDATION: "FALSE"
+  only:
+    - /^paper(-.*)?$/
+  artifacts:
+    paths:
+      - "${TEX_DIR}/PSplineInference.tex"
       - "${TEX_DIR}/figures"
 
 overleaf:
@@ -77,29 +117,28 @@ overleaf:
   stage: overleaf
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/OutbreakInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/OutbreakInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${TEX_DIR}/PSplineInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/PSplineInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
+  only:
+    - master
+    - /^paper(-.*)?$/
 
 tex:
   extends: .use-autodocker
   stage: tex
   script:
     - cd "${OVERLEAF_ARTIFACTS_DIR}"
-    - lualatex "OutbreakInference.tex"
-    - bibtex "OutbreakInference"
-    - lualatex "OutbreakInference.tex"
-    - lualatex "OutbreakInference.tex"
-    - mv "OutbreakInference.pdf" "${CI_PROJECT_DIR}"
+    - lualatex "PSplineInference.tex"
+    - bibtex "PSplineInference"
+    - lualatex "PSplineInference.tex"
+    - lualatex "PSplineInference.tex"
+    - mv "PSplineInference.pdf" "${CI_PROJECT_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
-      - "OutbreakInference.pdf"
-
-# Set up docker image for the rest of the build, keyed off commit ID
-autodocker:
-  extends: .autodocker
-  tags: 
-    - dind-mem:2
+      - "PSplineInference.pdf"
+  only: 
+    - /^paper(-.*)?$/

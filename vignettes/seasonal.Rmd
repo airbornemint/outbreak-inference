@@ -1,0 +1,478 @@
+---
+author: "Ben Artin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example of applying p-spline inference to seasonal infections}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{pspline.inference, dplyr, mgcv, ggplot2, knitr, kableExtra, magrittr, doParallel, parallel, import}
+---
+# Disease outbreak outcome estimation using penalized splines
+
+## Overview
+
+The purpose of this package is to allow estimation of complex outcome measures of infectious disease outbreaks.
+
+The package works by using generalized additive models (GAMs) with penalized basis splines (p-splines) to approximate the observed data. Approximating splines are sampled from their distribution, and for each approximating spline, the outcome measure of interest is calculated. This yields a sampling distribution of the outcome measure of interest, from which point and itnerval estimates can then be obtained. 
+
+We begin by loading the package:
+
+```{r package, include=FALSE}
+library(pspline.inference)
+```
+
+```{r setup, include=FALSE}
+# I know I did this above already, but that was for demo purposes. This here is to make sure it's always run.
+library(pspline.inference)
+
+library(mgcv)
+
+library(magrittr)
+library(plyr)
+library(dplyr)
+
+library(knitr)
+library(kableExtra)
+
+library(ggplot2)
+
+library(doParallel)
+library(parallel)
+
+# Set up parallel processing, used for simulation study
+registerDoParallel(detectCores())
+opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
+```
+
+```{r plot utilities, include=FALSE}
+# These are utilities used for plots in the vignette
+
+# Correspondence between epi weeks and month labels. 
+# Fudge by .01 to let minor gridlines show through
+epiWeekBreaks <- c(3.01, 7.25, 11.75, 16.01, 20.25, 24.75, 29.01, 33.01, 37.5, 42.01, 46.25, 50.75)
+epiWeekLabels <- c("Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")
+
+breaks.df <- data.frame(i=seq(1, 12), mid=epiWeekBreaks)
+monthBoundaries <- breaks.df %>%
+  inner_join(
+    breaks.df %>% mutate(i=i %% 12 + 1) %>% rename(prevMid=mid),
+    by="i"
+  ) %>%
+  inner_join(
+    breaks.df %>% mutate(i=(i - 2) %% 12 + 1) %>% rename(nextMid=mid),
+    by="i"
+  ) %>%
+  mutate(
+    min=(prevMid + (mid - prevMid) %% 52 / 2) %% 52,
+    max=mid + (nextMid - mid) %% 52 / 2
+  ) %>%
+  select(i, min, mid, max)
+
+basePlot <- function(data, legends) {
+  plotFills = c(
+    casesObs=NA, 
+    casesEst=grey(0.75), 
+    casesEstMedian=grey(0.75), 
+    casesEstSamples=grey(0.75), 
+    seriousEstMedian=grey(0.5), 
+    supplyEnd=grey(0.5)
+  )
+  plotColors = c(
+    casesObs="black", 
+    casesEst=grey(0.75), 
+    casesEstMedian=grey(0.75), 
+    casesEstSamples=grey(0.75), 
+    seriousEstMedian=grey(0.5), 
+    supplyEnd=grey(0.5)
+  )
+  plotSizes = c(
+    casesObs=0.5, 
+    casesEst=1, 
+    casesEstMedian=1, 
+    casesEstSamples=1, 
+    seriousEstMedian=1, 
+    supplyEnd=1
+  )
+  legendLabels = c(
+    casesObs="Observed cases", 
+    casesEst="Predicted cases (95% CI)", 
+    casesEstMedian="Predicted cases (median)", 
+    casesEstSamples="Predicted cases (sampled)", 
+    seriousEstMedian="Predicted serious cases (median)", 
+    supplyEnd="End of supply (sampled)"
+  )
+  
+  ggplot(data) +
+    theme_light() +
+    scale_y_continuous() +
+    scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) + 
+    labs(x=NULL, y=NULL) + 
+    coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
+    scale_fill_manual(
+      name=NULL, 
+      values=plotFills, 
+      limits=legends, 
+      labels=legendLabels,
+      drop=TRUE,
+      guide=guide_legend(ncol=1)
+    ) +
+    scale_colour_manual(
+      name=NULL, 
+      values=plotColors, 
+      limits=legends, 
+      labels=legendLabels,
+      drop=TRUE,
+      guide=guide_legend(ncol=1)
+    ) +
+    scale_size_manual(
+      name=NULL, 
+      values=plotSizes, 
+      limits=legends, 
+      labels=legendLabels,
+      drop=TRUE,
+      guide=guide_legend(ncol=1)
+    ) +
+    theme(
+      panel.grid.major.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.x=element_text(hjust=0.5, vjust=0.5),
+      legend.key = element_rect(colour="white", fill="white"),
+      legend.position = "bottom"
+    )
+}
+
+```
+
+## Loading data and setting up the model
+
+Next, we load observations. The example dataset is a CSV file consisting of weekly (`time`) count of cases of a seasonal infectious disease (`cases`).
+
+We also calculate observed cumulative incidence (absolute and relative) here; these are used only for subsequent visualization, not for analysis.
+
+```{r data}
+obs <- read.csv("seasonal.csv")
+obs$cases.cum <- cumsum(obs$cases)
+obs$cases.cumrel <- obs$cases.cum / max(obs$cases.cum)
+```
+
+Next, we generate a log-linked (`family=poisson`) GAM with 20-knot (`k=20`) cubic (`m=3`) cyclic P-splines (`bs="cp"`). You can vary the number of knots as needed. Fewer knots result in faster computation, but looser fit; more knots will take longer to compute, but increasing the number of knots beyond a certain point will not improve the fit. We chose 20 knots for our analysis by increasing the number of knots and plotting the model predictions until fit visualy converged. 
+
+```{r model}
+model <- gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=obs)
+```
+
+Generate a vector of time values at which the model will be sampled. This is used for analysis (whenever the analysis requires numeric integration) as well as visualization (whenever a spline is plotted). Higher `sampleFreq` increases the accuracy of results, but also increases computation time.
+
+Here, we set up the time covariate so that it runs from one half time period (inclusive) before the start of the observed times to one half time period (non-inclusive) after the end of the observed times. 
+
+```{r model time}
+sampleFreq <- 20
+modelTime <- seq(min(obs$time) - 0.5, max(obs$time) + 0.5 - 1 / sampleFreq, 1 / sampleFreq)
+predictors = data.frame(time=modelTime)
+```
+
+This is the number of samples that will be drawn from the outcome distribution. Higher `n` decreases the variance of results, but also increases computation time.
+
+```{r model samples}
+n <- 2000
+```
+
+There are two main types of outcome measures that this package can estimate: time series outcomes (in which an outcome estimate is calculated for each observed time point), and scalar outcomes (in which a single overall outcome estimate is calculated). 
+
+## Example 1: Time series outcome estimation
+
+In this simple example, we estimate the 95% confidence interval for infection case counts. The workhorse of time series estimation is the `pspline.estimate.timeseries` function, which takes three parameters: a data from of covariates at which the outcome will be estimated (`covariates`, which we set up above), a function which calculates the desired outcome, and the number of samples we want to draw (`n`).
+
+We will see examples later of how to estimate custom outcomes, but for this simple example we can use the `pspline.outbreak.cases` function (which is built into the package) to calculate our outcome of interest. 
+
+```{r estimated cases, include=FALSE}
+casesEst <- model %>%
+  pspline.estimate.timeseries(predictors, pspline.outbreak.cases, samples=n, level=0.95)
+```
+
+The result of calling `pspline.estimate.timeseries` includes predictors, point estimates of our desired outcome (`median`), as well as an upper and lower confidence level (`upper` and `lower`), which we can plot. The results are what you might expect: the confidence interval is narrow outside of the main part of outbreak, and widest at the outbreak's peak. 
+
+```{r estimated cases plot}
+basePlot(casesEst, c("casesObs", "casesEst")) +
+  geom_ribbon(aes(x=time, ymin=cases.lower, ymax=cases.upper, fill="casesEst")) +
+  geom_point(data=obs, aes(x=time, y=cases, color="casesObs", size="casesObs")) +
+  labs(x=NULL, y="Cases")
+```
+
+## Example 2: Time series outcome estimation
+
+Another simple outcome measure that the package can calculate for us is the relative cumulative incidence, using the `pspline.outbreak.cumcases.relative` function. Here we estimate and plot cumulative incidence at the 95% confidence level. Because we are calculating *relative* incidence, the outcome is constrained to 0 before the outbreak starts and to 1 after the outbreak ends, and therefore the confidence intervals are at their narrowest before and after the outbreak. 
+
+```{r estimate cum cases, include=FALSE}
+cumCasesRelEst <- model %>%
+  pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases.relative, samples=n, level=0.95)
+```
+
+```{r estimate cum cases plot}
+basePlot(cumCasesRelEst, c("casesObs", "casesEst")) +
+  geom_ribbon(aes(x=time, ymin=cases.cumrel.lower, ymax=cases.cumrel.upper, fill="casesEst")) +
+  geom_point(data=obs, aes(x=time, y=cases.cumrel, color="casesObs", size="casesObs")) +
+  labs(x=NULL, y="Relative cumulative incidence")
+```
+
+## Example 3: Accessing individual time series samples
+
+The package provides access to the individual samples of the outcome measure, which can be helpful for visualization. For example, if you ask for 15 sampled estimates of case counts, you will get a data frame with a `pspline.sample` column identifying the 15 time series samples:
+
+```{r plot cases estimates}
+casesSamples <- model %>%
+  pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=15)
+  
+basePlot(casesSamples, c("casesObs", "casesEstSamples")) +
+  geom_line(aes(x=time, y=cases, group=pspline.sample, color="casesEstSamples")) +
+  geom_point(data=obs, aes(x=time, y=cases, color="casesObs", size="casesObs")) +
+  labs(y="Cases")
+```
+
+## Example 4: Combining sampled outcomes with summary statistics
+
+It may be useful -- especially for visualization purposes -- to obtain outcome estimates as well as the outcome samples those estimates were derived from. Calling `pspline.sample.timeseries` followed by `pspline.confints.timeseries` (which is what `pspline.estimate.timeseries` does internally) gives you access to individual samples as well as their resultant confidence interval. Here we draw 100 samples and then calculate a confidence interval from them. 
+
+```{r cases estimates and stats, include=FALSE}
+casesSamples <- model %>%
+  pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=100)
+  
+casesEst <- casesSamples %>% 
+  pspline.confints.timeseries(model, level=0.95)
+```
+
+TODO Here `casesSamples` is a 15-column matrix of sampled case count estimates (as in example 3 above), and `casesEst` is a data frame containing the median, the lowel CL, and the upper CL of the case count (as in example 2 above) *for the same 15 samples*.
+
+## Example 5: Estimation of a custom time series outcome
+
+Suppose that the infection we are investigating progresses to serious disease in 80% of cases, but that it can be treated — before it progresses — with a treatment that has a 90% success rate. Also suppose that our supply is limited to 50 treatments, and that treatment is administered to all infected people until we run out of supply.
+
+Then, among the first 100 cases, 10% will fail treatment, of which 80% will progress to serious disease; for all subsequent cases, no treatment will be available, and 80% will progress to serious disease. We are interested in an estimate of the number of cases of serious disease (as a function of time), based on our observations of the number of cases of the underlying infection.
+
+The `pspline.inference` package does not include a built-in way to calculate this outcome, but we can write our own function to do it. This function will take a model object (`model`, obtained from the call to `gam()` above), a model parameters matrix (`params`), and a data frame of predictors (`predictors`). It will return a data frame of calculate outcome estimates.
+
+```{r custom time series calc}
+seriousDiseaseCases <- function(model, data) {
+  # Get predicted incidence and cumulative incidence for the given param values
+  cumcases = pspline.outbreak.calc.cumcases(data$time, data$cases)
+  
+  # Calculate when we hit 100 cases
+  treatmentAvail <- cumcases < 50
+
+  # Calculate serious disease case counts -- 80% of (10% before we run out of treatment + 100% after). 
+  seriouscases = data$cases * 0.8
+  seriouscases[treatmentAvail] = seriouscases[treatmentAvail] * 0.1
+  
+  data %>%
+    mutate(seriouscases.cum=pspline.outbreak.calc.cumcases(time, seriouscases)) %>%
+    select(-cases)
+}
+```
+
+We can now combine our custom outcome measure calculation with time series estimation:
+
+```{r custom time series est, include=FALSE}
+seriousEst <- model %>%
+  pspline.estimate.timeseries(predictors, seriousDiseaseCases, samples=n, level=0.95)
+```
+
+We'll also calculate an estimate of all cumulative cases (serious or not), to better visualize the effect of the treatment
+
+```{r custom cum cases est, include=FALSE}
+cumCasesEst <- model %>%
+  pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases, samples=n, level=0.95)
+```
+
+As you might imagine, as the estimated number of all cases rises past 50 and medication becomes unavailable, the estimated number of serious cases takes off sharply.
+
+```{r custom time series est plot}
+basePlot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
+  geom_line(aes(x=time, y=seriouscases.cum.median, color="seriousEstMedian")) +
+  geom_line(data=cumCasesEst, aes(x=time, y=cases.cum.median, color="casesEstMedian")) +
+  geom_point(data=obs, aes(x=time, y=cases.cum, color="casesObs", size="casesObs")) +
+  labs(y="Cases")
+```
+
+Our custom outcome calculation function will probably be more useful if we allow progression rate, treatment success rate, and treatment supply to be varied. We can accomplish this by using a function within a function:
+
+```{r custom calc parameterized}
+seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatmentMax) {
+  function(model, data) {
+    # Calculate cumulative incidence
+    cumcases = pspline.outbreak.calc.cumcases(data$time, data$cases)
+    
+    # Calculate when we hit 100 cases
+    treatmentAvail <- cumcases < treatmentMax
+  
+    # Calculate serious disease case counts -- 80% of (10% before we run out of treatment + 100% after). 
+    seriouscases = data$cases * progressionRate
+    seriouscases[treatmentAvail] = seriouscases[treatmentAvail] * (1 - treatmentSuccessRate)
+    
+    data %>%
+      mutate(seriouscases.cum=pspline.outbreak.calc.cumcases(time, seriouscases)) %>%
+      select(-cases)
+  }
+}
+```
+
+This is how we would use it:
+
+```{r custom est parameterized, include=FALSE}
+seriousEst <- model %>%
+  pspline.estimate.timeseries(
+    predictors, 
+    seriousDiseaseCases(progressionRate=0.8, treatmentSuccessRate=0.9, treatmentMax=50), 
+    samples=n, 
+    level=0.95
+  )
+```
+
+```{r custom est parameterized plot}
+basePlot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
+  geom_line(aes(x=time, y=seriouscases.cum.median, color="seriousEstMedian")) +
+  geom_line(data=cumCasesEst, aes(x=time, y=cases.cum.median, color="casesEstMedian")) +
+  geom_point(data=obs, aes(x=time, y=cases.cum, color="casesObs", size="casesObs")) +
+  labs(y="Cases")
+```
+
+## Example 6: Scalar outcome measures
+
+Rather than considering the expected incidence of the infection at hand, and its serious manifestation, let us now consider a related question: if we administer preventative medication on a first-come-first-served basis, and we have 50 doses of it, when do we expect to run out?
+
+This is a scalar outcome measure, and we can estimate it using the `pspline.estimate.scalars` function. Similar to `outbreak.estimate.timeseries`, it takes a model, predictors, an outcome calculation function, the number of samples to draw, and the confidence interval. Also similar to `pspline.estimate.timeseries`, it returns median and lower/upper confidence limits for the outcome measure of interest. 
+
+For this particular outcome measure, we need to write a function to calculate it. We'll use the same function-in-function technique to allow us to customize the number of medication doses as needed:
+
+```{r estimate supply duration, message=FALSE}
+medicationSupplyEnd <- function(medicationQuantity) {
+  function(model, data) {
+    # Get predicted cumulative incidence for the given param values
+    data %<>% mutate(
+      cumcases=pspline.outbreak.calc.cumcases(time, cases)
+    )
+    
+    # Find where cumulative incidence exceeds the amount of medication we have
+    idx = sum(data$cumcases < medicationQuantity)
+    
+    # Use the point halfway between latest time below the threshold and the earliest time above the threshold
+    data.frame(supply.duration=mean(c(data$time[idx], data$time[idx + 1])))
+  }
+}
+
+supplyDurationEst <- model %>% 
+  pspline.estimate.scalars(predictors, medicationSupplyEnd(medicationQuantity=50))
+
+kable_styling(
+  kable(
+    supplyDurationEst, 
+    caption="Estimated time before medication supply is exhausted, in weeks since July 1st", 
+    col.names=c("Lower CL", "Median", "Upper CL")
+  )
+)
+```
+
+## Example 7: Accessing individual scalar samples
+
+Similar to time series outcomes, we can obtain the individual samples of a scalar outcome using the `pspline.sample.scalars` function. This is useful for visualization -- in this example, we show the density plot of the estimated time when medication supply will run out:
+
+```{r plot supply duration, warning=FALSE}
+supplyDurationSamples <- model %>% 
+  pspline.sample.scalars(predictors, medicationSupplyEnd(medicationQuantity=50), samples=n)
+
+basePlot(seriousEst, c("casesObs", "casesEst", "supplyEnd")) +
+  geom_ribbon(data=cumCasesEst, aes(x=time, ymin=cases.cum.lower, ymax=cases.cum.upper, fill="casesEst", color="casesEst")) +
+  geom_point(data=obs, aes(x=time, y=cases.cum, color="casesObs", size="casesObs")) +
+  geom_density(
+    data=supplyDurationSamples,
+    aes(x=supply.duration, y=..density..*50, fill="supplyEnd", color="supplyEnd"),
+    trim=TRUE
+  ) +
+  labs(x=NULL, y="Cumulative incidence")
+```
+
+## Example 8: Outcome estimate validation
+
+Being able to estimate an outcome is useful, but in order to trust those estimates, we need to validate the method of estimation. This is what the `pspline.validate.scalars` function is for. It performs a simulation study by first generating one of more underlyign true behaviors of the process we are interested in, then generating one or more sets of observations from each true system, and then computing the outcome measures for each true process and each set of observations. The results it returns specify whether the true value of an outcome measure was included in the confidence interval the required number of times.
+
+Let's run a simulation study to validate our estimate of the time when the medication supply will run out, as described in the previous examples. First, we need a function to generate a true outbreak:
+
+
+```{r generate truth}
+
+generateTruths <- function() {
+  timeMin = 1
+  timeMax = 52
+  deltaT = 0.05
+
+  # Times
+  time = seq(timeMin - 0.5, timeMax + 0.5 - deltaT, deltaT)
+  
+  # Rough shape of a peak using a single cos period
+  onset = runif(1, 10, 40)
+  duration = runif(1, 5, 15)
+  max = runif(1, 25, 75)
+  cases0 = 0.5 * log(max) * (1 - cos((time - onset) * 2 * pi / duration)) * (time > onset) * (time < onset + duration)
+  cases0 = round(exp(cases0) - 1)
+  data0 = data.frame(time=time, cases=cases0)
+
+  # Make it polynomial by running it through a simple spline
+  data.frame(
+    time=time,
+    cases=gam(cases ~ s(time, k=4, bs="cp", m=3), family=poisson, data=data0) %>%
+      predict(type="response")
+  )
+}
+```
+
+Next, we need a function which will generate observations from a true process. Since we are dealing with infectious disease incidence, we will take observations to be Poisson-distributed with the distribution parameter equal to the true value. We will sample the true process in one-week increments:
+
+```{r generate observations}
+generateObservations <- function(truth) {
+  # Initialize with observation sampling times
+  observed = data.frame(time = seq(min(truth$time) + 0.5, max(truth$time), 1))
+  
+  # Merge with true case values and run through rpoiss
+  truth %>% 
+    inner_join(observed, by="time") %>%
+    mutate(cases=rpois(nrow(.), cases))
+}
+```
+
+We also need to specify how to create a model from a set of observations. We'll use Poisson (log) link and a 20-knot cyclic cubic p-spline:
+
+```{r make model}
+makeModel <- function(data) {
+  gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
+}
+```
+
+Finally, we need a way to calculate outcomes. We aready wrote `medicationSupplyEnd` above, and it's critical that we use the exact same function for validation as we do for estimation. Let's now run a simulation study; we need to choose the number of truths we will generate and the number of observation sets we'll generate from each truth, as well as the confidence level and the number of splines that will be sampled to estimate the outcome from each set of observations.
+
+Simulation studies are time-consuming, so for demonstration puspose we'll only include 10*10=100 simulations in this study. A proper simulation study would need to be bigger.
+
+```{r validate supply duration, include=FALSE}
+set.seed(0)
+validationResults = pspline.validate.scalars(
+  fun.truth=generateTruths,
+  n.truths=10,
+  fun.observations=generateObservations,
+  n.observations=10,
+  fun.model=makeModel,
+  fun.outcome=medicationSupplyEnd(50),
+  n.samples=1000,
+  level=0.95
+)
+```
+
+The simulation study shows that using the P-spline GAM method to obtain the 95% confidence interval for the date when the supply of 50 doses will run out yields confidence intervals that contain the true value `r (validationResults$supply.duration.good * 100)[1]`% of the time
+
+```{r validate supply duration table}
+kable_styling(
+  kable(
+    validationResults, 
+    caption="Validation results: frequency with which true value is included in the 95% CI", 
+    col.names=c("Supply duration")
+  )
+)
+```
