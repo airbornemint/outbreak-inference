@@ -52,7 +52,7 @@ build:
   variables:
     BUILD_VIGNETTES: "TRUE"
   except: 
-    - /^paper(-.*)?$/
+    - /^[Pp]aper([/-].*)?$/
     - /^validation(-.*)?$/
   
 ⚡️ build:
@@ -66,7 +66,7 @@ check:
   script:
     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
   except:
-    - /^paper(-.*)?$/
+    - /^[Pp]aper([/-].*)?$/
     - /^validation(-.*)?$/
   dependencies:
     - build
@@ -108,7 +108,7 @@ knitr:
   variables:
     RUN_VALIDATION: "FALSE"
   only:
-    - /^paper(-.*)?$/
+    - /^[Pp]aper([/-].*)?$/
   artifacts:
     paths:
       - "${TEX_DIR}/PSplineInference.tex"
@@ -125,8 +125,7 @@ overleaf:
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
   only:
-    - master
-    - /^paper(-.*)?$/
+    - /^[Pp]aper([/-].*)?$/
 
 tex:
   extends: .use-autodocker
@@ -143,4 +142,4 @@ tex:
     paths:
       - "PSplineInference.pdf"
   only: 
-    - /^paper(-.*)?$/
+    - /^[Pp]aper([/-].*)?$/
