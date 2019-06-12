@@ -42,7 +42,7 @@ RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPEN
 # RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
-ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-binaries texlive-luatex texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
+ARG TEX_APT_DEPENDENCIES="wget xzdec lmodern texlive texlive-binaries texlive-luatex texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
 RUN apt-get install -y -qq --no-install-recommends ${TEX_APT_DEPENDENCIES}
 
 RUN tlmgr init-usertree
