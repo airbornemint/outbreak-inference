@@ -68,6 +68,8 @@ check:
   except:
     - /^paper(-.*)?$/
     - /^validation(-.*)?$/
+  dependencies:
+    - build
 
 .knitr:
   extends: .use-autodocker
