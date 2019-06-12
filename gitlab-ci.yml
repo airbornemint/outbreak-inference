@@ -125,7 +125,6 @@ overleaf:
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
   only:
-    - master
     - /^paper(-.*)?$/
 
 tex:
