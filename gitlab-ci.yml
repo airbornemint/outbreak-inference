@@ -35,29 +35,43 @@ variables:
 autodocker:
   extends: .autodocker
 
-build-release:
+.build:
   extends: .r
   stage: build
   script:
     - mkdir -p "${R_BUILD_DIR}"
-    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = TRUE, binary = FALSE)"
+    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = ${BUILD_VIGNETTES}, binary = FALSE)"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-package"
     paths:
       - "${R_BUILD_DIR}/pspline.inference*.tar.gz"
     when: always
+  
+build:
+  extends: .build
+  variables:
+    BUILD_VIGNETTES: "TRUE"
+  except: 
+    - /^paper(-.*)?$/
+    - validation-*
+  
+⚡️ build:
+  extends: .build
+  variables:
+    BUILD_VIGNETTES: "FALSE"
 
-check-release:
+check:
   extends: .r
   stage: check
   script:
     - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
+  except:
+    - /^paper(-.*)?$/
+    - validation-*
 
-knitr:
+.knitr:
   extends: .use-autodocker
   stage: knitr
-  tags:
-    - docker-mem:3
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -67,9 +81,33 @@ knitr:
     - cd "${TEX_DIR}"
     - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
   dependencies:
-    - build-release
+    - ⚡️ build
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
+    
+knitr:
+  extends: .knitr
+  tags:
+    - docker-cpu:comp8
+  variables:
+    RUN_VALIDATION: "TRUE"
+  only:
+    - /^validation(-.*)?$/
+  artifacts:
+    paths:
+      - "${TEX_DIR}/ValidationResults.rds"
+      - "${TEX_DIR}/PSplineInference.tex"
+      - "${TEX_DIR}/figures"
+
+⚡️ knitr:
+  extends: .knitr
+  tags:
+    - docker-mem:3
+  variables:
+    RUN_VALIDATION: "FALSE"
+  only:
+    - /^paper(-.*)?$/
+  artifacts:
     paths:
       - "${TEX_DIR}/PSplineInference.tex"
       - "${TEX_DIR}/figures"
@@ -84,6 +122,9 @@ overleaf:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
+  only:
+    - master
+    - /^paper(-.*)?$/
 
 tex:
   extends: .use-autodocker
@@ -99,26 +140,5 @@ tex:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "PSplineInference.pdf"
-      
-# autodocker-sim:
-#   extends: .autodocker
-#   variables:
-#     AUTODOCKER_CONTEXT_NAME: sim
-#   tags:
-#     - dind-mem:2
-#
-# sim:
-#   extends: .use-autodocker
-#   variables:
-#     AUTODOCKER_CONTEXT_NAME: sim
-#   stage: sim
-#   tags:
-#     - docker-cpu:comp8
-#   script:
-#     - Rscript -e "devtools::install()"
-#     - time Rscript Paper/SimStudy.R
-#   artifacts:
-#     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-sim"
-#     paths:
-#       - studyResults.rds
-#
+  only: 
+    - /^paper(-.*)?$/
