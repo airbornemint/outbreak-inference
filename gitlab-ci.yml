@@ -1,5 +1,5 @@
 include:
-  - remote: https://gitlab.com/cirecipes/autodocker/raw/v1.0b2/gitlab-autodocker.yml
+  - remote: https://gitlab.com/cirecipes/autodocker/raw/v1.0b3/gitlab-autodocker.yml
 
 stages:
   - autodocker
