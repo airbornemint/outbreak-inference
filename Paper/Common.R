@@ -17,7 +17,7 @@ predThresholds = function(params, model, predictors, seasonThreshold) {
   thresholds = params %>%
     pspline.inference:::pspline.calc.scalars(model, predictors, pspline.outbreak.thresholds(seasonThreshold, 1 - seasonThreshold)) %>%
     adply(1, function(row) {
-      cases = params[1,] %>%
+      cases = params[row$pspline.sample,] %>%
         t() %>%
         pspline.inference:::pspline.calc.timeseries(model, data.frame(time=c(row$onset, row$offset)), pspline.outbreak.cases)
       data.frame(onset.cases=cases$cases[1], offset.cases=cases$cases[2]) %>%
