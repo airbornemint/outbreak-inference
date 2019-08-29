@@ -325,9 +325,9 @@ Our simulation study found that the true value of season onset was included in t
 
 We similarly found that the true value of season offset was included in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$offset.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:simPctileOffset}.
 
-Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults["offset.good"], 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:simPctileOffset}.
+Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$offset.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:simPctileOffset}.
 
-In summary, our simulation study validated out method of interval estimation for all three outcome measures of interest in our RSV research.
+In summary, our simulation study validated our method of interval estimation for all three outcome measures of interest in our RSV research.
 
 \section{Discussion}
 

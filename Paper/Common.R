@@ -2,6 +2,8 @@ import::from(dplyr, rename, mutate)
 import::from(plyr, adply)
 import::from(data.table, setnames)
 import::from(reshape, melt)
+import::from(scales, percent)
+import::from(stringr, str_replace_all)
 
 predCases = function(params, model, predictors) {
   params %>%
@@ -43,3 +45,6 @@ predFraction = function(params, model, predictors) {
     pspline.inference:::pspline.calc.scalars(model, predictors, calcFraction)
 }
 
+latexPercent = function(...) {
+  percent(...) %>% str_replace_all("%", "\\\\%")
+}
