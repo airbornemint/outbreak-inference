@@ -62,8 +62,8 @@ quantile.multi = function(data, probs, prob.names) {
 #' @param data data.frame containing predictor variables and outcome variables
 #' @param model associated model (its formula is used to determine which variables in \code{data} are predictors and which are outcomes)
 #' @param probs probabilities at which quantiles will be calculated (same as for `quantile`)
-#' @param prob.names format strings used to construct names of the new data columns. For example, if \code{probs} is 0.5 and
-#' \code{prob.names} is \code{\%s.median}, then the median of each outcome variable \code{var} will be returned in \code{var.median}.
+#' @param prob.names format strings used to construct names of the new data columns. For example, if \code{probs} is 0.05 and
+#' \code{prob.names} is \code{\%s.lower}, then the 5th percentile of each outcome variable \code{var} will be returned in \code{var.lower}.
 #' @return data frame of predictors and associated outcome quantiles.
 #' @keywords internal
 quantile.outcomes = function(data, model, probs, prob.names) {
