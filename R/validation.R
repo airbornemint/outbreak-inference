@@ -22,7 +22,7 @@
 #' @param fun.outcomes function that calculates the outcomes of interest. Same as outcomes function in \code{\link{pspline.estimate.scalars}}.
 #' @param n.samples number of samples to use for estimation. See \code{\link{pspline.estimate.scalars}}.
 #' @param level confidence level to use for estimation. See \code{\link{pspline.estimate.scalars}}.
-#' @return data frame specifying the fraction of true values that were contained in their estimated confidence interval
+#' @return list of summary (which is a data frame specifying the fraction of true values that were contained in their estimated confidence interval) and results (which is a data frame specifying the quantile of the true value in the estimated sampled distribution for each simulation)
 #' @export
 pspline.validate.scalars <- function(fun.truth, n.truths, fun.observations, n.observations, fun.model, fun.outcomes, n.samples, level) {
   1:n.truths %>%
@@ -30,27 +30,31 @@ pspline.validate.scalars <- function(fun.truth, n.truths, fun.observations, n.ob
       fun.truth() %>%
         truth.results.scalars(fun.observations, n.observations, fun.model, fun.outcomes, n.samples, level) %>%
         mutate(idx.truth=idx)
-    }, .progress="text") %>%
-    select(-idx.truth, -idx.observations)%>%
-    summarize_all(function(col) mean(col, na.rm=TRUE))
+    }, .progress="text") %>% (function(results) {
+      list(
+        results=results,
+        summary=results %>%
+          select_at(vars(contains(".good"))) %>%
+          summarize_all(function(col) mean(col, na.rm=TRUE))
+      )
+    })
 }
 
 #' Assess whether scalar estimates fall within their intended confidence intervals
 #' @keywords internal
-check.scalars <- function(estimates, expected) {
-  results = estimates
+check.scalars <- function(ecdfs, expected, level) {
+  results = as.data.frame(matrix(nrow=1, ncol=0))
   for (outcome in names(expected)) {
-    lclName = sprintf("%s.lower", outcome)
-    uclName = sprintf("%s.upper", outcome)
-    medianName = sprintf("%s.median", outcome)
     checkName = sprintf("%s.good", outcome)
-    results %<>%
-      rename_at(lclName, function(x) "pspline.lower") %>%
-      rename_at(uclName, function(x) "pspline.upper") %>%
-      mutate(pspline.good = (pspline.lower < expected[outcome]) & pspline.upper > expected[outcome]) %>%
-      rename_at("pspline.good", function(x) checkName) %>%
-      select(-medianName) %>%
-      select(-pspline.lower, -pspline.upper)
+    quantileName = sprintf("%s.quantile", outcome)
+    outcomeECDF = ecdfs[[outcome]]
+
+    results[quantileName] = outcomeECDF(expected[outcome])
+
+    checkQuantiles = quantile(outcomeECDF, probs = c((1 - level) / 2, (1 + level) / 2))
+    lower = checkQuantiles[1]
+    upper = checkQuantiles[2]
+    results[checkName] = (lower < expected[outcome]) & (upper > expected[outcome])
   }
   results
 }
@@ -61,8 +65,9 @@ observed.results.scalars <- function(observed, truth, expected, fun.model, fun.o
   model = observed %>% fun.model()
   truth %<>% select_at(pred.vars(model))
   model %>%
-    pspline.estimate.scalars(truth, fun.outcome, n.samples, level) %>%
-    check.scalars(expected)
+    pspline.sample.scalars(truth, fun.outcome, n.samples) %>%
+    ecdf.outcomes(model) %>%
+    check.scalars(expected, level)
 }
 
 #' Run simulation study on one truth

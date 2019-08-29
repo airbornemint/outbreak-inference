@@ -13,8 +13,8 @@
 
 \item{probs}{probabilities at which quantiles will be calculated (same as for `quantile`)}
 
-\item{prob.names}{format strings used to construct names of the new data columns. For example, if \code{probs} is 0.5 and
-\code{prob.names} is \code{\%s.median}, then the median of each outcome variable \code{var} will be returned in \code{var.median}.}
+\item{prob.names}{format strings used to construct names of the new data columns. For example, if \code{probs} is 0.05 and
+\code{prob.names} is \code{\%s.lower}, then the 5th percentile of each outcome variable \code{var} will be returned in \code{var.lower}.}
 }
 \value{
 data frame of predictors and associated outcome quantiles.
