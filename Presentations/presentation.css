@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css?family=Fira+Sans&display=swap');
+
+em {
+  font-weight: 600;
+  color: dodgerblue;
+}
+
+slides > slide {
+  font-family: "Fira Sans", sans-serif;
+  background: white;
+}
+
+slides > slide.dark {
+  background: white !important;
+}
+
+.segue hgroup {
+  position: static;
+}
+
+.segue h2 {
+  color: #515151;
+  font-size: 45px;
+}
+
+ul > li:before {
+  content: '\2022';
+}
+
+h2 code {
+  color: #515151;
+}
+
+.auto-fadein {
+  transition: none;
+}
+
+slide article img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.MathJax_Display {
+  color: black;
+}
