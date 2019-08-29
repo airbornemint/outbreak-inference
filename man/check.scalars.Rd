@@ -4,7 +4,7 @@
 \alias{check.scalars}
 \title{Assess whether scalar estimates fall within their intended confidence intervals}
 \usage{
-check.scalars(estimates, expected)
+check.scalars(ecdfs, expected, level)
 }
 \description{
 Assess whether scalar estimates fall within their intended confidence intervals

@@ -94,6 +94,19 @@ quantile.outcomes = function(data, model, probs, prob.names) {
   }
 }
 
+#' Return empirical CDF for model outcome variables
+#' @param data data.frame containing predictor variables and outcome variables
+#' @param model associated model (its formula is used to determine which variables in \code{data} are predictors and which are outcomes)
+#' @return list of ECDFs
+#' @keywords internal
+ecdf.outcomes = function(data, model) {
+  data %<>% select(-pspline.sample)
+  outcomes = setdiff(names(data), pred.vars(model))
+  lapply(outcomes, function(outcome) {
+    ecdf(data[[outcome]])
+  }) %>% setNames(outcomes)
+}
+
 #' Calculate confidence intervals of model outcome variables
 #' @param data data frame containing predictor and outcome variables
 #' @param model associated model
