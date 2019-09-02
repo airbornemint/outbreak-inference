@@ -8,7 +8,7 @@ import::from(doParallel, registerDoParallel)
 import::from(parallel, detectCores)
 
 registerDoParallel(detectCores())
-print(paste("foreach::dopar", foreach::getDoParRegistered(), foreach::getDoParName(), foreach::getDoParVersion(), foreach::getDoParWorkers(), detectCores()))
+message(paste("foreach::dopar", foreach::getDoParRegistered(), foreach::getDoParName(), foreach::getDoParVersion(), foreach::getDoParWorkers(), detectCores()))
 set.seed(NULL)
 
 source("./Common.R")
@@ -57,18 +57,18 @@ makeModel = function(data) {
 
 if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 60,
-    generateObservations, 60,
-    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
+    generateTruth(1, 52, 0.05), 20,
+    generateObservations, 20,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
 
   saveRDS(validationResults, "ValidationResults.rds")
 } else {
   # Even when skipping full validation, run one cycle of it just to make sure it still works
   pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 1,
-    generateObservations, 1,
-    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
+    generateTruth(1, 52, 0.05), 20,
+    generateObservations, 20,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
 
   validationResults = readRDS("ValidationResults.rds")
