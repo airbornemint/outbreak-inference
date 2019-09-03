@@ -58,9 +58,9 @@ makeModel = function(data) {
 set.seed(NULL)
 if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 20,
-    generateObservations, 20,
-    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
+    generateTruth(1, 52, 0.05), 60,
+    generateObservations, 60,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 
   saveRDS(validationResults, "ValidationResults.rds")
