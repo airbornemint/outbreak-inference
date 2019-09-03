@@ -55,6 +55,7 @@ makeModel = function(data) {
   gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 }
 
+set.seed(NULL)
 if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
     generateTruth(1, 52, 0.05), 20,
