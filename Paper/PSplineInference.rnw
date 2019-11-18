@@ -9,6 +9,8 @@
 \usepackage{amsmath}
 \usepackage{dsfont}
 \usepackage{mathtools}
+\usepackage[svgnames]{xcolor} % Must go before tikz, todonotes, and structure.tex
+\usepackage{todonotes}
 
 \usepackage[toc,page]{appendix}
 \renewcommand{\appendixpagename}{Supplements}
@@ -19,7 +21,6 @@
 \usepackage{setspace}
 
 \usepackage[hidelinks]{hyperref}
-\usepackage[svgnames]{xcolor} % Must go before tikz and before structure.tex
 \usepackage{tikz}
 \usepackage{draftwatermark}
 \SetWatermarkScale{1}
@@ -28,7 +29,7 @@
 \SetWatermarkHorCenter{12ex}
 \SetWatermarkVerCenter{12ex}
 \SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 2}
+\SetWatermarkText{DRAFT 3}
 
 \input{structure.tex}
 \usepackage{amssymb}
@@ -257,6 +258,7 @@ Similarly, for the prophylaxis regimen that offers protection between $t_\mathit
 We used the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
 \subsection{Validation via simulation study}
+\todo[inline]{This section not ready for feedback}
 
 To demonstrate the validity of our method, and specifically that the 95\% CI estimates of the onset/offset time and the preventable fraction were correct, we performed a simulation study. We began by generating $N_\mathit{season} = 60$ RSV seasons. Each season was generated in two steps:
 
@@ -347,6 +349,8 @@ We similarly found that the true value of season offset was included in the esti
 \end{figure}
 
 Of note for onset and offset estimates is that our method tends to skew high (overestimate) for onset and low (underestimate) for offset; this skew is also seen in Figure \ref{fig:samplePredOnsetFull}. This is due to the asymmetric variability of the P-splines; there is much less variability in RSV incidence outside of the RSV season than during the RSV season, and therefore there is more variability on the high end of onset estimates and the low end of offset estimates, which is reflected in a skewed estimate distribution.
+
+\todo[inline]{Remainder of this section not ready for feedback}
 
 Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$protectedFraction.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:protectedQuantilesFull}.
 
