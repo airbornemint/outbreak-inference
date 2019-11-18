@@ -121,7 +121,7 @@ Analysis of infectious disease dynamics often concerns itself with inferences ab
 
 One of the principal limitations of GLM/GAM-based estimation methods is that they are only able to provide interval estimates for model parameters, the model response variable, and quantities trivially computed from those. Any quantity that is non-trivially computed from model parameters and response variables is only amenable to point-estimation, not interval estimation. Unfortunately, this limitation applies to many quantities of clinical and public health interest in infectious disease dynamics, because time-domain quantities (such as season start and end) have a complex computational relationship to the model parameters and response.
 
-These challenges are exemplified by respiratory syncytial virus (RSV) --- a respiratory infection with annual or biennial seasonal pattern that is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive and the duration of antibody protection is short-lived, so prophylaxis administration needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose,\cite{Midgley:2017bo} --- some more ad-hoc than others, and showing different degrees of sensitivity to the characteristics of the data outside the RSV season. 
+These challenges are exemplified by respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive and the duration of antibody protection is short-lived, so prophylaxis administration needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose,\cite{Midgley:2017bo} --- some more ad-hoc than others, and showing different degrees of sensitivity to the characteristics of the data outside the RSV season. 
 
 Our approach to this challenge is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several qualities desirable in the analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior.\cite{Eilers:1996kz} In this study, we show how GAM with P-splines can be used to fit smooth curves to infectious disease incidence data, and then used to make interval estimates of characteristics of RSV seasonal outbreaks, such as the time of their start and end.
 
@@ -131,10 +131,10 @@ Our approach to this challenge is to fit a smooth curve through the observed dis
 
 \subsubsection{Generalized additive modeling}
 
-A \textit{generalized additive model} (GAM --- sometimes known as a generalized linear model, GLM) provides a framework for modeling a response variable $y$, using potentially multiple predictor variables $x_i, i=1, \hdots, p$ with associated non-linear predictor functions $f_i, i=1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value $\hat{y}$ of $y$ is given as:
+A \textit{generalized additive model} (GAM --- sometimes known as a generalized linear model, GLM) provides a framework for modeling a response variable $y$, using predictor variables $x_i, i=1, \hdots, p$ with associated non-linear predictor functions $f_i, i=1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value $E(y)$ is given by:
 
 \begin{equation*}
-    g(\hat{y}) = \beta_0 + f_1(x_1) + f_2(x_2) + \dots + f_p(x_p)
+    g(E(y)) = \beta_0 + f_1(x_1) + f_2(x_2) + \dots + f_p(x_p)
 \end{equation*}
 
 \subsubsection{Basis splines}
@@ -149,11 +149,11 @@ A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real fu
 
 \subsubsection{Penalized B-splines in GAM}
 
-Splines, by virtue of their smoothness, can be used as predictor functions $f_i$ in a GAM. Expressed in terms of B-splines, $f_i =  \sum_j \beta_{i,j} B_{i,j}$, and the GAM takes the form:
+Splines can be used as predictor functions $f_i$ in a GAM. Expressed in terms of B-splines, $f_i = \sum_j \beta_{i,j} B_{i,j}$, and the GAM takes the form:
 
 \begin{equation}
 \begin{aligned}
-    g(\hat{y}) &= \beta_0 \\
+    g(E(y)) &= \beta_0 \\
     &+ \beta_{1,1} B_{1,1}(x_1) + \beta_{1,2} B_{1,2}(x_1) + \dots \\
     &+ \beta_{2,1} B_{2,1}(x_2) + \beta_{2,2} B_{2,2}(x_2) + \dots \\
     &+ \dots \\
@@ -161,9 +161,9 @@ Splines, by virtue of their smoothness, can be used as predictor functions $f_i$
 \end{aligned}\label{eqn:model}
 \end{equation}
 
-This model can be fitted to data simply by minimizing $\Vert y - \hat{y} \Vert^2$; however, this approach often leads to overfitting, especially with a larger number of knots. To mitigate this, the model can be modified to instead minimize $\Vert y - \hat{y} \Vert^2 + P$, where $P$ is a \textit{penalty function} that measures non-smoothness of the model response variable. This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as \textit{penalized B-splines} (P-splines). A variety of penalty functions have been defined; the most common ones use $k$-th order differences between the model and the data, for some small integer $k$ (often $k = 2$). As with general cyclic splines, \textit{cyclic P-splines} are an extension of P-splines to periodic functions.
+This model can be fitted to data simply by minimizing $\Vert y - E(y) \Vert^2$; however, this approach often leads to overfitting, especially with a larger number of knots. To mitigate this, the model can be modified to instead minimize $\Vert y - E(y) \Vert^2 + P$, where $P$ is a \textit{penalty function} that measures non-smoothness of the model response variable. This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as \textit{penalized B-splines} (P-splines)\cite{Eilers:1996kz}. A variety of penalty functions have been defined; the most common ones use $k$-th order differences between the model and the data, for some small integer $k$ (often $k = 2$). As with general cyclic splines, \textit{cyclic P-splines} are an extension of P-splines to periodic functions.
 
-For smooth estimation of non-linear experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed (provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function). 
+For smooth estimation of non-linear experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function.\cite{Eilers:1996kz} 
 
 \subsection{Outcome estimation}
 
@@ -181,7 +181,7 @@ To that end, we defined the following outcome measures of interest:
 \item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our incidence data, we could sample the model parameters $\beta_{i,j}$, use them to estimate the  model response variable (in our case, RSV incidence), and therefrom estimate the outcome measures of interest. By way of example, consider the (hypothetical) RSV season shown in Figure \ref{fig:sampleCases}. 
+Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our incidence data, we could sample the model parameters $\beta_{i,j}$, use them to estimate RSV incidence as a function of time, and therefrom estimate the outcome measures of interest. By way of example, consider the (hypothetical) RSV season shown in Figure \ref{fig:sampleCases}. 
 
 \begin{figure}
 \begin{center}
@@ -193,7 +193,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 
 \subsection{Model response sampling}
 
-To estimate the season onset and offset for this RSV season, we begin by fitting a P-spline GAM to the observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline (with 2nd degree smoothing penalty) as the only model term:
+To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
 \begin{align*}
     \log(\hat{I}(t)) &= \beta_0 + \beta_1 B_1(t) + \beta_2 B_2(t) + \dots + \beta_{20} B_{20}(t)
@@ -209,7 +209,7 @@ The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
 \end{center}
 \end{figure}
 
-In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $\hat{I}$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$  $\Sexpr{sampleNsimMini}$ times.
+In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$  $\Sexpr{sampleNsimMini}$ times.
 
 \begin{figure}
 \begin{center}
@@ -221,7 +221,7 @@ In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit corresponding
 
 \subsection{Outcome measure sampling}
 
-Next we turn to our outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
+Next we turn to our first outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
 \int_{t_\mathit{min}}^{t_\mathit{on}} I(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt \\
