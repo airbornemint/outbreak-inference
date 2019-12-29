@@ -1,9 +1,11 @@
 %TODO: PLOS comp biol template
-%TODO: PDF Plots
 %TODO: review competing methods
 %TODO: asymptotic normality
 
+% knitr preamble begins after \documentclass
 \documentclass[10pt,letter]{article}
+
+% end knitr preamble
 \usepackage{float}
 \floatplacement{figure}{H}
 \usepackage{amsmath}
@@ -90,7 +92,9 @@
 \date{\today}
 
 \pagestyle{empty}
+% begin knitr postamble
 \begin{document}
+% knitr postamble ends before \begin{document}
 
 \newlength\baseparindent
 \setlength\baseparindent{\parindent}
