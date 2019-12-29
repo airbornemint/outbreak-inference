@@ -75,7 +75,7 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = readRDS("ValidationResults.rds")
 }
 
-tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(validationResults$results) +
   theme_light(base_size=plotTextBaseSize) +
@@ -87,7 +87,7 @@ ggplot(validationResults$results) +
 
 dev.off()
 
-tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(validationResults$results) +
   theme_light(base_size=plotTextBaseSize) +

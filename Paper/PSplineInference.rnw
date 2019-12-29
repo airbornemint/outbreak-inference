@@ -21,6 +21,7 @@
 \usepackage{setspace}
 
 \usepackage[hidelinks]{hyperref}
+\usepackage[mode=image|tex]{standalone}
 \usepackage{tikz}
 \usepackage{draftwatermark}
 \SetWatermarkScale{1}
@@ -184,7 +185,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/sampleCases.tex}
+\includestandalone{\figuresDir/sampleCases}
 \caption{Incidence of RSV-associated hospitalizations}
 \label{fig:sampleCases}
 \end{center}
@@ -202,7 +203,7 @@ The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/sampleBestFit.tex}
+\includestandalone{\figuresDir/sampleBestFit}
 \caption[P-spline approximation of RSV incidence]{Incidence of RSV-associated hospitalizations, with best-fit P-spline}
 \label{fig:sampleBestFit}
 \end{center}
@@ -212,7 +213,7 @@ In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corres
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/samplePredMini.tex}
+\includestandalone{\figuresDir/samplePredMini}
 \caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with sampled approximating $P$-splines ($N=\Sexpr{sampleNsimMini}$)}
 \label{fig:samplePredMini}
 \end{center}
@@ -231,7 +232,7 @@ Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the co
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/samplePredOnsetMini}
+\includestandalone{\figuresDir/samplePredOnsetMini}
 \caption[Estimates of RSV season onset and offset]{Estimates of RSV season onset and offset numerically computed from P-spline approximations to RSV incidence.}
 \label{fig:samplePredOnsetMini}
 \end{center}
@@ -241,7 +242,7 @@ Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approx
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/samplePredOnsetFull}
+\includestandalone{\figuresDir/samplePredOnsetFull}
 \caption[Distribution of estimated RSV season onset]{Distribution of estimates of RSV season onset and offset.}
 \label{fig:samplePredOnsetFull}
 \end{center}
@@ -330,7 +331,7 @@ Our simulation study found that the true value of season onset was included in t
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/onsetQuantilesFull.tex}
+\includestandalone{\figuresDir/onsetQuantilesFull}
 \caption{Quantile of the true value of RSV season onset among estimates of onset, for 3600 simulated RSV seasons.}
 \label{fig:onsetQuantilesFull}
 \end{center}
@@ -340,7 +341,7 @@ We similarly found that the true value of season offset was included in the esti
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/offsetQuantilesFull.tex}
+\includestandalone{\figuresDir/offsetQuantilesFull}
 \caption{Quantile of the true value of RSV season offset among estimates of offet, for 3600 simulated RSV seasons.}
 \label{fig:offsetQuantilesFull}
 \end{center}
@@ -354,7 +355,7 @@ Finally, we found that the true value of the protected fraction was included TOD
 
 %\begin{figure}
 %\begin{center}
-%\input{\figuresDir/protectedQuantilesFull.tex}
+%\includestandalone{\figuresDir/protectedQuantilesFull}
 %\caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with sampled approximating $P$-splines ($N=\Sexpr{sampleNsimMini}$)}
 %\label{fig:protectedQuantilesFull}
 %\end{center}
