@@ -104,7 +104,7 @@
 
 \section*{\centerline{Abstract}}
 
-Most of the widely used methods of modeling outcomes of infectious disease outbreaks begin with a generalized linear model (GLM) of disease incidence, followed by estimation of the outcome measure of interest from incidence estimates. Calculation of outcome measures of clinical and public health significance is typically non-trivial, and consequently only point estimates (rather than interval estimates) of those measures can be made from the model. Motivated by respiratory syncytial virus (RSV) seasonality, we developed a general method for obtaining interval estimates of outcome measures of seasonal and sporadic infectious disease outbreaks using multivariate sampling of a generalized additive model with penalized basis splines. Our approach provides robust interval estimates regardless of the complexity of the calculations of the outcome measures, and it generalizes to other systems (including outbreaks of other infectious diseases). Here we present our general approach, its application to RSV, and an R package that provides a convenient interface for conducting and validating this type of analysis in other areas.
+There is often a need to estimate the characteristics of epidemics or seasonality from infectious disease data. For instance, accurately estimating the start and end date of respiratory syncytial virus (RSV) epidemics can be used to optimize the initiation of prophylactic medication. Many widely-used methods for describing these characteristics begin with a regression model fit to a time series of disease incidence. The fitted model is then often used to calculate the quantities of interest. Calculation of these quantities from the fitted regression model typically involves combining together different components of the fitted model, and consequently only point estimates (rather than measures of uncertainty) of those quantities can be made in a straightforward way. Motivated by attempts to estimate the optimal timing of prophylaxis for RSV, we developed a general method for obtaining confidence intervals for characteristics of seasonal and sporadic infectious disease outbreaks. To do this, we use multivariate sampling of a generalized additive model with penalized basis splines. Our approach provides robust confidence intervals regardless of the complexity of the calculations of the outcome measures, and it generalizes to other systems (including outbreaks of other infectious diseases). Here we present our general approach, its application to RSV, and an R package that provides a convenient interface for conducting and validating this type of analysis in other areas.
 
 \clearpage
 
@@ -118,31 +118,32 @@ Most of the widely used methods of modeling outcomes of infectious disease outbr
 
 \section{Introduction}
 
-Analysis of infectious disease dynamics often concerns itself with inferences about time --- for example, the start and the end of seasonal outbreaks, duration of outbreaks, or optimal timing of prophylaxis or treatment. The typical mathematical model used for these analyses treats observed disease incidence as the outcome variable in a generalized linear model (GLM) or a generalized additive model (GAM).
+Analyses of infectious disease dynamics often make inferences based on timing for various quantities of  clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Typically, a regression model (e.g., a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculation of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
 
-One of the principal limitations of GLM/GAM-based estimation methods is that they are only able to provide interval estimates for model parameters, the model response variable, and quantities trivially computed from those. Any quantity that is non-trivially computed from model parameters and response variables is only amenable to point-estimation, not interval estimation. Unfortunately, this limitation applies to many quantities of clinical and public health interest in infectious disease dynamics, because time-domain quantities (such as season start and end) have a complex computational relationship to the model parameters and response.
+Calculating the uncertainty of estimates from these types of GAM/GLM-based methods is a challenge. The models provide measures of uncertainty for the individual parameters; however, the quantities of interest typically represent complex combinations of these parameters, and there is often not a straightforward way to calculate their uncertainty. Therefore, uncertainty in the derived estimates is often ignored, or \textit{ad hoc} approaches, such as block bootstrapping, are used to calculate confidence intervals. 
 
-These challenges are exemplified by respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive and the duration of antibody protection is short-lived, so prophylaxis administration needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose,\cite{Midgley:2017bo} --- some more ad-hoc than others, and showing different degrees of sensitivity to the characteristics of the data outside the RSV season. 
+These challenges are exemplified by analyses of the dynamics of respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive, and the duration of antibody protection is short-lived, so administration of prophylaxis needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose,\cite{Midgley:2017bo}, and the methods exhibit different degrees of sensitivity to the characteristics of the data outside the RSV season. 
 
-Our approach to this challenge is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several qualities desirable in the analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior.\cite{Eilers:1996kz} In this study, we show how GAM with P-splines can be used to fit smooth curves to infectious disease incidence data, and then used to make interval estimates of characteristics of RSV seasonal outbreaks, such as the time of their start and end.
+In this study, we show how GAMs with  penalized splines can be used to fit smooth curves to infectious disease incidence data. The fitted model is then used to estimate characteristics of the RSV season, such as the time of the start and end, as well as the corresponding confidence intervals.
 
 \section{Methods}
 
 \subsection{Background}
 
 \subsubsection{Generalized additive modeling}
+Our approach  is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
 
-A \textit{generalized additive model} (GAM --- sometimes known as a generalized linear model, GLM) provides a framework for modeling a response variable $y$, using predictor variables $x_i, i=1, \hdots, p$ with associated non-linear predictor functions $f_i, i=1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value $E(y)$ is given by:
+A \textit{generalized additive model} (GAM) provides a framework for modeling a response variable $y$, using predictor variables $x_k, k=1, \hdots, p$ with associated non-linear predictor functions $f_k, k = 1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value, $E(y)$, is given as
 
 \begin{equation*}
-    g(E(y)) = \beta_0 + f_1(x_1) + f_2(x_2) + \dots + f_p(x_p)
+    g\left\{E(y)\right\} = \beta_0 + \sum_{k=1}^p f_k(x_k)
 \end{equation*}
 
 \subsubsection{Basis splines}
 
-A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points at which its polynomial segments join are known as \textit{knots} $k_i$. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
+A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_i \in [t_a, t_b]$ at which its polynomial segments join are known as \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
-Given a set of knots $k_i$, we can construct a unique set of splines of order $n$ (with those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_i$. All splines with knots $k_i$ can be represented as a linear combination of the basis splines with the same knots.
+Given a set of knots $K_i$, we can construct a unique set of splines of order $n$ (with those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j$. All splines with knots $K_i$ can be represented as a linear combination of the basis splines $B_j$ with the same knots.
 
 \subsubsection{Cyclic splines}
 
@@ -150,15 +151,11 @@ A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real fu
 
 \subsubsection{Penalized B-splines in GAM}
 
-Splines can be used as predictor functions $f_i$ in a GAM. Expressed in terms of B-splines, $f_i = \sum_j \beta_{i,j} B_{i,j}$, and the GAM takes the form:
+Splines can be used as predictor functions $f_k$ in a GAM. Expressed as a linear combination of B-splines, $f_k = \sum_j \beta_{j,k} B_{j,k}$, and the GAM takes the form
 
 \begin{equation}
 \begin{aligned}
-    g(E(y)) &= \beta_0 \\
-    &+ \beta_{1,1} B_{1,1}(x_1) + \beta_{1,2} B_{1,2}(x_1) + \dots \\
-    &+ \beta_{2,1} B_{2,1}(x_2) + \beta_{2,2} B_{2,2}(x_2) + \dots \\
-    &+ \dots \\
-    &+ \beta_{p,1} B_{p,1}(x_p) + \beta_{p,2} B_{p,2}(x_p) + \dots
+    g\left\{E(y)\right\} &= \beta_0 + \sum_{j=1}^p \sum_k \beta_{j,k} B_{j,k}\left(x_j\right)
 \end{aligned}\label{eqn:model}
 \end{equation}
 
@@ -168,7 +165,7 @@ For smooth estimation of non-linear experimental data, P-splines have desirable 
 
 \subsection{Outcome estimation}
 
-The principal questions of our RSV work were:
+The principal questions of our RSV analyses were:
 
 \begin{itemize}
 \item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
@@ -197,7 +194,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
 \begin{align*}
-    \log(\hat{I}(t)) &= \beta_0 + \beta_1 B_1(t) + \beta_2 B_2(t) + \dots + \beta_{20} B_{20}(t)
+    \log\left\{\hat{I}(t)\right\} &= \beta_0 + \sum_{j=1}^{20} \beta_j B_j(t)
 \end{align*}
 
 The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
@@ -210,7 +207,7 @@ The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
 \end{center}
 \end{figure}
 
-In this model $\beta_i \sim N(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$  $\Sexpr{sampleNsimMini}$ times.
+In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 \begin{figure}
 \begin{center}
@@ -366,11 +363,16 @@ In summary, our simulation study validated our method of interval estimation for
 
 \section{Discussion}
 
-We chose the specific outcome measures (onset/offset time and protected fraction) to serve our RSV research; validating our estimation of those outcomes gives methodological grounding to our RSV results, as well as opening up the possibility of applying them to investigations of other infectious disease outbreaks. In particular, we plan to investigate the potential benefits of regional RSV prophylaxis guidelines by applying our methods to RSV in states other than Connecticut. 
+In this study, we demonstrate how re-sampling procedures can be used to generate uncertainty intervals for custom quantities derived from regression models fit to disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious disease), as well as other outcome measures.
 
-That said, the greater significance of our results rests neither specifically with RSV nor specifically with those outcome measures. Our estimation method generalizes to other systems (such as outbreaks of other infectious disease), as well as other outcome measures.
+We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. There are direct public health applicaitons for this approach. For instance, the method could be used to investigate the potential benefits of region-specific RSV prophylaxis guidelines. 
 
 To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of an arbitrary user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and (TODO) CRAN, and its documentation includes examples beyond those shown here.
+
+TODO limitations...
+
+TODO concluding remarks...
+
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
