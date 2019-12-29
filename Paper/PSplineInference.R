@@ -87,7 +87,13 @@ figuresDir = "./figures"
 if (!dir.exists(figuresDir)) {
   dir.create(figuresDir, recursive=TRUE)
 }
-options(tikzMetricsDictionary='./tikzDictionary.dat')
+options(
+  tikzMetricsDictionary='./tikzDictionary.dat',
+  tikzDocumentDeclaration='\\documentclass[tikz]{standalone}',
+  tikzLatexPackages=c(
+    "\\usepackage{tikz}\n"
+  )
+)
 
 commonOptions = list(
   scale_x_continuous(expand=c(0, 0)),
@@ -104,7 +110,7 @@ commonOptions = list(
   )
 )
 
-tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
     geom_point(aes(x=time, y=cases), size=.5) +
@@ -112,7 +118,7 @@ ggplot(obs) +
 
 dev.off()
 
-tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
   geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="grey") +
@@ -122,7 +128,7 @@ ggplot(obs) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
   geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
@@ -131,7 +137,7 @@ ggplot(predCasesMini) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
   geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
@@ -143,7 +149,7 @@ ggplot(predCasesMini) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumFull
 splineData = data %>% filter(pspline.sample < sampleDisplayNsim)
@@ -171,7 +177,7 @@ ggplot(predThresholdsFull) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumSingle
 
@@ -216,7 +222,7 @@ ggplot(data) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumFull
 splineData = data %>% filter(pspline.sample < sampleDisplayNsim)
