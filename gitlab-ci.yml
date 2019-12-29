@@ -124,7 +124,7 @@ overleaf:
   stage: overleaf
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/PSplineInference.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/PSplineInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${TEX_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
