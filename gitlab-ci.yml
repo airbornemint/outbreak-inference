@@ -102,7 +102,8 @@ knitr:
     paths:
       - "${TEX_DIR}/ValidationResults.rds"
       - "${TEX_DIR}/PSplineInference.tex"
-      - "${TEX_DIR}/figures"
+      - "${TEX_DIR}/figures/*.tex"
+      - "${TEX_DIR}/figures/*.pdf"
 
 ⚡️ knitr:
   extends: .knitr
@@ -115,7 +116,8 @@ knitr:
   artifacts:
     paths:
       - "${TEX_DIR}/PSplineInference.tex"
-      - "${TEX_DIR}/figures"
+      - "${TEX_DIR}/figures/*.tex"
+      - "${TEX_DIR}/figures/*.pdf"
 
 overleaf:
   extends: .use-autodocker
