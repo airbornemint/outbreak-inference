@@ -1,22 +1,23 @@
-%TODO: PLOS comp biol template
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TODO: PLOS comp biol template -- remove figures, inline bibliography
 %TODO: review competing methods
 %TODO: asymptotic normality
 
-% knitr preamble begins after \documentclass
-\documentclass[10pt,letter]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Document class required by PLOS Comp Biol — do not modify
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% knitr preamble
+\documentclass[10pt,letterpaper]{article}
 
-% end knitr preamble
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Packages and macros
 \usepackage{float}
 \floatplacement{figure}{H}
 \usepackage{amsmath}
 \usepackage{dsfont}
 \usepackage{mathtools}
-\usepackage[svgnames]{xcolor} % Must go before tikz, todonotes, and structure.tex
+\usepackage[svgnames,table]{xcolor} % Must go before tikz, todonotes, and structure.tex
 \usepackage{todonotes}
-
-\usepackage[toc,page]{appendix}
-\renewcommand{\appendixpagename}{Supplements}
-\renewcommand{\appendixname}{Supplement}
 
 \usepackage{printlen}
 \usepackage{textcomp}
@@ -34,29 +35,18 @@
 \SetWatermarkLightness{.5}
 \SetWatermarkText{DRAFT 4}
 
-\input{structure.tex}
 \usepackage{amssymb}
 \usepackage{wasysym}
-
-\usepackage[bf,medium,raggedright,compact]{titlesec}
-\titleformat{\section}{\normalfont\large\bfseries\scshape}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries\scshape}{\thesubsection}{1em}{}
-\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{}{0em}{}
-\titleformat{\paragraph}{\normalfont\normalsize\bfseries}{}{0em}{}
-\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{0em}
 
 \usepackage{hanging}
 \usepackage{graphicx}
 
-\newlength\abstractindent
-\setlength\abstractindent{1in}
-\newcommand{\abstractsection}[1]{\hangpara{\abstractindent}{1}\makebox[1in][l]{\textbf{\textsc{#1}}}}
-\newcommand{\abstractpara}{\hskip\abstractindent\hskip\baseparindent}
-
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
-\renewenvironment{knitrout}{}{}
+\edef\figuresDir{./figures}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% R code
 <<options, echo=FALSE>>=
     knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
     #$
@@ -76,53 +66,152 @@
 <<sim, warning=FALSE, include=FALSE>>=
 @
 
-\edef\figuresDir{\Sexpr{figuresDir}}
-\title{Use of penalized basis splines in estimation of characteristics of seasonal and sporadic infectious disease outbreaks}
-\def\headertitle{Use of P-splines in estimation of characteristics of infectious disease outbreaks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Packages and macros from PLOS Comp Biol template — do not modify
+\usepackage[top=0.85in,left=2.75in,footskip=0.75in]{geometry}
 
-\author{
-    \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{1}}\\
-    \authorstyle{Daniel Weinberger, PhD\textsuperscript{1}}\\
-    \authorstyle{Virginia Pitzer, ScD\textsuperscript{1}}\\
-    \authorstyle{Joshua Warren, PhD\textsuperscript{1}}
-    \newline\newline
-    \textsuperscript{1}\institution{Yale University, School of Public Health}
+% amsmath and amssymb packages, useful for mathematical formulas and symbols
+\usepackage{amsmath,amssymb}
+
+% Use adjustwidth environment to exceed column width (see example table in text)
+\usepackage{changepage}
+
+% Use Unicode characters when possible
+\usepackage[utf8x]{inputenc}
+
+% textcomp package and marvosym package for additional characters
+\usepackage{textcomp,marvosym}
+
+% cite package, to clean up citations in the main text. Do not remove.
+\usepackage{cite}
+
+% Use nameref to cite supporting information files (see Supporting Information section for more info)
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[right]{lineno}
+
+% ligatures disabled
+\usepackage{microtype}
+\DisableLigatures[f]{encoding = *, family = * }
+
+% color can be used to apply background shading to table cells only
+\usepackage[table]{xcolor}
+
+% array package and thick rules for tables
+\usepackage{array}
+
+% create "+" rule type for thick vertical lines
+\newcolumntype{+}{!{\vrule width 2pt}}
+
+% create \thickcline for thick horizontal lines of variable length
+\newlength\savedwidth
+\newcommand\thickcline[1]{%
+  \noalign{\global\savedwidth\arrayrulewidth\global\arrayrulewidth 2pt}%
+  \cline{#1}%
+  \noalign{\vskip\arrayrulewidth}%
+  \noalign{\global\arrayrulewidth\savedwidth}%
 }
 
-\date{\today}
+% \thickhline command for thick horizontal lines that span the table
+\newcommand\thickhline{\noalign{\global\savedwidth\arrayrulewidth\global\arrayrulewidth 2pt}%
+\hline
+\noalign{\global\arrayrulewidth\savedwidth}}
 
-\pagestyle{empty}
+
+% Remove comment for double spacing
+%\usepackage{setspace} 
+%\doublespacing
+
+% Text layout
+\raggedright
+\setlength{\parindent}{0.5cm}
+\textwidth 5.25in 
+\textheight 8.75in
+
+% Bold the 'Figure #' in the caption and separate it from the title/caption with a period
+% Captions will be left justified
+\usepackage[aboveskip=1pt,labelfont=bf,labelsep=period,justification=raggedright,singlelinecheck=off]{caption}
+\renewcommand{\figurename}{Fig}
+
+% Use the PLoS provided BiBTeX style
+\bibliographystyle{plos2015}
+
+% Remove brackets from numbering in List of References
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
+
+
+% Header and Footer with logo
+\usepackage{lastpage,fancyhdr,graphicx}
+\usepackage{epstopdf}
+%\pagestyle{myheadings}
+\pagestyle{fancy}
+\fancyhf{}
+%\setlength{\headheight}{27.023pt}
+%\lhead{\includegraphics[width=2.0in]{PLOS-submission.eps}}
+\rfoot{\thepage/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
+\fancyheadoffset[L]{2.25in}
+\fancyfootoffset[L]{2.25in}
+\lfoot{\today}
+
 % begin knitr postamble
 \begin{document}
 % knitr postamble ends before \begin{document}
 
-\newlength\baseparindent
-\setlength\baseparindent{\parindent}
-\begingroup
-\setlength\parindent{0em}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Front matter (PLOS Comp Biol template)
 
-\maketitle
+\vspace*{0.2in}
 
-\thispagestyle{firstpage}
+% Title must be 250 characters or less.
+\begin{flushleft}
+{\Large
+\textbf\newline{Use of penalized basis splines in estimation of characteristics of seasonal and sporadic infectious disease outbreaks} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
+}
+\newline
+% Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
+\\
+Ben Artin\textsuperscript{1*},
+Daniel Weinberger\textsuperscript{1},
+Virginia Pitzer\textsuperscript{1},
+Joshua Warren\textsuperscript{1}
+\\
+\bigskip
+\textbf{1} Yale School of Public Health, Yale University, New Haven, Connecticut, US
+\\
+\bigskip
 
-\clearpage
-\endgroup
+% Use the asterisk to denote corresponding authorship and provide email address in note below.
+* ben.artin@yale.edu
 
-\section*{\centerline{Abstract}}
+\end{flushleft}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Abstract (PLOS Comp Biol template)
+
+% Please keep the abstract below 300 words
+\section*{Abstract}
 There is often a need to estimate the characteristics of epidemics or seasonality from infectious disease data. For instance, accurately estimating the start and end date of respiratory syncytial virus (RSV) epidemics can be used to optimize the initiation of prophylactic medication. Many widely-used methods for describing these characteristics begin with a regression model fit to a time series of disease incidence. The fitted model is then often used to calculate the quantities of interest. Calculation of these quantities from the fitted regression model typically involves combining together different components of the fitted model, and consequently only point estimates (rather than measures of uncertainty) of those quantities can be made in a straightforward way. Motivated by attempts to estimate the optimal timing of prophylaxis for RSV, we developed a general method for obtaining confidence intervals for characteristics of seasonal and sporadic infectious disease outbreaks. To do this, we use multivariate sampling of a generalized additive model with penalized basis splines. Our approach provides robust confidence intervals regardless of the complexity of the calculations of the outcome measures, and it generalizes to other systems (including outbreaks of other infectious diseases). Here we present our general approach, its application to RSV, and an R package that provides a convenient interface for conducting and validating this type of analysis in other areas.
 
-\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Author summary (PLOS Comp Biol template)
+% Please keep the Author Summary between 150 and 200 words
+% Use first person. 
+\section*{Author summary}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut dui eu ante cursus gravida non sed sem. Nullam sapien tellus, commodo id velit id, eleifend volutpat quam. Phasellus mauris velit, dapibus finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit pulvinar, volutpat risus.
 
-\pagestyle{fancy}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Content
 
-%\listoftables
-%\clearpage
+% Line numbers required by PLOS Comp Biol
+\linenumbers
 
-\listoffigures
-\clearpage
-
-\section{Introduction}
+\section*{Introduction}
 
 Analyses of infectious disease dynamics often make inferences based on timing for various quantities of  clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Typically, a regression model (e.g., a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculation of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
 
@@ -132,7 +221,7 @@ These challenges are exemplified by analyses of the dynamics of respiratory sync
 
 In this study, we show how GAMs with  penalized splines can be used to fit smooth curves to infectious disease incidence data. The fitted model is then used to estimate characteristics of the RSV season, such as the time of the start and end, as well as the corresponding confidence intervals.
 
-\section{Methods}
+\section*{Methods}
 
 \subsection{Background}
 
@@ -185,7 +274,7 @@ To that end, we defined the following outcome measures of interest:
 \item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our incidence data, we could sample the model parameters $\beta_{i,j}$, use them to estimate RSV incidence as a function of time, and therefrom estimate the outcome measures of interest. By way of example, consider the (hypothetical) RSV season shown in Figure \ref{fig:sampleCases}. 
+Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our incidence data, we could sample the model parameters $\beta_{i,j}$, use them to estimate RSV incidence as a function of time, and therefrom estimate the outcome measures of interest. By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:sampleCases}. 
 
 \begin{figure}
 \begin{center}
@@ -203,7 +292,7 @@ To estimate the season onset and offset for this RSV season, we begin by fitting
     \log\left\{\hat{I}(t)\right\} &= \beta_0 + \sum_{j=1}^{20} \beta_j B_j(t)
 \end{align*}
 
-The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
+The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
@@ -213,7 +302,7 @@ The best fit produced by this model is shown in Figure \ref{fig:sampleBestFit}.
 \end{center}
 \end{figure}
 
-In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Figure \ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 \begin{figure}
 \begin{center}
@@ -232,7 +321,7 @@ Next we turn to our first outcome measure of interest: time of outbreak onset ($
 \int_{t_\mathit{min}}^{t_\mathit{off}} I(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt
 \end{align*}
 
-Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Figure \ref{fig:samplePredOnsetMini}.
+Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
 
 \begin{figure}
 \begin{center}
@@ -242,7 +331,7 @@ Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the co
 \end{center}
 \end{figure}
 
-Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Figure \ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
+Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
 \begin{figure}
 \begin{center}
@@ -315,7 +404,7 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 %\end{center}
 %
 %where \texttt{n.truth} is the number of time series of true disease incidence generated for the simulation study and \texttt{n.obs} is the number of time series of observed disease incidence generated from each time series of true disease incidence. 
-%\section{Results}
+%\section*{Results}
 
 %For our RSV study we investigated two outcome measures:
 %
@@ -329,9 +418,9 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 %\end{itemize}
 %
 
-\section{Results}
+\section*{Results}
 
-Our simulation study found that the true value of season onset was included in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$onset.good, 2)}$\% of the simulations. The distribution of the true season onset's percentile in each simulation's distribution of season onset estimates is shown in Figure \ref{fig:onsetQuantilesFull}.
+Our simulation study found that the true value of season onset was included in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$onset.good, 2)}$\% of the simulations. The distribution of the true season onset's percentile in each simulation's distribution of season onset estimates is shown in Fig~\ref{fig:onsetQuantilesFull}.
 
 \begin{figure}
 \begin{center}
@@ -341,7 +430,7 @@ Our simulation study found that the true value of season onset was included in t
 \end{center}
 \end{figure}
 
-We similarly found that the true value of season offset was included in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$offset.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:offsetQuantilesFull}.
+We similarly found that the true value of season offset was included in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$offset.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Fig~\ref{fig:offsetQuantilesFull}.
 
 \begin{figure}
 \begin{center}
@@ -351,11 +440,11 @@ We similarly found that the true value of season offset was included in the esti
 \end{center}
 \end{figure}
 
-Of note for onset and offset estimates is that our method tends to skew high (overestimate) for onset and low (underestimate) for offset; this skew is also seen in Figure \ref{fig:samplePredOnsetFull}. This is due to the asymmetric variability of the P-splines; there is much less variability in RSV incidence outside of the RSV season than during the RSV season, and therefore there is more variability on the high end of onset estimates and the low end of offset estimates, which is reflected in a skewed estimate distribution.
+Of note for onset and offset estimates is that our method tends to skew high (overestimate) for onset and low (underestimate) for offset; this skew is also seen in Fig~\ref{fig:samplePredOnsetFull}. This is due to the asymmetric variability of the P-splines; there is much less variability in RSV incidence outside of the RSV season than during the RSV season, and therefore there is more variability on the high end of onset estimates and the low end of offset estimates, which is reflected in a skewed estimate distribution.
 
 \todo[inline]{Remainder of this section not ready for feedback}
 
-Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$protectedFraction.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Figure \ref{fig:protectedQuantilesFull}.
+Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$protectedFraction.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Fig~\ref{fig:protectedQuantilesFull}.
 
 %\begin{figure}
 %\begin{center}
@@ -367,7 +456,7 @@ Finally, we found that the true value of the protected fraction was included TOD
 
 In summary, our simulation study validated our method of interval estimation for all three outcome measures of interest in our RSV research.
 
-\section{Discussion}
+\section*{Discussion}
 
 In this study, we demonstrate how re-sampling procedures can be used to generate uncertainty intervals for custom quantities derived from regression models fit to disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious disease), as well as other outcome measures.
 
@@ -380,8 +469,12 @@ TODO limitations...
 TODO concluding remarks...
 
 
-\phantomsection
-\addcontentsline{toc}{section}{Bibliography}
-\printbibliography[title={Bibliography}]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Bibliography
+
+% Line numbers were required by PLOS Comp Biol
+\nolinenumbers
+
+\bibliography{PSplineInference}
 
 \end{document}
