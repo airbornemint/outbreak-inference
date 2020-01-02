@@ -236,9 +236,9 @@ A \textit{generalized additive model} (GAM) provides a framework for modeling a 
 
 \subsubsection*{Basis splines}
 
-A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_i \in [t_a, t_b]$ at which its polynomial segments join are known as \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
+A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_1, K_2, \dots, K_m \in [t_a, t_b]$ at which its polynomial segments join are known as its \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
-Given a set of knots $K_i$, we can construct a unique set of splines of order $n$ (with those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j$. All splines with knots $K_i$ can be represented as a linear combination of the basis splines $B_j$ with the same knots.
+For any set of $m$ knots, we can construct a unique set of $b = m - n$ splines of order $n$ (using those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j(x)$. Every spline $f(x)$ of order $n$ with $m$ knots can be represented as a linear combination $f(x) = \sum_{j=1}^b \beta_j B_j(x)$ of the basis splines $B_j(x)$ with the same knots.
 
 \subsubsection*{Cyclic splines}
 
@@ -246,11 +246,11 @@ A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real fu
 
 \subsubsection*{Penalized B-splines in GAM}
 
-Splines can be used as predictor functions $f_k$ in a GAM. Expressed as a linear combination of B-splines, $f_k = \sum_j \beta_{j,k} B_{j,k}$, and the GAM takes the form
+Splines can be used as predictor functions $f_k$ in a GAM. Different $f_k$ in the same model can have different orders and different knots. Expressed as a linear combination of B-splines, $f_k(x) = \sum_{j=1}^{b_k} \beta_{j,k} B_{j,k}(x)$, and the GAM takes the form
 
 \begin{equation}
 \begin{aligned}
-    g\left\{E(y)\right\} &= \beta_0 + \sum_{j=1}^p \sum_k \beta_{j,k} B_{j,k}\left(x_j\right)
+    g\left\{E(y)\right\} &= \beta_0 +  \sum_k \sum_{j=1}^{b_k} \beta_{j,k} B_{j,k}\left(x_j\right)
 \end{aligned}\label{eqn:model}
 \end{equation}
 
