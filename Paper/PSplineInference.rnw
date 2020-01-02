@@ -351,23 +351,25 @@ Similarly, for the prophylaxis regimen that offers protection between $t_\mathit
 We used the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
 \subsection*{Validation via simulation study}
-\todo[inline]{This section not ready for feedback}
+\todo[inline,color=green!20]{This section now ready for feedback}
 
-To demonstrate the validity of our method, and specifically that the 95\% CI estimates of the onset/offset time and the preventable fraction were correct, we performed a simulation study. We began by generating $N_\mathit{season} = 60$ RSV seasons. Each season was generated in two steps:
+To demonstrate the validity of our method, and specifically that the 95\% CI estimates of the onset/offset time and the preventable fraction were correct, we performed a simulation study. We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
 
 \begin{enumerate}
-\item Randomly choose season start ($t_\mathit{start} \sim ?$), season end ($t_\mathit{end} \sim ?$), and peak incidence ($I_\mathit{max} \sim ?$), and calculate \begin{equation*}
+\item Randomly choose epidemiologic week of season start $t_\mathit{start} \sim \mathcal{U}(\Sexpr{onsetSimMin}, \Sexpr{onsetSimMax})$, epidemiologic week of season end $t_\mathit{end} \sim \mathcal{U}(\Sexpr{offsetSimMin}, \Sexpr{offsetSimMax})$, and peak incidence $I_\mathit{max} \sim \mathcal{U}(\Sexpr{peakSimMin}, \Sexpr{peakSimMax})$.
+\item Calculate \begin{equation*}
     I^*(t) = \begin{cases}
- {1 \over 2} (1 + \cos(2 \pi {t - t_\mathit{start} \over t_\mathit{end} - t_\mathit{start}})) \cdot I_\mathit{max} &\text{for } t_\mathit{start} \leq t \leq t_\mathit{end} \\
- 0 &\text{otherwise}
- \end{cases}
-\end{equation*} This gave us an easy way to roughly control the overall shape of the simulated season, after which we
-\item Fit a $\log$-linked P-spline GAM to $I^*(t)$ and used its best-fit spline as the true value $I_0(t)$. This was a simple means of correcting for the fact that a single period of $\cos(t)$ is not a realistic approximation of an infectious disease outbreak, partly due to the fact that it lacks 2nd order smoothness. 
+        {1 \over 2} (1 + \cos(2 \pi {t - t_\mathit{start} \over t_\mathit{end} - t_\mathit{start}})) \cdot I_\mathit{max} &\text{for } t_\mathit{start} \leq t \leq t_\mathit{end} \\
+        0 &\text{otherwise}
+    \end{cases}
+\end{equation*}
+    to produce a curve roughly of the desired shape (rising from 0 to $I_\mathit{max}$, then falling back to 0, between $t_\mathit{start}$ and $t_\mathit{end}$).
+\item Fit a $\log$-linked P-spline to $I^*(t)$ to obtain true instantaneous incidence $I_0(t)$. 
 \end{enumerate}
 
-For each season, we then generated $N_\mathit{obs} = 60$ sets of observations by sampling observed incidence $I(t) \sim \mathit{Poisson}(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I(t)$ for each season.
+For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $I(t) \sim \mathit{Poisson}(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I_0(t)$ for each season.
 
-Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = 3600$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ (calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate estimates of preventable fraction.
+Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate the preventable fraction estimates.
 
 %The full documentation for our \texttt{pspline.inference} R package, including detailed examples, is included with the package, and available at (TODO: release on CRAN, currently at gitlab.com/airbornemint/pspline.inference); here we only present a brief overview of the two main functions in the package in order to highlight its ease of use.
 %

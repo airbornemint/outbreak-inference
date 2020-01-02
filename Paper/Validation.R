@@ -13,6 +13,13 @@ set.seed(NULL)
 
 source("./Common.R")
 
+onsetSimMin = 5
+onsetSimMax = 15
+offsetSimMin = 30
+offsetSimMax = 45
+peakSimMin = 50
+peakSimMax = 500
+
 # Calculate estimates of outcome measures
 outcomes = function(onsetThreshold, offsetThreshold) {
   thresholds = pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold)
@@ -26,9 +33,9 @@ generateTruth = function(time.min, time.max, time.delta) {
     time = seq(time.min - 0.5, time.max + 0.5 - time.delta, time.delta)
 
     # Pick a random onset/offset time and peak amplitude
-    onsetT = runif(1, 5, 15)
-    offsetT = runif(1, 30, 45)
-    peak = runif(1, 50, 500)
+    onsetT = runif(1, onsetSimMin, onsetSimMax)
+    offsetT = runif(1, offsetSimMin, offsetSimMax)
+    peak = runif(1, peakSimMin, peakSimMax)
 
     # Then use a single period of a sine wave for the outbreak peak
     cases0 = log(peak) / 2 * (1 - cos(2 * pi * (time - onsetT) / (offsetT - onsetT))) * (onsetT <= time & time < offsetT)
@@ -55,11 +62,14 @@ makeModel = function(data) {
   gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 }
 
+simNTruth = 60
+simNObs = 60
+
 set.seed(NULL)
 if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 60,
-    generateObservations, 60,
+    generateTruth(1, 52, 0.05), simNTruth,
+    generateObservations, simNObs,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 
