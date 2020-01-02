@@ -223,9 +223,9 @@ In this study, we show how GAMs with  penalized splines can be used to fit smoot
 
 \section*{Methods}
 
-\subsection{Background}
+\subsection*{Background}
 
-\subsubsection{Generalized additive modeling}
+\subsubsection*{Generalized additive modeling}
 Our approach  is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
 
 A \textit{generalized additive model} (GAM) provides a framework for modeling a response variable $y$, using predictor variables $x_k, k=1, \hdots, p$ with associated non-linear predictor functions $f_k, k = 1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value, $E(y)$, is given as
@@ -234,17 +234,17 @@ A \textit{generalized additive model} (GAM) provides a framework for modeling a 
     g\left\{E(y)\right\} = \beta_0 + \sum_{k=1}^p f_k(x_k)
 \end{equation*}
 
-\subsubsection{Basis splines}
+\subsubsection*{Basis splines}
 
 A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_i \in [t_a, t_b]$ at which its polynomial segments join are known as \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
 Given a set of knots $K_i$, we can construct a unique set of splines of order $n$ (with those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j$. All splines with knots $K_i$ can be represented as a linear combination of the basis splines $B_j$ with the same knots.
 
-\subsubsection{Cyclic splines}
+\subsubsection*{Cyclic splines}
 
 A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real function $f(x) = f(x - T)$. As with non-cyclic splines, a cyclic spline of order $n$ is continuous in up to $n - 1$ derivatives, and we only consider those continuous in exactly $n - 1$ derivatives. Use of cyclic splines is often necessary in infectious disease modeling because non-cyclic splines do not guarantee smoothness at $t_a \pm k T$ when extended to multiple periods.
 
-\subsubsection{Penalized B-splines in GAM}
+\subsubsection*{Penalized B-splines in GAM}
 
 Splines can be used as predictor functions $f_k$ in a GAM. Expressed as a linear combination of B-splines, $f_k = \sum_j \beta_{j,k} B_{j,k}$, and the GAM takes the form
 
@@ -258,7 +258,7 @@ This model can be fitted to data simply by minimizing $\Vert y - E(y) \Vert^2$; 
 
 For smooth estimation of non-linear experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function.\cite{Eilers:1996kz} 
 
-\subsection{Outcome estimation}
+\subsection*{Outcome estimation}
 
 The principal questions of our RSV analyses were:
 
@@ -284,7 +284,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 \end{center}
 \end{figure}
 
-\subsection{Model response sampling}
+\subsection*{Model response sampling}
 
 To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
@@ -312,7 +312,7 @@ In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corres
 \end{center}
 \end{figure}
 
-\subsection{Outcome measure sampling}
+\subsection*{Outcome measure sampling}
 
 Next we turn to our first outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
@@ -349,7 +349,7 @@ Similarly, for the prophylaxis regimen that offers protection between $t_\mathit
 
 We used the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
-\subsection{Validation via simulation study}
+\subsection*{Validation via simulation study}
 \todo[inline]{This section not ready for feedback}
 
 To demonstrate the validity of our method, and specifically that the 95\% CI estimates of the onset/offset time and the preventable fraction were correct, we performed a simulation study. We began by generating $N_\mathit{season} = 60$ RSV seasons. Each season was generated in two steps:
@@ -370,7 +370,7 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 
 %The full documentation for our \texttt{pspline.inference} R package, including detailed examples, is included with the package, and available at (TODO: release on CRAN, currently at gitlab.com/airbornemint/pspline.inference); here we only present a brief overview of the two main functions in the package in order to highlight its ease of use.
 %
-%\subsubsection{Outcome estimation}
+%\subsubsection*{Outcome estimation}
 %
 %Given 
 %
@@ -386,7 +386,7 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 %\texttt{pspline.estimate.scalars(model, predictors, fun.outcome)}
 %\end{center}
 %
-%\subsubsection{Estimate validation}
+%\subsubsection*{Estimate validation}
 %
 %Given 
 %
