@@ -33,9 +33,18 @@ pspline.validate.scalars <- function(fun.truth, n.truths, fun.observations, n.ob
     }, .progress="text") %>% (function(results) {
       list(
         results=results,
-        summary=results %>%
-          select_at(vars(contains(".good"))) %>%
-          summarize_all(function(col) mean(col, na.rm=TRUE))
+        summary=cbind(
+        	results %>%
+			  select_at(vars(contains(".good"))) %>%
+			  summarize_all(function(col) mean(col, na.rm=TRUE)),
+			results %>% 
+			  select_at(vars(contains(".bias"))) %>%
+			  summarize_all(function(col) mean(col, na.rm=TRUE)),
+			results %>% 
+			  select_at(vars(contains(".bias"))) %>%
+			  summarize_all(function(col) std.error(col, na.rm=TRUE)) %>%
+			  rename_all(function(col) sprintf("%s.se", col))
+		)
       )
     })
 }
@@ -47,14 +56,17 @@ check.scalars <- function(ecdfs, expected, level) {
   for (outcome in names(expected)) {
     checkName = sprintf("%s.good", outcome)
     quantileName = sprintf("%s.quantile", outcome)
+    biasName = sprintf("%s.bias", outcome)
     outcomeECDF = ecdfs[[outcome]]
 
     results[quantileName] = outcomeECDF(expected[outcome])
 
-    checkQuantiles = quantile(outcomeECDF, probs = c((1 - level) / 2, (1 + level) / 2))
+    checkQuantiles = quantile(outcomeECDF, probs = c((1 - level) / 2, (1 + level) / 2, 0.5))
     lower = checkQuantiles[1]
     upper = checkQuantiles[2]
+    median = checkQuantiles[3]
     results[checkName] = (lower < expected[outcome]) & (upper > expected[outcome])
+    results[biasName] = expected[outcome] - median
   }
   results
 }
@@ -67,7 +79,8 @@ observed.results.scalars <- function(observed, truth, expected, fun.model, fun.o
   model %>%
     pspline.sample.scalars(truth, fun.outcome, n.samples) %>%
     ecdf.outcomes(model) %>%
-    check.scalars(expected, level)
+    check.scalars(expected, level) %>%
+    cbind(expected)
 }
 
 #' Run simulation study on one truth

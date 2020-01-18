@@ -93,10 +93,11 @@
 #' @importFrom stats coef na.omit predict quantile rnorm
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
-#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains
+#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all
 #' @importFrom reshape2 melt dcast
 #' @importFrom plyr adply ldply
 #' @importFrom stats setNames
 #' @importFrom magrittr %>% %<>%
 #' @importFrom assertthat assert_that
+#' @importFrom plotrix std.error
 NULL
