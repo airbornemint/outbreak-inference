@@ -216,7 +216,7 @@ Prevention and treatment of seasonal infections use numerous resources, such as 
 
 Analyses of infectious disease dynamics often make inferences based on timing for various quantities of  clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Typically, a regression model (e.g., a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculation of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
 
-Calculating the uncertainty of estimates from these types of GAM/GLM-based methods is a challenge. The models provide measures of uncertainty for the individual parameters; however, the quantities of interest typically represent complex combinations of these parameters, and there is often not a straightforward way to calculate their uncertainty. Therefore, uncertainty in the derived estimates is often ignored, or \textit{ad hoc} approaches, such as block bootstrapping, are used to calculate confidence intervals. 
+Calculating the uncertainty of estimates from these types of GAM/GLM-based methods is a challenge. The models provide measures of uncertainty for the individual parameters; however, calculating the quantities of interest often would require differentiation or integration with respect to time (to identify outbreak transition points or to determine overall disease burden), for which there is no straightforward way to calculate uncertainty. Therefore, uncertainty in the derived estimates is often ignored, or \textit{ad hoc} approaches, such as block bootstrapping, are used to calculate confidence intervals. 
 
 These challenges are exemplified by analyses of the dynamics of respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive, and the duration of antibody protection is short-lived, so administration of prophylaxis needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose,\cite{Midgley:2017bo}, and the methods exhibit different degrees of sensitivity to the characteristics of the data outside the RSV season. 
 
@@ -261,7 +261,7 @@ For smooth estimation of non-linear experimental data, P-splines have desirable 
 
 \subsection*{Outcome estimation}
 
-The principal questions of our RSV analyses were:
+To demonstrate how we use P-spline fitting to infer time-domain outbreak features, we will use our analysis of RSV seasonality as an example. The principal questions of our RSV analyses were:
 
 \begin{itemize}
 \item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
@@ -303,7 +303,7 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 \end{center}
 \end{figure}
 
-In this model $\beta_i \sim \text{N}(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $\hat{\beta_i} \approx \text{N}(\mu_i, \sigma_i)$, with the best-fit corresponding to $\beta_i = \mu_i$. Since $E(I)$ is a function of $\beta_i$ and the distribution of each $\beta_i$ is known from the model, we can sample $I(t)$ indirectly by sampling $\beta_i$ and calculating $I(t) = \exp(\beta_0 + \sum_i \beta_i B_i(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $I(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 \begin{figure}
 \begin{center}
