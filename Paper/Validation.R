@@ -76,13 +76,13 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
   saveRDS(validationResults, "ValidationResults.rds")
 } else {
   # Even when skipping full validation, run one cycle of it just to make sure it still works
-  pspline.validate.scalars(
+  validationResults = pspline.validate.scalars(
     generateTruth(1, 52, 0.05), 20,
     generateObservations, 20,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
 
-  validationResults = readRDS("ValidationResults.rds")
+#  validationResults = readRDS("ValidationResults.rds")
 }
 
 tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
