@@ -433,16 +433,14 @@ To evaluate the results of our method, we consider three measures of robustness:
 
 Our simulation study produced the following robustness measures:
 
-\begin{table}[]
+\begin{table}[h]
 \begin{tabular}{lllll}
 					&  Concordance &  Bias (absolute) $\pm$ S.E. & Bias (relative) $\pm$ S.E. \\ \hline
 Season onset 		&  \Sexpr{round(100*validationResults$summary$onset.good, 2)} & $\Sexpr{round(100*validationResults$summary$onset.bias, 2)} \pm \Sexpr{round(100*validationResults$summary$onset.bias.se, 2)}$ weeks &  &  \\ \hline
-Season offset 		&  \Sexpr{round(100*validationResults$summary$offset.good, 2)} & $\Sexpr{round(100*validationResults$summary$offset.bias, 2)} \pm \Sexpr{round(100*validationResults$summary$offset.bias.se, 2)}$ &  &  \\ \hline
+Season offset 		&  \Sexpr{round(100*validationResults$summary$offset.good, 2)} & $\Sexpr{round(100*validationResults$summary$offset.bias, 2)} \pm \Sexpr{round(100*validationResults$summary$offset.bias.se, 2)}$ weeks &  &  \\ \hline
 Protected fraction 	&  TBD &  &  & 
 \end{tabular}
 \end{table}
-
-
 
 Of note for onset and offset estimates is that our method tends to skew high (overestimate) for onset and low (underestimate) for offset; this skew is also seen in Fig~\ref{fig:samplePredOnsetFull}. This is due to the asymmetric variability of the P-splines; there is much less variability in RSV incidence outside of the RSV season than during the RSV season, and therefore there is more variability on the high end of onset estimates and the low end of offset estimates, which is reflected in a skewed estimate distribution.
 
