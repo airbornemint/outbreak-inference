@@ -66,7 +66,7 @@ check.scalars <- function(ecdfs, expected, level) {
     upper = checkQuantiles[2]
     median = checkQuantiles[3]
     results[checkName] = (lower < expected[outcome]) & (upper > expected[outcome])
-    results[biasName] = expected[outcome] - median
+    results[biasName] = median - expected[outcome]
   }
   results
 }
