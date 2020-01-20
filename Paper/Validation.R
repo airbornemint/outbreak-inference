@@ -2,7 +2,8 @@
 
 import::from(pspline.inference, pspline.outbreak.thresholds, pspline.validate.scalars)
 
-import::from(dplyr, "%>%", mutate, inner_join)
+import::from(dplyr, "%>%", mutate, inner_join, summarize_all, rename_all)
+import::from(plotrix, std.error)
 import::from(mgcv, gam)
 import::from(doParallel, registerDoParallel)
 import::from(parallel, detectCores)
@@ -66,14 +67,15 @@ simNTruth = 60
 simNObs = 60
 
 set.seed(NULL)
+
+validationResults = NULL
+
 if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
     generateTruth(1, 52, 0.05), simNTruth,
     generateObservations, simNObs,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
-
-  saveRDS(validationResults, "ValidationResults.rds")
 } else {
   # Even when skipping full validation, run one cycle of it just to make sure it still works
   validationResults = pspline.validate.scalars(
@@ -81,9 +83,20 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
     generateObservations, 20,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
-
-#  validationResults = readRDS("ValidationResults.rds")
 }
+
+if (is.null(validationResults)) {
+  validationResults = readRDS("ValidationResults.rds")
+} else {
+  validationResults$results$onset.bias.rel = validationResults$results$onset.bias / (validationResults$results$offset - validationResults$results$onset)
+  validationResults$results$offset.bias.rel = validationResults$results$offset.bias / (validationResults$results$offset - validationResults$results$onset)
+  validationResults$summary = validationResults$summary %>% cbind(
+    validationResults$results %>% select(onset.bias.rel, offset.bias.rel) %>% summarize_all(function(col) mean(col, na.rm=TRUE)),
+    validationResults$results %>% select(onset.bias.rel, offset.bias.rel) %>% summarize_all(function(col) std.error(col, na.rm=TRUE)) %>% rename_all(function(col) sprintf("%s.se", col))
+  )
+  saveRDS(validationResults, "ValidationResults.rds")
+}
+
 
 tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 

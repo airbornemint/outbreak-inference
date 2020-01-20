@@ -436,8 +436,8 @@ Our simulation study produced the following robustness measures:
 \begin{table}[h]
 \begin{tabular}{lllll}
 					&  Concordance &  Bias (absolute) $\pm$ S.E. & Bias (relative) $\pm$ S.E. \\ \hline
-Season onset 		&  \Sexpr{round(100*validationResults$summary$onset.good, 2)} & $\Sexpr{round(100*validationResults$summary$onset.bias, 2)} \pm \Sexpr{round(100*validationResults$summary$onset.bias.se, 2)}$ weeks &  &  \\ \hline
-Season offset 		&  \Sexpr{round(100*validationResults$summary$offset.good, 2)} & $\Sexpr{round(100*validationResults$summary$offset.bias, 2)} \pm \Sexpr{round(100*validationResults$summary$offset.bias.se, 2)}$ weeks &  &  \\ \hline
+Season onset 		&  \Sexpr{round(100*validationResults$summary$onset.good, 2)} & $\Sexpr{round(validationResults$summary$onset.bias, 2)} \pm \Sexpr{round(validationResults$summary$onset.bias.se, 2)}$ weeks & $\Sexpr{round(100*validationResults$summary$onset.bias.rel, 2)} \pm \Sexpr{round(100*validationResults$summary$onset.bias.rel.se, 2)}$ \% &  \\ \hline
+Season offset 		&  \Sexpr{round(100*validationResults$summary$offset.good, 2)} & $\Sexpr{round(validationResults$summary$offset.bias, 2)} \pm \Sexpr{round(validationResults$summary$offset.bias.se, 2)}$ weeks & $\Sexpr{round(100*validationResults$summary$offset.bias.rel, 2)} \pm \Sexpr{round(100*validationResults$summary$offset.bias.rel.se, 2)}$ \%  &  \\ \hline
 Protected fraction 	&  TBD &  &  & 
 \end{tabular}
 \end{table}
