@@ -77,10 +77,10 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 } else {
-  # Even when skipping full validation, run one cycle of it just to make sure it still works
-  validationResults = pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 20,
-    generateObservations, 20,
+  # Even when skipping full validation, run (and discard) a small number of cycles just to make sure the code still runs properly
+  _discard = pspline.validate.scalars(
+    generateTruth(1, 52, 0.05), 5,
+    generateObservations, 5,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
 }
