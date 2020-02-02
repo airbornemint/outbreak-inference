@@ -35,15 +35,19 @@ pspline.validate.scalars <- function(fun.truth, n.truths, fun.observations, n.ob
         results=results,
         summary=cbind(
         	results %>%
-			  select_at(vars(contains(".good"))) %>%
-			  summarize_all(function(col) mean(col, na.rm=TRUE)),
-			results %>% 
-			  select_at(vars(contains(".bias"))) %>%
-			  summarize_all(function(col) mean(col, na.rm=TRUE)),
-			results %>% 
-			  select_at(vars(contains(".bias"))) %>%
-			  summarize_all(function(col) std.error(col, na.rm=TRUE)) %>%
-			  rename_all(function(col) sprintf("%s.se", col))
+            select_at(vars(contains(".good"))) %>%
+            summarize_all(function(col) mean(col, na.rm=TRUE)),
+          results %>% 
+            select_at(vars(contains(".bias"))) %>%
+            summarize_all(function(col) mean(abs(col), na.rm=TRUE)),
+          results %>% 
+            select_at(vars(contains(".bias"))) %>%
+            summarize_all(function(col) std.error(col, na.rm=TRUE)) %>%
+            rename_all(function(col) sprintf("%s.se", col)),
+          results %>% 
+            select_at(vars(contains(".bias"))) %>%
+            summarize_all(function(col) sign(mean(col, na.rm=TRUE))) %>%
+            rename_all(function(col) sprintf("%s.sign", col))
 		)
       )
     })
