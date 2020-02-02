@@ -88,18 +88,18 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
 if (is.null(validationResults)) {
   validationResults = readRDS("ValidationResults.rds")
 } else {
-  validationResults$results$onset.bias.rel = validationResults$results$onset.bias / (validationResults$results$offset - validationResults$results$onset)
-  validationResults$results$offset.bias.rel = validationResults$results$offset.bias / (validationResults$results$offset - validationResults$results$onset)
+  validationResults$results$onset.bias.frac = validationResults$results$onset.bias / (validationResults$results$offset - validationResults$results$onset)
+  validationResults$results$offset.bias.frac = validationResults$results$offset.bias / (validationResults$results$offset - validationResults$results$onset)
   validationResults$summary = validationResults$summary %>% cbind(
     validationResults$results %>% 
-      select(onset.bias.rel, offset.bias.rel) %>% 
+      select(onset.bias.frac, offset.bias.frac) %>% 
       summarize_all(function(col) mean(abs(col), na.rm=TRUE)),
     validationResults$results %>% 
-      select(onset.bias.rel, offset.bias.rel) %>% 
+      select(onset.bias.frac, offset.bias.frac) %>% 
       summarize_all(function(col) std.error(col, na.rm=TRUE)) %>% 
       rename_all(function(col) sprintf("%s.se", col)),
     validationResults$results %>% 
-      select(onset.bias.rel, offset.bias.rel) %>% 
+      select(onset.bias.frac, offset.bias.frac) %>% 
       summarize_all(function(col) sign(mean(col, na.rm=TRUE))) %>% 
       rename_all(function(col) sprintf("%s.sign", col))
   )
