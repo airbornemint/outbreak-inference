@@ -427,8 +427,8 @@ To evaluate the results of our method, we consider three measures of robustness:
 
 \begin{itemize}
 \item Concordance: the fraction of $95$\% confidence intervals that (correctly) include the true value of the outcome measure
-\item Absolute bias: the mean difference between point estimates and the true value
-\item Relative bias: for onset and offset only, the mean difference between point estimates and the true value divided by $t_\mathit{off} - t_\mathit{on}$
+\item Absolute bias: the absolute value of the difference between point estimates and the true value
+\item Relative bias: for onset and offset only, absolute bias divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
 Our simulation study produced the following robustness measures:
@@ -437,31 +437,23 @@ Our simulation study produced the following robustness measures:
 \begin{tabular}{lllll}
 
 					            &  Season onset                                                                 &  Season offset                                                                & Protected fraction    \\ \hline
-Power (?)   		            &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}                   & \Sexpr{round(100*validationResults$summary$offnset.good, 2)}                  & TBD                   \\ \hline
-Mean bias	                    &  \Sexpr{round(validationResults$summary$onset.bias, 2)}                       & \Sexpr{round(validationResults$summary$offset.bias, 2)}                       & TBD                   \\ \hline
-Bias standard error	            &  \Sexpr{round(validationResults$summary$onset.bias.se, 2)}                    & \Sexpr{round(validationResults$summary$offset.bias.se, 2)}                    & TBD                   \\ \hline
-Bias direction  	            &  \Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}      & \Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}      & TBD                   \\ \hline
-Mean fractional bias	        &  \Sexpr{round(validationResults$summary$onset.bias.frac, 2)}                  & \Sexpr{round(validationResults$summary$offset.bias.frac, 2)}                  & ---                   \\ \hline
-Fractional bias standard error	&  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 2)}               & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 2)}               & ---                   \\ \hline
-Fractional bias direction  	    &  \Sexpr{ifelse(validationResults$summary$onset.bias.frac.sign > 0, "+", "-")} & \Sexpr{ifelse(validationResults$summary$offset.bias.frac.sign > 0, "+", "-")} & TBD
+Power (?) (\%)		            &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}                    & TBD                   \\ \hline
+Mean absolute bias (weeks)      &  \Sexpr{round(validationResults$summary$onset.bias, 2)}                       & \Sexpr{round(validationResults$summary$offset.bias, 2)}                        & TBD                   \\ \hline
+Absolute bias standard error (weeks) &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)}                    & \Sexpr{round(validationResults$summary$offset.bias.se, 5)}                     & TBD                   \\ \hline
+Absolute bias direction         &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$    & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD                   \\ \hline
+Mean fractional bias (\%)       &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                  & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                   & ---                   \\ \hline
+Fractional bias standard error (\%)	&  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}               & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                & ---                   \\ \hline
+Fractional bias direction  	    &  $\Sexpr{ifelse(validationResults$summary$onset.bias.frac.sign > 0, "+", "-")}$ & $\Sexpr{ifelse(validationResults$summary$offset.bias.frac.sign > 0, "+", "-")}$ & TBD
 \end{tabular}
 \end{table}
 
-Of note for onset and offset estimates is that our method tends to skew high (overestimate) for onset and low (underestimate) for offset; this skew is also seen in Fig~\ref{fig:samplePredOnsetFull}. This is due to the asymmetric variability of the P-splines; there is much less variability in RSV incidence outside of the RSV season than during the RSV season, and therefore there is more variability on the high end of onset estimates and the low end of offset estimates, which is reflected in a skewed estimate distribution.
+Of note, the onset estimates have a negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate). The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
 \todo[inline]{Remainder of this section not ready for feedback}
 
-Finally, we found that the true value of the protected fraction was included TODO %in the estimated $95$\% confidence interval in $\Sexpr{round(100*validationResults$summary$protectedFraction.good, 2)}$\% of the simulations. The distribution of the true season offset's percentile in each simulation's distribution of season offset estimates is shown in Fig~\ref{fig:protectedQuantilesFull}.
+TODO something about protected fraction bias
 
-%\begin{figure}
-%\begin{center}
-%\includestandalone{\figuresDir/protectedQuantilesFull}
-%\caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with sampled approximating $P$-splines ($N=\Sexpr{sampleNsimMini}$)}
-%\label{fig:protectedQuantilesFull}
-%\end{center}
-%\end{figure}
-
-In summary, our simulation study validated our method of interval estimation for all three outcome measures of interest in our RSV research.
+In summary, our simulation study validated our estimation method for onset, offset, and protected fraction to a degree that meets the needs of our RSV research.
 
 \section*{Discussion}
 
