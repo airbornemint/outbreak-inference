@@ -353,7 +353,7 @@ We used the above method to estimate the protected fraction of the prophylaxis r
 \subsection*{Validation via simulation study}
 \todo[inline,color=green!20]{This section now ready for feedback}
 
-To demonstrate the validity of our method, and specifically that the 95\% CI estimates of the onset/offset time and the preventable fraction were correct, we performed a simulation study. We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
+To validate our method for 95\% CI estimates of the onset/offset time and the preventable fraction, we performed a simulation study. We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
 
 \begin{enumerate}
 \item Randomly choose epidemiologic week of season start $t_\mathit{start} \sim \mathcal{U}(\Sexpr{onsetSimMin}, \Sexpr{onsetSimMax})$, epidemiologic week of season end $t_\mathit{end} \sim \mathcal{U}(\Sexpr{offsetSimMin}, \Sexpr{offsetSimMax})$, and peak incidence $I_\mathit{max} \sim \mathcal{U}(\Sexpr{peakSimMin}, \Sexpr{peakSimMax})$.
@@ -364,7 +364,7 @@ To demonstrate the validity of our method, and specifically that the 95\% CI est
     \end{cases}
 \end{equation*}
     to produce a curve roughly of the desired shape (rising from 0 to $I_\mathit{max}$, then falling back to 0, between $t_\mathit{start}$ and $t_\mathit{end}$).
-\item Fit a $\log$-linked P-spline to $I^*(t)$ to obtain true instantaneous incidence $I_0(t)$. 
+\item Fit a $\log$-linked cubic P-spline to $I^*(t)$ to obtain true instantaneous incidence $I_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
 \end{enumerate}
 
 For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $I(t) \sim \mathit{Poisson}(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I_0(t)$ for each season.
