@@ -108,28 +108,28 @@ if (is.null(validationResults)) {
 }
 
 
-tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-
-ggplot(validationResults$results) +
-  theme_light(base_size=plotTextBaseSize) +
-  geom_histogram(aes(x=onset.quantile), binwidth=0.025, fill="gray") +
-  coord_cartesian(xlim=c(0, 1)) +
-  scale_x_continuous(labels = latexPercent) +
-  labs(x=NULL, y="Count")
-
-
-dev.off()
-
-tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-
-ggplot(validationResults$results) +
-  theme_light(base_size=plotTextBaseSize) +
-  geom_histogram(aes(x=offset.quantile), binwidth=0.025, fill="gray") +
-  coord_cartesian(xlim=c(0, 1)) +
-  scale_x_continuous(labels = latexPercent) +
-  labs(x=NULL, y="Count")
-
-
-dev.off()
-
-
+# tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
+#
+# ggplot(validationResults$results) +
+#   theme_light(base_size=plotTextBaseSize) +
+#   geom_histogram(aes(x=onset.quantile), binwidth=0.025, fill="gray") +
+#   coord_cartesian(xlim=c(0, 1)) +
+#   scale_x_continuous(labels = latexPercent) +
+#   labs(x=NULL, y="Count")
+#
+#
+# dev.off()
+#
+# tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
+#
+# ggplot(validationResults$results) +
+#   theme_light(base_size=plotTextBaseSize) +
+#   geom_histogram(aes(x=offset.quantile), binwidth=0.025, fill="gray") +
+#   coord_cartesian(xlim=c(0, 1)) +
+#   scale_x_continuous(labels = latexPercent) +
+#   labs(x=NULL, y="Count")
+#
+#
+# dev.off()
+#
+#
