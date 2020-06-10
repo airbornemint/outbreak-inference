@@ -426,9 +426,9 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 To evaluate the results of our method, we consider three measures of robustness: 
 
 \begin{itemize}
-\item Concordance: the fraction of $95$\% confidence intervals that (correctly) include the true value of the outcome measure
+\item Correctness: the fraction of $95$\% confidence intervals that (correctly) include the true value of the outcome measure
 \item Absolute bias: the absolute value of the difference between point estimates and the true value
-\item Relative bias: for onset and offset only, absolute bias divided by $t_\mathit{off} - t_\mathit{on}$
+\item Fractional bias, for onset and offset only: absolute bias divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
 Our simulation study produced the following robustness measures:
@@ -436,14 +436,14 @@ Our simulation study produced the following robustness measures:
 \begin{table}[h]
 \begin{tabular}{lllll}
 
-					            &  Season onset                                                                 &  Season offset                                                                & Protected fraction    \\ \hline
-Power (?) (\%)		            &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}                    & TBD                   \\ \hline
-Mean absolute bias (weeks)      &  \Sexpr{round(validationResults$summary$onset.bias, 2)}                       & \Sexpr{round(validationResults$summary$offset.bias, 2)}                        & TBD                   \\ \hline
-Absolute bias standard error (weeks) &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)}                    & \Sexpr{round(validationResults$summary$offset.bias.se, 5)}                     & TBD                   \\ \hline
-Absolute bias direction         &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$    & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD                   \\ \hline
-Mean fractional bias (\%)       &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                  & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                   & ---                   \\ \hline
-Fractional bias standard error (\%)	&  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}               & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                & ---                   \\ \hline
-Fractional bias direction  	    &  $\Sexpr{ifelse(validationResults$summary$onset.bias.frac.sign > 0, "+", "-")}$ & $\Sexpr{ifelse(validationResults$summary$offset.bias.frac.sign > 0, "+", "-")}$ & TBD
+					           &  Season onset                                                                   &  Season offset                                                                  & Protected fraction    \\ \hline
+Correctness  		           &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}\%                   & TBD                   \\ \hline
+Absolute bias mean             &  \Sexpr{round(validationResults$summary$onset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$offset.bias, 2)} weeks                   & TBD                   \\ \hline
+Absolute bias standard error   &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$offset.bias.se, 5)} weeks                & TBD                   \\ \hline
+Absolute bias direction        &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD                   \\ \hline
+Fractional bias mean           &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                    & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                    & ---                   \\ \hline
+Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}                 & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                 & ---                   \\ \hline
+Fractional bias direction  	   &  $\Sexpr{ifelse(validationResults$summary$onset.bias.frac.sign > 0, "+", "-")}$ & $\Sexpr{ifelse(validationResults$summary$offset.bias.frac.sign > 0, "+", "-")}$ & ---
 \end{tabular}
 \end{table}
 
