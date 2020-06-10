@@ -23,9 +23,10 @@ peakSimMax = 500
 
 # Calculate estimates of outcome measures
 outcomes = function(onsetThreshold, offsetThreshold) {
-  thresholds = pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold)
   function(model, data) {
-    thresholds(model, data)
+    pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold)(model, data) %>% cbind(
+      calcFraction(model, data)
+    )
   }
 }
 

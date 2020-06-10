@@ -27,16 +27,13 @@ predThresholds = function(params, model, predictors, seasonThreshold) {
     })
 }
 
-ppxStart = 20
-ppxEnd = 20 + 24
-
 aapStrat = function(t) {
-  as.numeric(t >= ppxStart & t <= ppxEnd)
+  as.numeric(t >= 20 & t <= 44)
 }
 
 calcFraction = function(model, data) {
   totalCases = sum(data$cases)
-  preventableCases = sum(data$cases[data$time >= ppxStart & data$time <= ppxEnd])
+  preventableCases = sum(data$cases[aapStrat(data$time)])
   data.frame(preventable=c(preventableCases / totalCases))
 }
 
