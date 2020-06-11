@@ -23,9 +23,10 @@ peakSimMax = 500
 
 # Calculate estimates of outcome measures
 outcomes = function(onsetThreshold, offsetThreshold) {
-  thresholds = pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold)
   function(model, data) {
-    thresholds(model, data)
+    pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold)(model, data) %>% cbind(
+      calcFraction(model, data)
+    )
   }
 }
 
@@ -107,28 +108,28 @@ if (is.null(validationResults)) {
 }
 
 
-tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-
-ggplot(validationResults$results) +
-  theme_light(base_size=plotTextBaseSize) +
-  geom_histogram(aes(x=onset.quantile), binwidth=0.025, fill="gray") +
-  coord_cartesian(xlim=c(0, 1)) +
-  scale_x_continuous(labels = latexPercent) +
-  labs(x=NULL, y="Count")
-
-
-dev.off()
-
-tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-
-ggplot(validationResults$results) +
-  theme_light(base_size=plotTextBaseSize) +
-  geom_histogram(aes(x=offset.quantile), binwidth=0.025, fill="gray") +
-  coord_cartesian(xlim=c(0, 1)) +
-  scale_x_continuous(labels = latexPercent) +
-  labs(x=NULL, y="Count")
-
-
-dev.off()
-
-
+# tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
+#
+# ggplot(validationResults$results) +
+#   theme_light(base_size=plotTextBaseSize) +
+#   geom_histogram(aes(x=onset.quantile), binwidth=0.025, fill="gray") +
+#   coord_cartesian(xlim=c(0, 1)) +
+#   scale_x_continuous(labels = latexPercent) +
+#   labs(x=NULL, y="Count")
+#
+#
+# dev.off()
+#
+# tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
+#
+# ggplot(validationResults$results) +
+#   theme_light(base_size=plotTextBaseSize) +
+#   geom_histogram(aes(x=offset.quantile), binwidth=0.025, fill="gray") +
+#   coord_cartesian(xlim=c(0, 1)) +
+#   scale_x_continuous(labels = latexPercent) +
+#   labs(x=NULL, y="Count")
+#
+#
+# dev.off()
+#
+#
