@@ -48,13 +48,19 @@ latexPercent = function(...) {
 }
 
 progress_plyr = function(...) {
-  pb <- NULL
+  progress <- list()
   list(
     init = function(x, ...) {
-      pb <<- progress_bar$new(total = x, force=TRUE, ...)
+      progress <<-  list(count=0, start=Sys.time())
     },
     step = function() {
-      pb$tick()
+      progress <<- list(count=progress$count + 1, start=progress$start)
+      message(sprintf(
+        "# %d %s (%s each)",
+        progress$count,
+        format(difftime(Sys.time(), progress$start)),
+        format(difftime(Sys.time(), progress$start, units="secs") / progress$count)
+      ))
     },
     term = function() NULL
   )
