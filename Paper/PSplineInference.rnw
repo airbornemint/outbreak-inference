@@ -49,7 +49,16 @@
 %%% R code
 <<options, echo=FALSE>>=
     knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
-    #$
+    local({
+        now = Sys.time()
+        knitr::knit_hooks$set(time_chunk = function(before) {
+            if (before) {
+                now <<- Sys.time()
+            } else {
+                message(paste("Chunk took", format(Sys.time() - now), "to run"))
+            }
+        })  
+    })
 @
 
 <<load, include=FALSE>>=
@@ -57,13 +66,13 @@
     knitr::read_chunk("./Validation.R")
 @
 
-<<paper, warning=FALSE, include=FALSE>>=
+<<sim, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
 @
 
-<<figures, warning=FALSE, include=FALSE>>=
+<<paper, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
 @
 
-<<sim, warning=FALSE, include=FALSE>>=
+<<figures, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -287,7 +296,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 
 \subsection*{Model response sampling}
 
-To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
+To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t) = I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
 \begin{align*}
     \log\left\{\hat{I}(t)\right\} &= \beta_0 + \sum_{j=1}^{20} \beta_j B_j(t)
@@ -440,10 +449,9 @@ Our simulation study produced the following robustness measures:
 Correctness  		           &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}\%                   & TBD                   \\ \hline
 Absolute bias mean             &  \Sexpr{round(validationResults$summary$onset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$offset.bias, 2)} weeks                   & TBD                   \\ \hline
 Absolute bias standard error   &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$offset.bias.se, 5)} weeks                & TBD                   \\ \hline
-Absolute bias direction        &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD                   \\ \hline
 Fractional bias mean           &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                    & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                    & ---                   \\ \hline
 Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}                 & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                 & ---                   \\ \hline
-Fractional bias direction  	   &  $\Sexpr{ifelse(validationResults$summary$onset.bias.frac.sign > 0, "+", "-")}$ & $\Sexpr{ifelse(validationResults$summary$offset.bias.frac.sign > 0, "+", "-")}$ & ---
+Bias direction        &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD
 \end{tabular}
 \end{table}
 
@@ -457,11 +465,11 @@ In summary, our simulation study validated our estimation method for onset, offs
 
 \section*{Discussion}
 
-In this study, we demonstrate how re-sampling procedures can be used to generate uncertainty intervals for custom quantities derived from regression models fit to disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious disease), as well as other outcome measures.
+In this study, we demonstrate how P-spline regression and resampling can be used to generate uncertainty intervals for quantities derived from disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious diseases), as well as other outcome measures.
 
-We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. There are direct public health applicaitons for this approach. For instance, the method could be used to investigate the potential benefits of region-specific RSV prophylaxis guidelines. 
+We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines. 
 
-To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of an arbitrary user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and (TODO) CRAN, and its documentation includes examples beyond those shown here.
+To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and (TODO) CRAN, and its documentation includes examples beyond those shown here.
 
 TODO limitations...
 

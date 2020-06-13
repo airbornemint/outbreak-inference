@@ -4,6 +4,7 @@ import::from(data.table, setnames)
 import::from(reshape, melt)
 import::from(scales, percent)
 import::from(stringr, str_replace_all)
+import::from(progress, progress_bar)
 
 predCases = function(params, model, predictors) {
   params %>%
@@ -45,3 +46,29 @@ predFraction = function(params, model, predictors) {
 latexPercent = function(...) {
   percent(...) %>% str_replace_all("%", "\\\\%")
 }
+
+progress_plyr = function(...) {
+  progress <- list()
+  list(
+    init = function(x, ...) {
+      progress <<-  list(count=0, start=Sys.time())
+    },
+    step = function() {
+      progress <<- list(count=progress$count + 1, start=progress$start)
+      message(sprintf(
+        "# %d %s (%s each)",
+        progress$count,
+        format(difftime(Sys.time(), progress$start)),
+        format(difftime(Sys.time(), progress$start, units="secs") / progress$count)
+      ))
+    },
+    term = function() NULL
+  )
+}
+
+# progress_dplyr = function(...) {
+#
+# }
+
+assignInNamespace("progress_text", progress_plyr, ns="plyr")
+# assignInNamespace("progress_estimated", progress_dplyr, ns="dplyr")
