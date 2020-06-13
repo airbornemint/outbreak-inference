@@ -66,13 +66,13 @@
     knitr::read_chunk("./Validation.R")
 @
 
+<<sim, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
+@
+
 <<paper, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
 @
 
 <<figures, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
-@
-
-<<sim, warning=FALSE, include=FALSE, time_chunk=TRUE>>=
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
