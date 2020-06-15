@@ -34,7 +34,7 @@ aapStrat = function(t) {
 
 calcFraction = function(model, data) {
   totalCases = sum(data$cases)
-  preventableCases = sum(data$cases[aapStrat(data$time)])
+  preventableCases = sum(data$cases[aapStrat(data$time) == 1])
   data.frame(preventable=c(preventableCases / totalCases))
 }
 
