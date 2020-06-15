@@ -445,12 +445,12 @@ Our simulation study produced the following robustness measures:
 \begin{table}[h]
 \begin{tabular}{lllll}
 
-					           &  Season onset                                                                   &  Season offset                                                                  & Protected fraction    \\ \hline
-Correctness  		           &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}\%                   & TBD                   \\ \hline
-Absolute bias mean             &  \Sexpr{round(validationResults$summary$onset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$offset.bias, 2)} weeks                   & TBD                   \\ \hline
-Absolute bias standard error   &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$offset.bias.se, 5)} weeks                & TBD                   \\ \hline
-Bias direction                 &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & TBD                   \\ \hline
-Fractional bias mean           &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                    & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                    & ---                   \\ \hline
+					           &  Season onset                                                                   &  Season offset                                                                  & Protected fraction                                                               \\ \hline
+Correctness  		           &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$preventable.good, 2)}\%               \\ \hline
+Absolute bias mean             &  \Sexpr{round(validationResults$summary$onset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$offset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$preventable.bias, 2)}                     \\ \hline
+Absolute bias standard error   &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$offset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$preventable.bias.se, 5)}                  \\ \hline
+Bias direction                 &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$  \\ \hline
+Fractional bias mean           &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                    & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                    & ---                                                                              \\ \hline
 Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}                 & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                 & ---
 \end{tabular}
 \end{table}
