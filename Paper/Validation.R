@@ -2,7 +2,7 @@
 
 import::from(pspline.inference, pspline.outbreak.thresholds, pspline.validate.scalars)
 
-import::from(dplyr, "%>%", mutate, inner_join, summarize_all, rename_all)
+import::from(dplyr, "%>%", mutate, inner_join, summarize_all, rename_all, select)
 import::from(plotrix, std.error)
 import::from(mgcv, gam)
 import::from(doParallel, registerDoParallel)
