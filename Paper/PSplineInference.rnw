@@ -457,11 +457,9 @@ Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.b
 
 Of note, the onset estimates have a negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate). The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
-\todo[inline]{Remainder of this section not ready for feedback}
+The protected fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
 
-TODO something about protected fraction bias
-
-In summary, our simulation study validated our estimation method for onset, offset, and protected fraction to a degree that meets the needs of our RSV research.
+Overall, our simulation study showed that our estimation method for onset, offset, and protected fraction meets the needs of our RSV research.
 
 \section*{Discussion}
 
@@ -469,15 +467,17 @@ In this study, we demonstrate how P-spline regression and resampling can be used
 
 We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines (TODO cite RSV paper). 
 
-To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and (TODO) CRAN, and its documentation includes examples beyond those shown here.
+To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and the Comprehensive R Archive Network (CRAN), and its documentation includes examples beyond those shown here.
 
 The flexibility of our approach comes at a price. We validated our approach only for our input data and for our outcome measures; applications of this approach to other types of analysis will have to be validated independently. Our R package makes this validation simple to perform, but the validation is inherently time-consuming; whereas our analysis took minutes to run, validation of our analysis took days. 
 
-The estimates produced by our method are likely to be biased (as shown in our RSV application); measuring that bias (using our validation tools) and assessing its impact on results is, necessarily, again left up to the individual application.
+Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC), because the computationally expensive step in our approach is validation, not the analysis itself. For example, although validation for our RSV outcome measures took days of computer time, the analysis itself took only minutes; and the time-consuming validation does not need to be repeated for subsequent analyses of onset, offset, or protected fraction on data sets with characteristics that were covered by our validation.
+
+The estimates produced by our method are likely to be biased (as shown in our RSV application); measuring that bias (using our validation tools) and assessing its impact on results is, necessarily, left up to the individual application.
 
 Our method is inherently retrospective; the strengths of our approach come from considering the incidence time series as a whole, and it therefore cannot be directly applied to real-time analysis. 
 
-TODO concluding remarks...
+In summary, ours is a method of retrospective analysis of infectious disease outbreaks based on P-splines; it is computationally less demanding that Bayesian MCMC methods, yet --- unlike the common frequentist methods --- it allows interval estimation of time-based outbreak characteristics. Although we only validated it for our analysis of RSV seasonality, it is applicable to other similar systems, and --- by publishing it on CRAN --- we hope to facilitate its use in other analyses. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
