@@ -1,0 +1,109 @@
+version: "3.4"
+
+services:
+    ############################################################
+    # Tools for building the package
+    package-tools:
+        image: package-tools:dev
+        build:
+            context: .
+            target: package-tools
+       
+    ############################################################
+    # Commands for building the package
+    package-build:
+        image: package-tools:dev
+        command:
+            - |
+                devtools::build(
+                    pkg="/package", 
+                    path="${R_BUILD_DIR:-build}", 
+                    vignettes=${R_BUILD_VIGNETTES:-FALSE}, 
+                    binary=FALSE
+                )
+        volumes:
+            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+        
+    ############################################################
+    # Commands for checking the package
+    package-check:
+        image: package-tools:dev
+        command:
+            - |
+                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))
+        env_file: build.env
+        volumes:
+            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+
+    ############################################################
+    # Tools for building the paper
+    paper-tools:
+        image: paper-tools:dev
+        build:
+            context: .
+            target: paper-tools
+       
+    ############################################################
+    # Commands for converting figures to PDF and EPS
+    paper-knit:
+        image: paper-tools:dev
+        entrypoint: ["Rscript", "-e"]
+        command: 
+            - |
+                install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); 
+                options(pspline.paper.validation.run=${KNITR_RUN_VALIDATION:-FALSE}); 
+                options(pspline.paper.output='${KNITR_OUTPUT_DIR:-knitr}'); 
+                knitr::knit(
+                    'PSplineInference.rnw', 
+                    output='${KNITR_OUTPUT_DIR:-knitr}/PSplineInference.tex'
+                )
+        env_file: build.env
+        volumes:
+            - "./${R_BUILD_DIR:-build}:/tex/${R_BUILD_DIR:-build}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+       
+    ############################################################
+    # Commands for converting figures to PDF and EPS
+    paper-figures:
+        image: paper-tools:dev
+        environment:
+            KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
+        command: 
+            - |
+                cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
+                find . -name "*.tex" -exec latexmk -pdf {} \;
+                find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
+                find . -name "*.tif" -exec convert -compress lzw {} {} \;
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+
+    ############################################################
+    # Commands for exporting paper for PLOS Comp Biol
+    # Includes inlining the bibliography
+    paper-plos-comp-biol:
+        image: paper-tools:dev
+        command: 
+            - >
+                cd output
+
+                latexmk -pdflua 
+                -usepretex="\edef\outputvariant{ploscompbiol}" 
+                PSplineInference.tex
+
+                python3 /tex/export-plos-comp-biol.py PSplineInference.tex
+                
+                latexmk -pdflua 
+                -usepretex="\edef\outputvariant{ploscompbiol}" 
+                PSplineInference.tex
+        volumes:
+            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
+
+    ############################################################
+    # Commands for generating our PDF (inline images)
+    paper-pdf:
+        image: paper-tools:dev
+        command: 
+            - cd output; latexmk -pdflua PSplineInference.tex
+        volumes:
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex/output
+

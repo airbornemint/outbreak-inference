@@ -1,0 +1,20 @@
+version: "3.4"
+
+services:
+    package-tools:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/package-tools-ci:iid-${CI_PIPELINE_IID}
+    package-build:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/package-tools-ci:iid-${CI_PIPELINE_IID}
+    package-check:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/package-tools-ci:iid-${CI_PIPELINE_IID}
+    paper-tools:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
+    paper-knit:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
+    paper-figures:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
+    paper-plos-comp-biol:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
+    paper-pdf:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
+

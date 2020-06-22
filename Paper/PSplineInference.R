@@ -70,11 +70,12 @@ sampleDisplayNsim = 100
 
 # ---- figures ----
 
-import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs)
+import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs, sec_axis, geom_histogram)
 import::from(ggstance, geom_violinh)
 import::from(gridExtra, grid.arrange)
 import::from(grDevices, dev.off)
 import::from(tikzDevice, tikz)
+import::from(magrittr, "%>%")
 
 inlinePlotWidth = 3.1
 inlinePlotHeight = 2.5
@@ -82,102 +83,78 @@ pagePlotWidth = inlinePlotWidth * 2.1
 pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
 plotTextBaseSize = 8
 
-figuresDir = "./figures"
+figuresDir = paste0(getOption("pspline.paper.output", "."), "/figures")
 if (!dir.exists(figuresDir)) {
   dir.create(figuresDir, recursive=TRUE)
 }
-options(tikzMetricsDictionary='./tikzDictionary.dat')
+options(
+  tikzMetricsDictionary='./tikzDictionary.dat',
+  tikzDocumentDeclaration='\\documentclass[tikz]{standalone}',
+  tikzLatexPackages=c(
+    "\\usepackage{tikz}\n"
+  )
+)
 
-tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+commonOptions = list(
+  scale_x_continuous(expand=c(0, 0)),
+  scale_y_continuous(),
+  labs(x="Time (weeks)", y="RSV incidence"),
+  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))),
+  theme_light(base_size=plotTextBaseSize) +
+  theme(
+    panel.grid.major.x=element_blank(),
+    legend.title=element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+    legend.position="bottom"
+  )
+)
+
+tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-    theme_light(base_size=plotTextBaseSize) +
     geom_point(aes(x=time, y=cases), size=.5) +
-    scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-    scale_y_continuous() +
-    coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-    labs(x="Time", y="RSV incidence") +
-    theme(
-        panel.grid.major.x=element_blank(),
-        legend.title=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-        legend.position="bottom"
-    )
+    commonOptions
 
 dev.off()
 
-tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-  theme_light(base_size=plotTextBaseSize) +
   geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="grey") +
   geom_point(aes(x=time, y=cases), size=.5) +
-  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  scale_y_continuous() +
-  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-  labs(x="Time", y="RSV incidence") +
-  theme(
-    panel.grid.major.x=element_blank(),
-    legend.title=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
-  )
+  commonOptions
+
 
 dev.off()
 
-tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  theme_light(base_size=plotTextBaseSize) +
   geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
   geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
-  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  scale_y_continuous() +
-  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-  labs(x="Time", y="RSV incidence") +
-  theme(
-    panel.grid.major.x=element_blank(),
-    legend.title=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
-  )
+  commonOptions
 
 dev.off()
 
-tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  theme_light(base_size=plotTextBaseSize) +
   geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
   geom_point(data=predThresholdsMini, aes(x=onset, y=0), size=0.75, shape=17) +
   geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), linetype="11") +
   geom_point(data=predThresholdsMini, aes(x=offset, y=0), size=0.75, shape=17) +
   geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), linetype="11") +
-  scale_y_continuous() +
-  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
-  labs(x="Time", y="RSV incidence") +
-  theme(
-    panel.grid.major.x=element_blank(),
-    legend.title=element_blank(),
-    axis.title.y=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
-  )
+  commonOptions
 
 dev.off()
 
-tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumFull
 splineData = data %>% filter(pspline.sample < sampleDisplayNsim)
 
 ggplot(predThresholdsFull) +
-  theme_light(base_size=plotTextBaseSize) +
   # geom_line(data=splineData, aes(x=time, y=cases, group=pspline.sample), color="gray") +
   # geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
   geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
@@ -195,22 +172,12 @@ ggplot(predThresholdsFull) +
     fill="gray50", color=NA, trim=TRUE
     # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
-  scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
-  scale_y_continuous() +
-  coord_cartesian(xlim=range(c(monthBoundaries$min, monthBoundaries$max))) +
   # coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
-  labs(x="Time", y="Relative cumulative incidence") +
-  theme(
-    panel.grid.major.x=element_blank(),
-    legend.title=element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
-  )
+  commonOptions
 
 dev.off()
 
-tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumSingle
 
@@ -255,7 +222,7 @@ ggplot(data) +
 
 dev.off()
 
-tikz(sprintf("%s/samplePreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
+tikz(sprintf("%s/samplePreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 data = predCumFull
 splineData = data %>% filter(pspline.sample < sampleDisplayNsim)

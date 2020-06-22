@@ -4,8 +4,8 @@ Version: 0.8
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre"))
 Description: Stochastic inference of non-linear outcomes of infectious disease outbreaks using generalized additive (mixed) models.
 Depends: R (>= 3.4.0)
-Imports: stats, utils, mgcv, dplyr, magrittr, assertthat, plyr, reshape2
-Suggests: import, ggplot2, data.table, ggstance, knitr, rmarkdown, roxygen2, kableExtra, doParallel, parallel
+Imports: stats, utils, mgcv, dplyr, magrittr, assertthat, plyr, reshape2, plotrix
+Suggests: import, ggplot2, data.table, ggstance, knitr, rmarkdown, roxygen2, kableExtra, doParallel, parallel, stringr, scales
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true

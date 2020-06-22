@@ -25,7 +25,7 @@ pspline.validate.scalars(fun.truth, n.truths, fun.observations,
 \item{level}{confidence level to use for estimation. See \code{\link{pspline.estimate.scalars}}.}
 }
 \value{
-data frame specifying the fraction of true values that were contained in their estimated confidence interval
+list of summary (which is a data frame specifying the fraction of true values that were contained in their estimated confidence interval) and results (which is a data frame specifying the quantile of the true value in the estimated sampled distribution for each simulation)
 }
 \description{
 Run a simulation study to validate a scalar estimator
