@@ -10,6 +10,7 @@ LICENSE.md
 ^build
 ^knitr
 ^overleaf
+^review
 ^\.cache$
 ^\.dockerignore$
 ^docker-compose.yml$

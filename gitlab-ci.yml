@@ -135,6 +135,24 @@ overleaf:
   only:
     - /^[Pp]aper([/-].*)?$/
 
+plos-comp-biol:
+  stage: exports
+  extends: 
+    - .docker
+  script:
+    - mkdir -p "${REVIEW_ARTIFACTS_DIR}"
+    - cp "${KNITR_OUTPUT_DIR}/figures"/*.tif  "${REVIEW_ARTIFACTS_DIR}"
+    - cp "${KNITR_OUTPUT_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${REVIEW_ARTIFACTS_DIR}"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-plos-comp-biol
+  artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
+    paths:
+      - '${REVIEW_ARTIFACTS_DIR}/*.tif'
+      - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
+  only:
+    - /^[Pp]aper([/-].*)?$/
+
 pdf:
   stage: pdf
   extends: 

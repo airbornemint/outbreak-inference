@@ -22,6 +22,8 @@
 \usepackage{printlen}
 \usepackage{textcomp}
 \usepackage{setspace}
+\usepackage{etoolbox}
+\usepackage{ifthen}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[mode=image|tex]{standalone}
@@ -44,6 +46,17 @@
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
 \edef\figuresDir{./figures}
+
+% Do some things differently depending on which variant we're compiling
+\ifundef{\outputvariant}{\edef\outputvariant{none}}{}
+% By default, tex images are included in output
+\ifthenelse{\equal{\outputvariant}{none}}{
+\newcommand{\paperincludegraphic}[1]{\includestandalone{#1}}
+}{}
+% For PLOS Comp Bio, images are left out
+\ifthenelse{\equal{\outputvariant}{ploscompbiol}}{
+\newcommand{\paperincludegraphic}[1]{}
+}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% R code
@@ -288,7 +301,7 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 
 \begin{figure}
 \begin{center}
-\includestandalone{\figuresDir/sampleCases}
+\paperincludegraphic{\figuresDir/sampleCases}
 \caption{Incidence of RSV-associated hospitalizations}
 \label{fig:sampleCases}
 \end{center}
@@ -306,7 +319,7 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
-\includestandalone{\figuresDir/sampleBestFit}
+\paperincludegraphic{\figuresDir/sampleBestFit}
 \caption[P-spline approximation of RSV incidence]{Incidence of RSV-associated hospitalizations, with best-fit P-spline}
 \label{fig:sampleBestFit}
 \end{center}
@@ -316,7 +329,7 @@ In this model $\hat{\beta_i} \approx \text{N}(\mu_i, \sigma_i)$, with the best-f
 
 \begin{figure}
 \begin{center}
-\includestandalone{\figuresDir/samplePredMini}
+\paperincludegraphic{\figuresDir/samplePredMini}
 \caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with sampled approximating $P$-splines ($N=\Sexpr{sampleNsimMini}$)}
 \label{fig:samplePredMini}
 \end{center}
@@ -335,7 +348,7 @@ Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the co
 
 \begin{figure}
 \begin{center}
-\includestandalone{\figuresDir/samplePredOnsetMini}
+\paperincludegraphic{\figuresDir/samplePredOnsetMini}
 \caption[Estimates of RSV season onset and offset]{Estimates of RSV season onset and offset numerically computed from P-spline approximations to RSV incidence.}
 \label{fig:samplePredOnsetMini}
 \end{center}
@@ -345,7 +358,7 @@ Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approx
 
 \begin{figure}
 \begin{center}
-\includestandalone{\figuresDir/samplePredOnsetFull}
+\paperincludegraphic{\figuresDir/samplePredOnsetFull}
 \caption[Distribution of estimated RSV season onset]{Distribution of estimates of RSV season onset and offset.}
 \label{fig:samplePredOnsetFull}
 \end{center}

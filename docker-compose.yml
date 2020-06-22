@@ -77,6 +77,18 @@ services:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
 
     ############################################################
+    # Commands for exporting paper for PLOS Comp Biol
+    paper-plos-comp-biol:
+        image: paper-tools:dev
+        command: 
+            - >
+                latexmk -pdflua 
+                -usepretex="\edef\outputvariant{ploscompbiol}" 
+                PSplineInference.tex
+        volumes:
+            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex
+
+    ############################################################
     # Commands for generating our PDF (inline images)
     paper-pdf:
         image: paper-tools:dev
