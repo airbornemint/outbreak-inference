@@ -73,6 +73,7 @@ services:
                 cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
                 find . -name "*.tex" -exec latexmk -pdf {} \;
                 find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
+                find . -name "*.tif" -exec convert -compress lzw {} {} \;
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
 

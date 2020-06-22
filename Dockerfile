@@ -80,7 +80,8 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	texlive-fonts-extra \
 	texlive-pictures \
 	latexmk \
-	poppler-utils
+	poppler-utils \
+	imagemagick
 
 RUN tlmgr init-usertree
 RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
