@@ -90,7 +90,7 @@
 #'   annotate("segment", x=-Inf, xend=Inf, y=offsetThreshold, yend=offsetThreshold) +
 #'  labs(x="Time", y="Relative cumulative incidence")
 #'
-#' @importFrom stats coef na.omit predict quantile rnorm
+#' @importFrom stats coef na.omit predict quantile rnorm ecdf
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
 #' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all

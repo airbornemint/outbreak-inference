@@ -72,23 +72,13 @@ set.seed(NULL)
 validationResults = NULL
 
 if(getOption("pspline.paper.validation.run", FALSE)) {
+  message("Regenerating validation data")
   validationResults = pspline.validate.scalars(
     generateTruth(1, 52, 0.05), simNTruth,
     generateObservations, simNObs,
-    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
-  )
-} else {
-  # Even when skipping full validation, run (and discard) a small number of cycles just to make sure the code still runs properly
-  .validationResults = pspline.validate.scalars(
-    generateTruth(1, 52, 0.05), 5,
-    generateObservations, 5,
     makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
   )
-}
 
-if (is.null(validationResults)) {
-  validationResults = readRDS("ValidationResults.rds")
-} else {
   validationResults$results$onset.bias.frac = validationResults$results$onset.bias / (validationResults$results$offset - validationResults$results$onset)
   validationResults$results$offset.bias.frac = validationResults$results$offset.bias / (validationResults$results$offset - validationResults$results$onset)
   validationResults$summary = validationResults$summary %>% cbind(
@@ -104,32 +94,17 @@ if (is.null(validationResults)) {
       summarize_all(function(col) sign(mean(col, na.rm=TRUE))) %>% 
       rename_all(function(col) sprintf("%s.sign", col))
   )
-  saveRDS(validationResults, "ValidationResults.rds")
+
+  saveRDS(validationResults, paste0(getOption("pspline.paper.output", "."), "/ValidationResults.rds"))
+
+} else {
+  message("Loading saved validation data")
+  # Even when skipping full validation, run (and discard) a small number of cycles just to make sure the code still runs properly
+  .validationResults = pspline.validate.scalars(
+    generateTruth(1, 52, 0.05), 5,
+    generateObservations, 5,
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
+  )
+
+  validationResults = readRDS("./ValidationResults.rds")
 }
-
-
-# tikz(sprintf("%s/onsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-#
-# ggplot(validationResults$results) +
-#   theme_light(base_size=plotTextBaseSize) +
-#   geom_histogram(aes(x=onset.quantile), binwidth=0.025, fill="gray") +
-#   coord_cartesian(xlim=c(0, 1)) +
-#   scale_x_continuous(labels = latexPercent) +
-#   labs(x=NULL, y="Count")
-#
-#
-# dev.off()
-#
-# tikz(sprintf("%s/offsetQuantilesFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
-#
-# ggplot(validationResults$results) +
-#   theme_light(base_size=plotTextBaseSize) +
-#   geom_histogram(aes(x=offset.quantile), binwidth=0.025, fill="gray") +
-#   coord_cartesian(xlim=c(0, 1)) +
-#   scale_x_continuous(labels = latexPercent) +
-#   labs(x=NULL, y="Count")
-#
-#
-# dev.off()
-#
-#
