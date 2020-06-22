@@ -20,40 +20,24 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libgit2-dev \
 	libssl-dev
 
+# Pandoc is needed for vignettes	
+RUN apt-get update && apt-get install --yes --no-install-recommends \
+	pandoc \
+	pandoc-citeproc
 
 ############################################################
 # R with dependencies for building the package
 FROM r AS package-tools
 
-# install2.r needs these
-RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
-
-# These come from CRAN
-RUN install2.r \
-	zipcode \
-	dplyr \
-	knitr \
-	reshape \
-	mgcv \
-	data.table \
-	tikzDevice \
-	sp \
-	mapproj \
-	ggplot2 \
-	ggstance \
-	gridExtra \
-	devtools \
-	import \
-	doParallel \
-	kableExtra \
-	rmarkdown \
-	plotrix
-
-# For deps
 WORKDIR /package
-COPY DESCRIPTION . 
-RUN Rscript -e "devtools::install_deps(upgrade=FALSE)"
-RUN Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
+
+# Deps
+COPY .Rprofile .Rprofile
+COPY renv renv
+# Devtools before deps to avoid rebuilding devtools if deps change
+RUN Rscript -e "renv::install('devtools')"
+COPY renv.lock renv.lock
+RUN Rscript -e "renv::restore()"
 COPY . .
 
 SHELL ["/bin/bash", "-c"]
@@ -65,8 +49,6 @@ FROM r AS tex
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-	pandoc \
-	pandoc-citeproc \
 	qpdf \
 	wget \
 	xzdec \
