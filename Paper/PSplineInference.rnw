@@ -199,9 +199,9 @@
 % Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
 \\
 Ben Artin\textsuperscript{1*},
-Daniel Weinberger\textsuperscript{1},
-Virginia Pitzer\textsuperscript{1},
-Joshua Warren\textsuperscript{1}
+Daniel M.\ Weinberger\textsuperscript{1},
+Virginia E.\ Pitzer\textsuperscript{1},
+Joshua L.\ Warren\textsuperscript{1}
 \\
 \bigskip
 \textbf{1} Yale School of Public Health, Yale University, New Haven, Connecticut, US
@@ -218,7 +218,7 @@ Joshua Warren\textsuperscript{1}
 
 % Please keep the abstract below 300 words
 \section*{Abstract}
-There is often a need to estimate the characteristics of epidemics or seasonality from infectious disease data. For instance, accurately estimating the start and end date of respiratory syncytial virus (RSV) epidemics can be used to optimize the initiation of prophylactic medication. Many widely-used methods for describing these characteristics begin with a regression model fit to a time series of disease incidence. The fitted model is then often used to calculate the quantities of interest. Calculation of these quantities from the fitted regression model typically involves combining together different components of the fitted model, and consequently only point estimates (rather than measures of uncertainty) of those quantities can be made in a straightforward way. Motivated by attempts to estimate the optimal timing of prophylaxis for RSV, we developed a general method for obtaining confidence intervals for characteristics of seasonal and sporadic infectious disease outbreaks. To do this, we use multivariate sampling of a generalized additive model with penalized basis splines. Our approach provides robust confidence intervals regardless of the complexity of the calculations of the outcome measures, and it generalizes to other systems (including outbreaks of other infectious diseases). Here we present our general approach, its application to RSV, and an R package that provides a convenient interface for conducting and validating this type of analysis in other areas.
+There is often a need to estimate the characteristics of epidemics or seasonality from infectious disease data. For instance, accurately estimating the start and end date of respiratory syncytial virus (RSV) epidemics can be used to optimize the initiation of prophylactic medication. Many widely-used methods for describing these characteristics begin with a regression model fit to a time series of disease incidence. The fitted model is then used to calculate the quantities of interest. Calculation of these quantities typically involves combining multiple estimated parameters from the fitted model, and consequently only point estimates (rather than measures of uncertainty) can be made in a straightforward way. Motivated by attempts to estimate the optimal timing of prophylaxis for RSV, we developed a general method for obtaining confidence intervals for characteristics of seasonal and sporadic infectious disease outbreaks. To do this, we use multivariate sampling of a generalized additive model with penalized basis splines. Our approach provides robust confidence intervals regardless of the complexity of the calculations of the outcome measures, and it generalizes to other systems (including outbreaks of other infectious diseases). Here we present our general approach, its application to RSV, and an R package that provides a convenient interface for conducting and validating this type of analysis in other areas.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Author summary (PLOS Comp Biol template)
@@ -249,19 +249,21 @@ In this study, our goal was to develop a method of retrospective analysis of inf
 \subsection*{Background}
 
 \subsubsection*{Generalized additive modeling}
-Our approach  is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
+Our approach is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
 
-A \textit{generalized additive model} (GAM) provides a framework for modeling a response variable $y$, using predictor variables $x_k, k=1, \hdots, p$ with associated non-linear predictor functions $f_k, k = 1, \hdots, p$ and a function $g$ (\textit{link function}) such that the expected value, $E(y)$, is given as
+A \textit{generalized additive model} (GAM) provides a framework for modeling a response variable $y$, using predictor variables $x_k, k=1, \hdots, p$, with corresponding potentially non-linear predictor functions $f_k, k = 1, \hdots, p$ and a link function $g$ such that the expected value, $E(y)$, is defined as
 
 \begin{equation*}
-    g\left\{E(y)\right\} = \beta_0 + \sum_{k=1}^p f_k(x_k)
+    g\left\{E(y)\right\} = \beta_0 + \sum_{k=1}^p f_k(x_k; \beta_k)
 \end{equation*}
+
+where $\beta_0, \beta_1, \hdots, \beta_k$ represent unknown model parameters.
 
 \subsubsection*{Basis splines}
 
 A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_1, K_2, \dots, K_m \in [t_a, t_b]$ at which its polynomial segments join are known as its \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
-For any set of $m$ knots, we can construct a unique set of $b = m - n$ splines of order $n$ (using those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j(x)$. Every spline $f(x)$ of order $n$ with $m$ knots can be represented as a linear combination $f(x) = \sum_{j=1}^b \beta_j B_j(x)$ of the basis splines $B_j(x)$ with the same knots.
+For any set of $m$ knots, we can construct a unique set of $b = m - n$ splines of order $n$ (using those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j(x)$. Every spline $f(x)$ of order $n$ with $m$ knots can be represented as a linear combination of the basis splines $B_j(x)$ with the same knots such that $f(x) = \sum_{j=1}^b \beta_j B_j(x)$.
 
 \subsubsection*{Cyclic splines}
 
@@ -283,7 +285,7 @@ For smooth estimation of non-linear experimental data, P-splines have desirable 
 
 \subsection*{Outcome estimation}
 
-To demonstrate how we use P-spline fitting to infer time-domain outbreak features, we will use our analysis of RSV seasonality as an example. The principal questions of our RSV analyses were:
+To demonstrate how we use P-spline fitting to infer time-domain outbreak features, we will use our analysis of RSV seasonality as an example. The principal questions of our RSV analyses are:
 
 \begin{itemize}
 \item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
@@ -372,7 +374,7 @@ Similarly, for the prophylaxis regimen that offers protection between $t_\mathit
 
 We used the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
-\subsection*{Validation via simulation study}
+\subsection*{Simulation study}
 \todo[inline,color=green!20]{This section now ready for feedback}
 
 To validate our method for 95\% CI estimates of the onset/offset time and the preventable fraction, we performed a simulation study. We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
