@@ -84,29 +84,26 @@ services:
         image: paper-tools:dev
         command: 
             - >
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
-                
-                python3 -c "import re;
-                import sys;
-                tex = open(sys.argv[1]).read();
-                tex = re.sub(r'\\\\bibliography\{(.*)\}', lambda f: open(f'{f.group(1)}.bbl').read(), tex);
-                open(sys.argv[1], 'w').write(tex);
-                " PSplineInference.tex
+                cd output
 
                 latexmk -pdflua 
                 -usepretex="\edef\outputvariant{ploscompbiol}" 
                 PSplineInference.tex
+
+                python3 /tex/export-plos-comp-biol.py PSplineInference.tex
+                
+                latexmk -pdflua 
+                -usepretex="\edef\outputvariant{ploscompbiol}" 
+                PSplineInference.tex
         volumes:
-            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex
+            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
 
     ############################################################
     # Commands for generating our PDF (inline images)
     paper-pdf:
         image: paper-tools:dev
         command: 
-            - latexmk -pdflua PSplineInference.tex
+            - cd output; latexmk -pdflua PSplineInference.tex
         volumes:
-            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex/output
 
