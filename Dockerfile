@@ -6,9 +6,10 @@ LABEL maintainer="Ben Artin <ben@artins.org>"
 ### Setup apt packages needed to build the image
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install --yes --no-install-recommends moreutils > /dev/null 2>&1
-SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
+# SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
 
-### Setup R packages
+# Most of these are needed to build a dependency of the package, which means they 
+# are needed for to build dependencies of the paper too
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libcurl4-gnutls-dev \
 	gnutls-dev \
@@ -18,6 +19,11 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libpng-dev \
 	libgit2-dev \
 	libssl-dev
+
+
+############################################################
+# R with dependencies for building the package
+FROM r AS package-tools
 
 # install2.r needs these
 RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
@@ -43,36 +49,21 @@ RUN install2.r \
 	rmarkdown \
 	plotrix
 
+# For deps
 WORKDIR /package
-SHELL ["/bin/bash", "-c"]
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["/bin/bash"]
-
-############################################################
-# Commands for building the R package
-FROM r AS build-package
-
-COPY . /package
-
-SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
-ENTRYPOINT Rscript -e "devtools::install_dev_deps(upgrade=FALSE); devtools::build(pkg='/package', path=Sys.getenv('R_BUILD_DIR'), vignettes=as.logical(Sys.getenv('R_BUILD_VIGNETTES')), binary=FALSE)"
-
-############################################################
-# Commands for checking the R package
-FROM r AS check-package
-
-# For dev deps
 COPY DESCRIPTION . 
+RUN Rscript -e "devtools::install_deps(upgrade=FALSE)"
+RUN Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
+COPY . .
 
-# SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
-ENTRYPOINT Rscript -e "devtools::install_dev_deps(upgrade=FALSE); devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))"
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT ["Rscript", "-e"]
 
 ############################################################
-# Tex environment we use (it includes R because knitr needs both)
+# Tex environment we use to build the paper (it includes R because of knitr)
 FROM r AS tex
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
-SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	pandoc \
 	pandoc-citeproc \
@@ -87,21 +78,21 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	texlive-latex-extra \
 	texlive-bibtex-extra \
 	texlive-fonts-extra \
-	texlive-pictures
+	texlive-pictures \
+	latexmk \
+	poppler-utils
 
 RUN tlmgr init-usertree
 RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
+RUN luaotfload-tool -u
+
 WORKDIR /tex
-SHELL [ "/bin/bash", "-c" ]
-ENTRYPOINT /bin/bash
+ENTRYPOINT ["/bin/bash", "-c"]
 
 ############################################################
 # Commands for knitting the paper source
-# Knitr requires latex for masuring figure elements
-FROM tex AS knitr-paper
-
-SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
+FROM tex AS paper-tools
 
 # Install dependencies
 WORKDIR /tex
@@ -111,24 +102,5 @@ COPY Paper/renv renv
 COPY Paper/renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
-COPY Paper /tex
+COPY Paper .
 COPY vignettes/seasonal.csv /vignettes/seasonal.csv
-
-SHELL [ "/bin/bash", "-c" ]
-ENTRYPOINT Rscript -e "install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); options(pspline.paper.validation.run=as.logical(Sys.getenv('KNITR_RUN_VALIDATION'))); options(pspline.paper.output=Sys.getenv('KNITR_OUTPUT_DIR')); knitr::knit(Sys.getenv('KNITR_INPUT_FILE'), output=Sys.getenv('KNITR_OUTPUT_FILE'))"
-
-############################################################
-# Commands for converting figures to PDF
-FROM knitr-paper AS pdflatex-figures
-
-SHELL [ "/usr/bin/chronic", "/bin/bash", "-c" ]
-ENTRYPOINT cd "${KNITR_OUTPUT_DIR}/figures" ; find . -name "*.tex" -exec pdflatex {} \;
-
-############################################################
-# Commands for generating paper PDF
-FROM knitr-paper AS pdflatex-paper
-
-RUN apt-get update && apt-get install --yes --no-install-recommends \
-	latexmk
-
-ENTRYPOINT latexmk -pdflua "${LATEX_FILE}"

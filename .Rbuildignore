@@ -13,6 +13,7 @@ LICENSE.md
 ^\.cache$
 ^\.dockerignore$
 ^docker-compose.yml$
+^docker-compose-gitlab.yml$
 ^build.env$
 ^gitlab-ci.yml$
 ^Presentations$

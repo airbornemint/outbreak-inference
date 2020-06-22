@@ -1,57 +1,87 @@
 version: "3.4"
 
 services:
-    build-package:
-        image: build-package:dev
+    ############################################################
+    # Tools for building the package
+    package-tools:
+        image: package-tools:dev
         build:
             context: .
-            target: build-package
-        environment:
-            R_BUILD_DIR: "${R_BUILD_DIR:-build}"
-            R_BUILD_VIGNETTES: "${R_BUILD_VIGNETTES:-FALSE}"
+            target: package-tools
+       
+    ############################################################
+    # Commands for building the package
+    package-build:
+        image: package-tools:dev
+        command:
+            - |
+                devtools::build(
+                    pkg="/package", 
+                    path="${R_BUILD_DIR:-build}", 
+                    vignettes=${R_BUILD_VIGNETTES:-FALSE}, 
+                    binary=FALSE
+                )
         volumes:
             - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
         
-    check-package:
-        image: check-package:dev
-        build:
-            context: .
-            target: check-package
+    ############################################################
+    # Commands for checking the package
+    package-check:
+        image: package-tools:dev
+        command:
+            - |
+                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))
         env_file: build.env
         volumes:
             - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
 
-    knitr-paper:
-        image: knitr-paper:dev
+    ############################################################
+    # Tools for building the paper
+    paper-tools:
+        image: paper-tools:dev
         build:
             context: .
-            target: knitr-paper
-        environment:
-            KNITR_INPUT_FILE: PSplineInference.rnw
-            KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
-            KNITR_OUTPUT_FILE: "${KNITR_OUTPUT_DIR:-knitr}/PSplineInference.tex"
-            KNITR_RUN_VALIDATION: "${KNITR_RUN_VALIDATION:-FALSE}"
+            target: paper-tools
+       
+    ############################################################
+    # Commands for converting figures to PDF and EPS
+    paper-knit:
+        image: paper-tools:dev
+        entrypoint: ["Rscript", "-e"]
+        command: 
+            - |
+                install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); 
+                options(pspline.paper.validation.run=${KNITR_RUN_VALIDATION:-FALSE}); 
+                options(pspline.paper.output='${KNITR_OUTPUT_DIR:-knitr}'); 
+                knitr::knit(
+                    'PSplineInference.rnw', 
+                    output='${KNITR_OUTPUT_DIR:-knitr}/PSplineInference.tex'
+                )
         env_file: build.env
         volumes:
             - "./${R_BUILD_DIR:-build}:/tex/${R_BUILD_DIR:-build}"
             - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
        
-    pdflatex-figures:
-        image: pdflatex-figures:dev
+    ############################################################
+    # Commands for converting figures to PDF and EPS
+    paper-figures:
+        image: paper-tools:dev
         environment:
             KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
-        build:
-            context: .
-            target: pdflatex-figures
+        command: 
+            - |
+                cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
+                find . -name "*.tex" -exec latexmk -pdf {} \;
+                find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
 
-    pdflatex-paper:
-        image: pdflatex-paper:dev
-        build:
-            context: .
-            target: pdflatex-paper
-        environment: 
-            ARG LATEX_FILE: PSplineInference.tex
+    ############################################################
+    # Commands for generating our PDF (inline images)
+    paper-pdf:
+        image: paper-tools:dev
+        command: 
+            - latexmk -pdflua PSplineInference.tex
         volumes:
-            - ./overleaf:/tex
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex
+
