@@ -54,7 +54,7 @@ tools:
 build:
   extends: .build
   variables:
-    BUILD_VIGNETTES: "TRUE"
+    R_BUILD_VIGNETTES: "TRUE"
   except: 
     - /^[Pp]aper([/-].*)?$/
     - /^validation(-.*)?$/
@@ -62,7 +62,7 @@ build:
 ⚡️ build:
   extends: .build
   variables:
-    BUILD_VIGNETTES: "FALSE"
+    R_BUILD_VIGNETTES: "FALSE"
 
 check:
   stage: check
