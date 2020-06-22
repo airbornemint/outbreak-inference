@@ -20,6 +20,10 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libgit2-dev \
 	libssl-dev
 
+# Pandoc is needed for vignettes	
+RUN apt-get update && apt-get install --yes --no-install-recommends \
+	pandoc \
+	pandoc-citeproc
 
 ############################################################
 # R with dependencies for building the package
@@ -45,8 +49,6 @@ FROM r AS tex
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-	pandoc \
-	pandoc-citeproc \
 	qpdf \
 	wget \
 	xzdec \
