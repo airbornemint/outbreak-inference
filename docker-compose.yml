@@ -79,10 +79,22 @@ services:
 
     ############################################################
     # Commands for exporting paper for PLOS Comp Biol
+    # Includes inlining the bibliography
     paper-plos-comp-biol:
         image: paper-tools:dev
         command: 
             - >
+                latexmk -pdflua 
+                -usepretex="\edef\outputvariant{ploscompbiol}" 
+                PSplineInference.tex
+                
+                python3 -c "import re;
+                import sys;
+                tex = open(sys.argv[1]).read();
+                tex = re.sub(r'\\\\bibliography\{(.*)\}', lambda f: open(f'{f.group(1)}.bbl').read(), tex);
+                open(sys.argv[1], 'w').write(tex);
+                " PSplineInference.tex
+
                 latexmk -pdflua 
                 -usepretex="\edef\outputvariant{ploscompbiol}" 
                 PSplineInference.tex

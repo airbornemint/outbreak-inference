@@ -148,6 +148,7 @@ plos-comp-biol:
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
+      - '${REVIEW_ARTIFACTS_DIR}/*.tex'
       - '${REVIEW_ARTIFACTS_DIR}/*.tif'
       - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
   only:
