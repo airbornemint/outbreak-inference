@@ -4,8 +4,15 @@
 \alias{observed.results.scalars}
 \title{Run simulation study on one set of observations}
 \usage{
-observed.results.scalars(observed, truth, expected, fun.model, fun.outcome,
-  n.samples, level)
+observed.results.scalars(
+  observed,
+  truth,
+  expected,
+  fun.model,
+  fun.outcome,
+  n.samples,
+  level
+)
 }
 \description{
 Run simulation study on one set of observations

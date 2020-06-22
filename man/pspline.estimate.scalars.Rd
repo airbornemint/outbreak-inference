@@ -4,8 +4,13 @@
 \alias{pspline.estimate.scalars}
 \title{Calculates confidence intervals for scalars estimated from generalized additive (mixed) model of an outbreak}
 \usage{
-pspline.estimate.scalars(model, predictors, outcomes, samples = 100,
-  level = 0.95)
+pspline.estimate.scalars(
+  model,
+  predictors,
+  outcomes,
+  samples = 100,
+  level = 0.95
+)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}}

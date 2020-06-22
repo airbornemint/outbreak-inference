@@ -4,8 +4,15 @@
 \alias{truth.results.scalars}
 \title{Run simulation study on one truth}
 \usage{
-truth.results.scalars(truth, fun.observations, n.observations, fun.model,
-  fun.outcome, n.samples, level)
+truth.results.scalars(
+  truth,
+  fun.observations,
+  n.observations,
+  fun.model,
+  fun.outcome,
+  n.samples,
+  level
+)
 }
 \description{
 Run simulation study on one truth
