@@ -76,7 +76,7 @@ if(getOption("pspline.paper.validation.run", FALSE)) {
   validationResults = pspline.validate.scalars(
     generateTruth(1, 52, 0.05), simNTruth,
     generateObservations, simNObs,
-    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 20, 0.95
+    makeModel, outcomes(onsetThreshold=0.025, offsetThreshold=0.975), 2000, 0.95
   )
 
   validationResults$results$onset.bias.frac = validationResults$results$onset.bias / (validationResults$results$offset - validationResults$results$onset)
