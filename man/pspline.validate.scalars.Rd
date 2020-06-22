@@ -4,8 +4,16 @@
 \alias{pspline.validate.scalars}
 \title{Run a simulation study to validate a scalar estimator}
 \usage{
-pspline.validate.scalars(fun.truth, n.truths, fun.observations,
-  n.observations, fun.model, fun.outcomes, n.samples, level)
+pspline.validate.scalars(
+  fun.truth,
+  n.truths,
+  fun.observations,
+  n.observations,
+  fun.model,
+  fun.outcomes,
+  n.samples,
+  level
+)
 }
 \arguments{
 \item{fun.truth}{function that generates a true state of the system. Takes no arguments, returns data frame of true values for model variables}

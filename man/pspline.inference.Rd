@@ -3,7 +3,6 @@
 \docType{package}
 \name{pspline.inference}
 \alias{pspline.inference}
-\alias{pspline.inference-package}
 \title{Inference using penalized basis splines (P-splines) in a generalized additive model (GAM), with applications in
 infectious disease outbreak modeling}
 \description{

@@ -4,8 +4,13 @@
 \alias{pspline.estimate.timeseries}
 \title{Calculates confidence intervals for time series sampled from generalized additive (mixed) model of an outbreak}
 \usage{
-pspline.estimate.timeseries(model, predictors, outcome, samples = 1000,
-  level = 0.95)
+pspline.estimate.timeseries(
+  model,
+  predictors,
+  outcome,
+  samples = 1000,
+  level = 0.95
+)
 }
 \arguments{
 \item{model}{model returned by \code{\link[mgcv]{gam}} or \code{\link[mgcv]{gamm}}, with a single parameter (time)}
