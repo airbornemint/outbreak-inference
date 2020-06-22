@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+    build-package:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-package-ci:iid-${CI_PIPELINE_IID}
+        
+    check-package:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/check-package-ci:iid-${CI_PIPELINE_IID}
+
+    knitr-paper:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/knitr-paper-ci:iid-${CI_PIPELINE_IID}
+       
+    pdflatex-figures:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/pdflatex-figures-ci:iid-${CI_PIPELINE_IID}
+
+    pdflatex-paper:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/pdflatex-paper-ci:iid-${CI_PIPELINE_IID}

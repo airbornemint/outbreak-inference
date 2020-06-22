@@ -1,8 +1,5 @@
-include:
-  - remote: https://gitlab.com/cirecipes/autodocker/raw/v1.0b3/gitlab-autodocker.yml
-
 stages:
-  - autodocker
+  - tools
   - build
   - check
   - knitr
@@ -11,40 +8,43 @@ stages:
 
 variables:
   R_BUILD_DIR: "build"
-  R_PACKAGE_CACHE: ".cache/r"
-  TEX_DIR: "Paper" # Relative to build root
-  OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
-  KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
-  AUTODOCKER_CONTEXT_NAME: build
+  KNITR_OUTPUT_DIR: "knitr"
+  TEX_DIR: "Paper"
+  OVERLEAF_ARTIFACTS_DIR: "overleaf"
+  COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
+
+.docker:
+    tags:
+        - docker
+    services:
+        - docker:18.09.7-dind
+    image: ${CI_REGISTRY}/ci-utilities/ci-commands/gitlab-docker-compose-ci
+
+tools:
+  stage: tools
+  extends: 
+    - .docker
+  script:
+    - gitlab-docker-compose ${COMPOSE_FILES} --cache-from main build-package check-package knitr-paper pdflatex-figures pdflatex-paper
   
-.r:
-  extends: .use-autodocker
-  before_script:
-    - mkdir -p /usr/local/lib/R/etc
-    - mkdir -p "${R_PACKAGE_CACHE}"
-    - echo "R_LIBS=${R_PACKAGE_CACHE}" > .Renviron
-    - echo "R_LIBS_USER=${R_PACKAGE_CACHE}" >> .Renviron
-    - echo "R_PACKAGE_CACHE=${R_PACKAGE_CACHE}" >> .Renviron
-    - Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
-
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${R_PACKAGE_CACHE}"
-      
-autodocker:
-  extends: .autodocker
-
 .build:
-  extends: .r
   stage: build
+  extends: 
+    - .docker
+  variables:
+    R_PACKAGE_SOURCE: .
   script:
     - mkdir -p "${R_BUILD_DIR}"
-    - Rscript -e "devtools::build(pkg = '.', path = '${R_BUILD_DIR}', vignettes = ${BUILD_VIGNETTES}, binary = FALSE)"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} pull build-package
+    - docker-compose ${COMPOSE_FILES} run build-package
+    - export R_PACKAGE_ARCHIVE=`ls "${R_BUILD_DIR}"/pspline.inference*.tar.gz | head -n1`
+    - printenv | grep '^R_PACKAGE_ARCHIVE=' >> build.env
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-package"
     paths:
-      - "${R_BUILD_DIR}/pspline.inference*.tar.gz"
+      - "${R_BUILD_DIR}"
+      - build.env
     when: always
   
 build:
@@ -61,10 +61,13 @@ build:
     BUILD_VIGNETTES: "FALSE"
 
 check:
-  extends: .r
   stage: check
+  extends: 
+    - .docker
   script:
-    - Rscript -e "devtools::check_built(path = paste0('${R_BUILD_DIR}/', list.files('${R_BUILD_DIR}', pattern='pspline.inference.*t.*gz')[1]))"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} pull check-package
+    - docker-compose ${COMPOSE_FILES} run check-package
   except:
     - /^[Pp]aper([/-].*)?$/
     - /^validation(-.*)?$/
@@ -72,24 +75,19 @@ check:
     - build
 
 .knitr:
-  extends: .use-autodocker
   stage: knitr
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${TEX_DIR}/${KNITR_CACHE_DIR}"
+  extends: 
+    - .docker
   script:
-    - cd "${TEX_DIR}"
-    - Rscript -e "renv::restore()"
-    - find ../"${R_BUILD_DIR}" -name "pspline.inference*.tar.gz" -exec Rscript -e "install.packages(commandArgs(TRUE)[1])" {} \;
-    - Rscript -e "options(pspline.paper.validation.run=${RUN_VALIDATION}); knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('PSplineInference.rnw')"
-    - pushd figures 
-    - find . -name "*.tex" -exec pdflatex {} \;
-    
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} pull knitr-paper 
+    - docker-compose ${COMPOSE_FILES} run knitr-paper
   dependencies:
     - ⚡️ build
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
+    paths:
+      - "${KNITR_OUTPUT_DIR}"
     
 knitr:
   extends: .knitr
@@ -99,12 +97,6 @@ knitr:
     RUN_VALIDATION: "TRUE"
   only:
     - /^validation(-.*)?$/
-  artifacts:
-    paths:
-      - "${TEX_DIR}/ValidationResults.rds"
-      - "${TEX_DIR}/PSplineInference.tex"
-      - "${TEX_DIR}/figures/*.tex"
-      - "${TEX_DIR}/figures/*.pdf"
 
 ⚡️ knitr:
   extends: .knitr
@@ -114,18 +106,16 @@ knitr:
     RUN_VALIDATION: "FALSE"
   only:
     - /^[Pp]aper([/-].*)?$/
-  artifacts:
-    paths:
-      - "${TEX_DIR}/PSplineInference.tex"
-      - "${TEX_DIR}/figures/*.tex"
-      - "${TEX_DIR}/figures/*.pdf"
 
 overleaf:
-  extends: .use-autodocker
   stage: overleaf
+  extends: 
+    - .docker
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${TEX_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - docker-compose ${COMPOSE_FILES} pull pdflatex-figures 
+    - docker-compose ${COMPOSE_FILES} run pdflatex-figures 
+    - cp -r "${KNITR_OUTPUT_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
@@ -134,15 +124,14 @@ overleaf:
     - /^[Pp]aper([/-].*)?$/
 
 tex:
-  extends: .use-autodocker
   stage: tex
+  extends: 
+    - .docker
   script:
-    - cd "${OVERLEAF_ARTIFACTS_DIR}"
-    - lualatex "PSplineInference.tex"
-    - bibtex "PSplineInference"
-    - lualatex "PSplineInference.tex"
-    - lualatex "PSplineInference.tex"
-    - mv "PSplineInference.pdf" "${CI_PROJECT_DIR}"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} pull pdflatex-paper
+    - docker-compose ${COMPOSE_FILES} run pdflatex-paper
+    - mv "${OVERLEAF_ARTIFACTS_DIR}/PSplineInference.pdf" .
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:

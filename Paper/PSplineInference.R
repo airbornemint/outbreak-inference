@@ -83,7 +83,7 @@ pagePlotWidth = inlinePlotWidth * 2.1
 pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
 plotTextBaseSize = 8
 
-figuresDir = "./figures"
+figuresDir = paste0(getOption("pspline.paper.output", "."), "/figures")
 if (!dir.exists(figuresDir)) {
   dir.create(figuresDir, recursive=TRUE)
 }
