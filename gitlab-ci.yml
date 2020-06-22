@@ -92,7 +92,7 @@ knitr:
   tags:
     - docker-cpu:comp8
   variables:
-    RUN_VALIDATION: "TRUE"
+    KNITR_RUN_VALIDATION: "TRUE"
   only:
     - /^validation(-.*)?$/
 
@@ -101,7 +101,7 @@ knitr:
   tags:
     - docker-mem:3
   variables:
-    RUN_VALIDATION: "FALSE"
+    KNITR_RUN_VALIDATION: "FALSE"
   only:
     - /^[Pp]aper([/-].*)?$/
 
