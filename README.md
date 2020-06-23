@@ -22,6 +22,6 @@ This package can handle two types of outcome measures:
 ```
 install.packages("devtools")
 library(devtools)
-install_gitlab("airbornemint/pspline.inference")
+install_gitlab("airbornemint/pspline.inference@main")
 ?pspline.inference
 ```
