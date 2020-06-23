@@ -21,10 +21,12 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libssl-dev
 
 # Pandoc is needed for vignettes	
+# qpdf is needed for R check
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	pandoc \
 	pandoc-citeproc \
-	libxt6
+	libxt6 \
+	qpdf
 
 ############################################################
 # R with dependencies for building the package
@@ -50,7 +52,6 @@ FROM r AS tex
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-	qpdf \
 	wget \
 	xzdec \
 	lmodern \
