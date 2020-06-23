@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	pandoc \
 	pandoc-citeproc \
-	libxt
+	libxt6
 
 ############################################################
 # R with dependencies for building the package
