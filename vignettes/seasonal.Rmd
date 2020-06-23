@@ -470,7 +470,7 @@ The simulation study shows that using the P-spline GAM method to obtain the 95% 
 ```{r validate supply duration table}
 kable_styling(
   kable(
-    validationResults, 
+    validationResults$summary$supply.duration.good, 
     caption="Validation results: frequency with which true value is included in the 95% CI", 
     col.names=c("Supply duration")
   )
