@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 # Pandoc is needed for vignettes	
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	pandoc \
-	pandoc-citeproc
+	pandoc-citeproc \
+	libxt
 
 ############################################################
 # R with dependencies for building the package
