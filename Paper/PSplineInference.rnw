@@ -246,10 +246,29 @@ In this study, our goal was to develop a method of retrospective analysis of inf
 
 \section*{Methods}
 
-\subsection*{Background}
+\subsection*{Motivation}
 
-\subsubsection*{Generalized additive modeling}
-Our approach is to fit a smooth curve through the observed disease incidence time series, and infer time-domain features of the outbreak from this curve. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
+We developed this method for our RSV research, in which the principal questions were:
+
+\begin{itemize}
+\item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
+\item Could the prophylaxis period be adjusted so that more of the prophylaxis-eligible RSV cases fall within the prophylaxis period?
+\end{itemize}
+
+To answer these questions, we defined the following outcome measures:
+
+\begin{itemize}
+\item Season onset and offset, defined as the points in time when the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season
+\item Protected fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
+\end{itemize}
+
+Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics.
+
+Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
+
+Additionally, we used a simulation study to validate this interval estimation method for our outcome measures.
+
+\subsection*{Background}
 
 A \textit{generalized additive model} (GAM) provides a framework for modeling a response variable $y$, using predictor variables $x_k, k=1, \hdots, p$, with corresponding potentially non-linear predictor functions $f_k, k = 1, \hdots, p$ and a link function $g$ such that the expected value, $E(y)$, is defined as
 
@@ -259,17 +278,11 @@ A \textit{generalized additive model} (GAM) provides a framework for modeling a 
 
 where $\beta_0, \beta_1, \hdots, \beta_k$ represent unknown model parameters.
 
-\subsubsection*{Basis splines}
-
 A \textit{spline} of order $n$ is a piecewise polynomial real function of degree $n - 1$ on interval $[t_a, t_b]$; the points $K_1, K_2, \dots, K_m \in [t_a, t_b]$ at which its polynomial segments join are known as its \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[t_a, t_b]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
 For any set of $m$ knots, we can construct a unique set of $b = m - n$ splines of order $n$ (using those knots) known as the \textit{basis splines} (B-splines) and denoted with $B_j(x)$. Every spline $f(x)$ of order $n$ with $m$ knots can be represented as a linear combination of the basis splines $B_j(x)$ with the same knots such that $f(x) = \sum_{j=1}^b \beta_j B_j(x)$.
 
-\subsubsection*{Cyclic splines}
-
 A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real function $f(x) = f(x - T)$. As with non-cyclic splines, a cyclic spline of order $n$ is continuous in up to $n - 1$ derivatives, and we only consider those continuous in exactly $n - 1$ derivatives. Use of cyclic splines is often necessary in infectious disease modeling because non-cyclic splines do not guarantee smoothness at $t_a \pm k T$ when extended to multiple periods.
-
-\subsubsection*{Penalized B-splines in GAM}
 
 Splines can be used as predictor functions $f_k$ in a GAM. Different $f_k$ in the same model can have different orders and different knots. Expressed as a linear combination of B-splines, $f_k(x) = \sum_{j=1}^{b_k} \beta_{j,k} B_{j,k}(x)$, and the GAM takes the form
 
@@ -279,27 +292,13 @@ Splines can be used as predictor functions $f_k$ in a GAM. Different $f_k$ in th
 \end{aligned}\label{eqn:model}
 \end{equation}
 
-This model can be fitted to data simply by minimizing $\Vert y - E(y) \Vert^2$; however, this approach often leads to overfitting, especially with a larger number of knots. To mitigate this, the model can be modified to instead minimize $\Vert y - E(y) \Vert^2 + P$, where $P$ is a \textit{penalty function} that measures non-smoothness of the model response variable. This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as \textit{penalized B-splines} (P-splines)\cite{Eilers:1996kz}. A variety of penalty functions have been defined; the most common ones use $k$-th order differences between the model and the data, for some small integer $k$ (often $k = 2$). As with general cyclic splines, \textit{cyclic P-splines} are an extension of P-splines to periodic functions.
+This model can be fitted to data simply by minimizing $\Vert y - E(y) \Vert^2$; however, this approach often leads to overfitting, especially with a larger number of knots. To mitigate this, the model can be modified to instead minimize $\Vert y - E(y) \Vert^2 + P$, where $P$ is a \textit{penalty function} that measures non-smoothness of the model response variable. This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as \textit{penalized B-splines} (P-splines)\cite{Eilers:1996kz}. A variety of penalty functions have been defined; the most common ones use $p$-th order differences between the model and the data, for some small integer $p$ (often $p = 2$). As with general cyclic splines, \textit{cyclic P-splines} are an extension of P-splines to periodic functions.
 
 For smooth estimation of non-linear experimental data, P-splines have desirable computational and statistical properties. Most notably for our application, P-spline parameters $\beta_{i,j}$ estimated by GAM are normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function.\cite{Eilers:1996kz} 
 
 \subsection*{Outcome estimation}
 
-To demonstrate how we use P-spline fitting to infer time-domain outbreak features, we will use our analysis of RSV seasonality as an example. The principal questions of our RSV analyses are:
-
-\begin{itemize}
-\item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
-\item Could the prophylaxis period be adjusted so that more of the prophylaxis-eligible RSV cases fall within the prophylaxis period?
-\end{itemize}
-
-To that end, we defined the following outcome measures of interest:
-
-\begin{itemize}
-\item Season onset and offset, defined as the points in time when the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season
-\item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
-\end{itemize}
-
-Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our incidence data, we could sample the model parameters $\beta_{i,j}$, use them to estimate RSV incidence as a function of time, and therefrom estimate the outcome measures of interest. By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:sampleCases}. 
+By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:sampleCases}. 
 
 \begin{figure}
 \begin{center}
@@ -308,8 +307,6 @@ Once we constructed a P-spline GAM (Equation \ref{eqn:model}) and fit it to our 
 \label{fig:sampleCases}
 \end{center}
 \end{figure}
-
-\subsection*{Model response sampling}
 
 To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t) = I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
@@ -332,21 +329,19 @@ In this model $\hat{\beta_i} \approx \text{N}(\mu_i, \sigma_i)$, with the best-f
 \begin{figure}
 \begin{center}
 \paperincludegraphic{\figuresDir/samplePredMini}
-\caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with sampled approximating $P$-splines ($N=\Sexpr{sampleNsimMini}$)}
+\caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with $\Sexpr{sampleNsimMini}$ sampled approximating $P$-splines}
 \label{fig:samplePredMini}
 \end{center}
 \end{figure}
 
-\subsection*{Outcome measure sampling}
-
-Next we turn to our first outcome measure of interest: time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
+Having obtained a smooth model of out incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
 \int_{t_\mathit{min}}^{t_\mathit{on}} I(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt \\
 \int_{t_\mathit{min}}^{t_\mathit{off}} I(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt
 \end{align*}
 
-Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
+Given any $I(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thus indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $I(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
 
 \begin{figure}
 \begin{center}
@@ -366,18 +361,18 @@ Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approx
 \end{center}
 \end{figure}
 
-Similarly, for the prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, we defined the preventable fraction ($f_p$) as:
+We defined our other outcome measure, the protected fraction ($f_p$) of a prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, as:
 
 \begin{equation*}
     f_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} I(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} I(t) dt
 \end{equation*}
 
-We used the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
+We repeated the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
 \subsection*{Simulation study}
 \todo[inline,color=green!20]{This section now ready for feedback}
 
-To validate our method for 95\% CI estimates of the onset/offset time and the preventable fraction, we performed a simulation study. We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
+We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
 
 \begin{enumerate}
 \item Randomly choose epidemiologic week of season start $t_\mathit{start} \sim \mathcal{U}(\Sexpr{onsetSimMin}, \Sexpr{onsetSimMax})$, epidemiologic week of season end $t_\mathit{end} \sim \mathcal{U}(\Sexpr{offsetSimMin}, \Sexpr{offsetSimMax})$, and peak incidence $I_\mathit{max} \sim \mathcal{U}(\Sexpr{peakSimMin}, \Sexpr{peakSimMax})$.
@@ -391,59 +386,11 @@ To validate our method for 95\% CI estimates of the onset/offset time and the pr
 \item Fit a $\log$-linked cubic P-spline to $I^*(t)$ to obtain true instantaneous incidence $I_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
 \end{enumerate}
 
+The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our research. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our data. 
+
 For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $I(t) \sim \mathit{Poisson}(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I_0(t)$ for each season.
 
-Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate the preventable fraction estimates.
-
-%The full documentation for our \texttt{pspline.inference} R package, including detailed examples, is included with the package, and available at (TODO: release on CRAN, currently at gitlab.com/airbornemint/pspline.inference); here we only present a brief overview of the two main functions in the package in order to highlight its ease of use.
-%
-%\subsubsection*{Outcome estimation}
-%
-%Given 
-%
-%\begin{enumerate}
-%\item \texttt{model}: a P-spline GAM model, 
-%\item \texttt{predictors}: a data frame of predictor values
-%\item \texttt{fun.outcome(data)}: a function that receives a data frame (\texttt{data}) containing time series of disease incidence sampled from the model, and computes a scalar outcome measure $O$ for the given time series
-%\end{enumerate}
-%
-%the point and interval estimates of $O$ over the given predictors can be obtained by calling:
-%
-%\begin{center}
-%\texttt{pspline.estimate.scalars(model, predictors, fun.outcome)}
-%\end{center}
-%
-%\subsubsection*{Estimate validation}
-%
-%Given 
-%
-%\begin{enumerate}
-%\item \texttt{fun.truth()}: a function which generates a simulated time series of true disease incidence,
-%\item \texttt{fun.obs(truth)}: a function which receives a data frame (\texttt{truth}) containing a time series of true disease incidence and returns a data frame of observed disease incidence
-%\item \texttt{fun.model(observations)}: a function which receives a data frame (\texttt{observations}) of observed disease incidence, and returns a GAM model for those observations; and
-%\item \texttt{fun.outcome(data)}: a function which receives a data frame (\texttt{data}) containing a time series of (true or observed) disease incidence, and returns the scalar outcome measure $O$ for the given time series
-%\end{enumerate}
-%
-%a simulation study can be run by calling
-%
-%\begin{center}
-%\texttt{pspline.validate.scalars\allowbreak(fun.truth, n.truth, fun.obs, n.obs, fun.model, fun.outcome)}
-%\end{center}
-%
-%where \texttt{n.truth} is the number of time series of true disease incidence generated for the simulation study and \texttt{n.obs} is the number of time series of observed disease incidence generated from each time series of true disease incidence. 
-%\section*{Results}
-
-%For our RSV study we investigated two outcome measures:
-%
-%\begin{itemize}
-%\item Onset/offset time, defined as the time ($t_\mathit{th}$) at which RSV cumulative disease incidence rises above a predefined threshold ($C_\mathit{th}$) relative to the total disease incidence: \begin{equation*}
-%    t_\mathit{th} = \max(t_0 : \sum_{t \leq t_0}I(t) / \sum_t I(t) \leq C_\mathit{th})
-%\end{equation*} where $I(t)$ is RSV incidence at time $t$.
-%\item Protected fraction ($f_p$), defined as the fraction of all RSV cases occurring during the time period ($[t_\mathit{start}, t_\mathit{end}]$) during which a prophylaxis regimen provides protection: \begin{equation*}
-%    f_p(t_\mathit{start}, t_\mathit{end}) = \sum_{t = t_\mathit{start}}^{t_\mathit{end}} I(t) / \sum_t I(t)
-%\end{equation*}
-%\end{itemize}
-%
+Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate the protected fraction estimates.
 
 \section*{Results}
 
@@ -455,7 +402,7 @@ To evaluate the results of our method, we consider three measures of robustness:
 \item Fractional bias (for onset and offset only): absolute bias divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
-Our simulation study produced the following robustness measures:
+Our simulation study produced the following results:
 
 \begin{table}[h]
 \begin{tabular}{lllll}
@@ -470,11 +417,11 @@ Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.b
 \end{tabular}
 \end{table}
 
-Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric behavior of the pandemic curve at onset and offset. The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
+Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
 The protected fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
 
-Overall, our simulation study showed that our estimation method for onset, offset, and protected fraction meets the needs of our RSV research.
+Overall, our simulation study shows that our estimation method for onset, offset, and protected fraction meets the needs of our RSV research.
 
 \section*{Discussion}
 
@@ -486,7 +433,7 @@ To facilitate application of P-spline estimation to other research, we wrote an 
 
 The flexibility of our approach comes at a price. We validated our approach only for our input data and for our outcome measures; applications of this approach to other types of analysis will have to be validated independently. Our R package makes this validation simple to perform, but the validation is inherently time-consuming; whereas our analysis took minutes to run, validation of our analysis took hours. 
 
-Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC), because the computationally expensive step in our approach is validation, not the analysis itself. For example, although validation for our RSV outcome measures took hours of computer time, the analysis itself took only minutes; and the time-consuming validation does not need to be repeated for subsequent analyses of onset, offset, or protected fraction on data sets with characteristics that were covered by our validation.
+Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC), because the computationally expensive step in our approach is validation, not the analysis itself. In our RSV research, the hours-long validation does not need to be repeated for subsequent analyses of onset, offset, or protected fraction on data sets with characteristics that were covered by our validation.
 
 The estimates produced by our method are likely to be biased (as shown in our RSV application); measuring that bias (using our validation tools) and assessing its impact on results is, necessarily, left up to the individual application.
 
