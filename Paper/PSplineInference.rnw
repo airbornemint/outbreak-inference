@@ -35,7 +35,7 @@
 \SetWatermarkHorCenter{12ex}
 \SetWatermarkVerCenter{12ex}
 \SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 4}
+\SetWatermarkText{DRAFT 5}
 
 \usepackage{amssymb}
 \usepackage{wasysym}
@@ -245,6 +245,7 @@ These challenges are exemplified by analyses of the dynamics of respiratory sync
 In this study, our goal was to develop a method of retrospective analysis of infectious disease incidence that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as onset time) while being flexible as to the precise definition of the characteristic of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the time of the start and the end of its seasons.
 
 \section*{Methods}
+\todo[inline,color=green!20]{Section restructured, needs re-review}
 
 \subsection*{Motivation}
 
@@ -370,7 +371,7 @@ We defined our other outcome measure, the protected fraction ($f_p$) of a prophy
 We repeated the above method to estimate the protected fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season. (Ref RSV paper)
 
 \subsection*{Simulation study}
-\todo[inline,color=green!20]{This section now ready for feedback}
+\todo[inline,color=green!20]{This subsection now ready for feedback}
 
 We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
 
