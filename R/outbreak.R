@@ -87,10 +87,13 @@ pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
   function(model, data) {
     # Calculate cumulative case counts from the model and parameters
     data.cumrel = pspline.outbreak.cumcases.relative(model, data)
+    time.name = pred.var(model)
+    cases.name = model.var(model)
+    cumcases.name = sprintf("%s.cumrel", cases.name)
 
     data.frame(
-      onset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, onset),
-      offset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, offset)
+      onset=threshold.ts(data.cumrel[[time.name]], data.cumrel[[cumcases.name]], onset),
+      offset=threshold.ts(data.cumrel[[time.name]], data.cumrel[[cumcases.name]], offset)
     )
   }
 }
