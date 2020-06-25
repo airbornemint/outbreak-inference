@@ -44,7 +44,7 @@ services:
             target: paper-tools
        
     ############################################################
-    # Commands for converting figures to PDF and EPS
+    # Commands for knitting the paper
     paper-knit:
         image: paper-tools:dev
         entrypoint: ["Rscript", "-e"]
