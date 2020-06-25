@@ -71,6 +71,7 @@ sampleDisplayNsim = 100
 # ---- figures ----
 
 import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs, sec_axis, geom_histogram)
+import::from(dplyr, "%>%", filter, mutate, do, arrange, first, last, ungroup)
 import::from(ggstance, geom_violinh)
 import::from(gridExtra, grid.arrange)
 import::from(grDevices, dev.off)
