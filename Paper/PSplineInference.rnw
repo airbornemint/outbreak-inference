@@ -44,6 +44,8 @@
 \usepackage{graphicx}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+\DeclareMathOperator{\Poiss}{Poiss}
+\DeclareMathOperator{\Unif}{Unif}
 
 \edef\figuresDir{./figures}
 
@@ -226,7 +228,7 @@ There is often a need to estimate the characteristics of epidemics or seasonalit
 % Use first person. 
 \section*{Author summary}
 
-Prevention and treatment of seasonal infections use numerous resources, such as pharmaceuticals, laboratory equipment, and clinical and non-clinical staff. Optimizing the use of these resources usually requires forecasting the timing of infectious disease seasons. In our research of respiratory syncytial virus (a seasonal respiratory infection that is a significant cause of infant hospitalizations and mortality world-wide) we used splines (a type of mathematical curve with convenient and well-understood statistical properties) to develop a new approach to estimate the time of seasonal epidemics. We also developed an R package to facilitate use or our methods in other research. Here we present our general approach and outline its applications to RSV.
+Prevention and treatment of seasonal infections use numerous resources, such as pharmaceuticals, laboratory equipment, and clinical and non-clinical staff. Optimizing the use of these resources usually requires forecasting the timing of infectious disease seasons. In our research of respiratory syncytial virus (a seasonal respiratory infection that is a significant cause of infant hospitalizations and mortality world-wide) we used splines (a type of mathematical curve with convenient and well-understood statistical properties) to develop a new approach to obtain interval estimates of temporal characteristics (such as onset and offset) of seasonal epidemics. We also developed an R package to facilitate use or our methods in other research. Here we present our general approach and outline its applications to RSV.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Content
@@ -238,11 +240,11 @@ Prevention and treatment of seasonal infections use numerous resources, such as 
 
 Analyses of infectious disease dynamics often make inferences based on timing for various quantities of clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Typically, a regression model (e.g., a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculations of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
 
-Calculating the uncertainty of estimates from these types of GAM/GLM-based methods presents a challenge under frequentist approaches. The models provide measures of uncertainty for the individual parameters; however, calculating the quantities of interest often would require differentiation or integration with respect to time (to identify outbreak transition points or to determine overall disease burden), for which there is no straightforward way to calculate uncertainty using standard frequentist analysis tools. Therefore, uncertainty in the derived estimates is often ignored, or \textit{ad hoc} approaches, such as block bootstrapping, are used to calculate confidence intervals. 
+Calculating the uncertainty of estimates from these types of GAM/GLM-based methods presents a challenge under frequentist approaches. Frequentist models typically provide measures of uncertainty for the individual model parameters. However, calculating the quantities of interest from those model parameters often requires differentiation or integration with respect to time (for example, to identify outbreak transition points or to determine overall disease burden), and frequentist approaches typically offer no straightforward way to calculate uncertainty of differentiated or integrated model parameters. As a result, frequentist tools in infectious disease modeling typically leave out uncertainty from estimation; when they do allow for uncertainty estimates, they typically do so with methods that are either complex to use or computationally intensive (or both), such as block bootstrapping. 
 
 These challenges are exemplified by analyses of the dynamics of respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive, and the duration of antibody protection is short-lived, so administration of prophylaxis needs to be timed with the RSV season to provide optimal protection. Therefore, estimating the timing of initiation of the RSV season in different locations is important. A variety of methods have been employed for this purpose\cite{Midgley:2017bo}, with various data-smoothing approaches (such as moving averages) and various onset criteria (including weekly incidence of RSV and change in weekly incidence of RSV). The various methods exhibit different degrees of sensitivity to the characteristics of the data outside the RSV season. 
 
-In this study, our goal was to develop a method of retrospective analysis of infectious disease incidence that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as onset time) while being flexible as to the precise definition of the characteristic of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the time of the start and the end of its seasons.
+In this study, our goal was to develop a general framework of retrospective analysis of infectious disease incidence that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as onset time) while being flexible as to the precise definition of the characteristic of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the time of the start and the end of its seasons.
 
 \section*{Methods}
 \todo[inline,color=green!20]{Section restructured, needs re-review}
@@ -263,9 +265,7 @@ To answer these questions, we defined the following outcome measures:
 \item Protected fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics.
-
-Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
+Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics. Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
 
 Additionally, we used a simulation study to validate this interval estimation method for our outcome measures.
 
@@ -311,9 +311,12 @@ By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:
 
 To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t) = I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic basis spline $B_i$ (with 2nd degree smoothing penalty) as the only model term:
 
-\begin{align*}
-    \log\left\{\hat{I}(t)\right\} &= \beta_0 + \sum_{j=1}^{20} \beta_j B_j(t)
-\end{align*}
+\begin{equation}
+\begin{aligned}
+    y(t) &= \Poiss(\lambda(t)) \\
+    \log\left\{\lambda(t)\right\} &= \beta_0 + \sum_{j=1}^{20} \beta_j B_j(t)
+\end{aligned}
+\end{equation}
 
 The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 
@@ -335,7 +338,7 @@ In this model $\hat{\beta_i} \approx \text{N}(\mu_i, \sigma_i)$, with the best-f
 \end{center}
 \end{figure}
 
-Having obtained a smooth model of out incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
+Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
 \int_{t_\mathit{min}}^{t_\mathit{on}} I(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt \\
@@ -399,23 +402,39 @@ To evaluate the results of our method, we consider three measures of robustness:
 
 \begin{itemize}
 \item Coverage: the fraction of estimated $95$\% confidence intervals that (correctly) include the true value of the outcome measure
-\item Absolute bias: the absolute value of the difference between point estimates and the true value
-\item Fractional bias (for onset and offset only): absolute bias divided by $t_\mathit{off} - t_\mathit{on}$
+\item Mean absolute error: the mean absolute value of the difference between point estimates and the true value
+\item Error sign: the sign of the mean difference between point estimates and the true value
+\item Scaled mean absolute error (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
-Our simulation study produced the following results:
+The results of our simulation study are shown in Table~\ref{fig:samplePredOnsetFull}.
 
 \begin{table}[h]
 \begin{tabular}{lllll}
 
-					           &  Season onset                                                                   &  Season offset                                                                  & Protected fraction                                                               \\ \hline
-Coverage  		           &  \Sexpr{round(100*validationResults$summary$onset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$offset.good, 2)}\%                   & \Sexpr{round(100*validationResults$summary$preventable.good, 2)}\%               \\ \hline
-Absolute bias mean             &  \Sexpr{round(validationResults$summary$onset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$offset.bias, 2)} weeks                   & \Sexpr{round(validationResults$summary$preventable.bias, 2)}                     \\ \hline
-Absolute bias standard error   &  \Sexpr{round(validationResults$summary$onset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$offset.bias.se, 5)} weeks                & \Sexpr{round(validationResults$summary$preventable.bias.se, 5)}                  \\ \hline
-Bias direction                 &  $\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$      & $\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$  \\ \hline
-Fractional bias mean           &  \Sexpr{round(validationResults$summary$onset.bias.frac, 3)}                    & \Sexpr{round(validationResults$summary$offset.bias.frac, 3)}                    & ---                                                                              \\ \hline
-Fractional bias standard error &  \Sexpr{round(validationResults$summary$onset.bias.frac.se, 5)}                 & \Sexpr{round(validationResults$summary$offset.bias.frac.se, 5)}                 & ---
+    & 
+Season onset &
+Season offset &
+Protected fraction \\ \hline
+Coverage &
+\Sexpr{format(round(100*validationResults$summary$onset.good, 2), scientific=FALSE)}\% &
+\Sexpr{format(round(100*validationResults$summary$offset.good, 2), scientific=FALSE)}\% &
+\Sexpr{format(round(100*validationResults$summary$preventable.good, 2), scientific=FALSE)}\% \\ \hline
+MAE (SE) &
+\Sexpr{format(round(validationResults$summary$onset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.se, 3), scientific=FALSE)}) weeks &
+\Sexpr{format(round(validationResults$summary$offset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.se, 3), scientific=FALSE)}) weeks &
+\Sexpr{format(round(validationResults$summary$preventable.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$preventable.bias.se, 4), scientific=FALSE)}) \\ \hline
+Error sign &
+$\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$ &
+$\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$ &
+$\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$ \\ \hline
+Scaled MAE (SE) &
+\Sexpr{format(round(validationResults$summary$onset.bias.frac, 3), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.frac.se, 4), scientific=FALSE)}) &
+\Sexpr{format(round(validationResults$summary$offset.bias.frac, 3), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.frac.se, 4), scientific=FALSE)}) &
+---
 \end{tabular}
+\caption{Simulation study results. MAE: Mean absolute Error. SE: Standard error}
+\label{fig:samplePredOnsetFull}
 \end{table}
 
 Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
@@ -426,7 +445,7 @@ Overall, our simulation study shows that our estimation method for onset, offset
 
 \section*{Discussion}
 
-In this study, we demonstrate how P-spline regression and resampling can be used to generate uncertainty intervals for quantities derived from disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious diseases), as well as other outcome measures.
+In this study, we demonstrate how P-spline regression, combined with parameter resampling, can be used to generate uncertainty intervals for quantities derived from disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious diseases), as well as other outcome measures.
 
 We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines (TODO cite RSV paper). 
 
