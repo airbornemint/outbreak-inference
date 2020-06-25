@@ -49,7 +49,6 @@ ENTRYPOINT ["Rscript", "-e"]
 ############################################################
 # Tex environment we use to build the paper (it includes R because of knitr)
 FROM r AS tex
-LABEL maintainer="Ben Artin <ben@artins.org>"
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	wget \
