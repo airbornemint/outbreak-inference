@@ -263,7 +263,7 @@ To answer these questions, we defined the following outcome measures:
 
 \begin{itemize}
 \item Season onset and offset, defined as the points in time when the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season
-\item Protected fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
+\item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
 Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics. Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
@@ -407,7 +407,7 @@ The number of seasons was chosen to balance power of our simulation and its comp
 
 For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $y(t) \sim \Poiss(I_0(t))$ at weekly intervals. We also calculated the true values $t_\mathit{on}$ and $t_\mathit{off}$ directly from $I_0(t)$ for each season.
 
-Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate the protected fraction estimates.
+Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $I_0(t)$) were contained in the 95\% CI at least 95\% of the time. We repeated the same process to validate the preventable fraction estimates.
 
 \section*{Results}
 
@@ -452,21 +452,21 @@ Scaled MAE (SE) &
 
 Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
-The protected fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
+The preventable fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
 
-Overall, our simulation study shows that our estimation method for onset, offset, and protected fraction meets the needs of our RSV research.
+Overall, our simulation study shows that our estimation method for onset, offset, and preventable fraction meets the needs of our RSV research.
 
 \section*{Discussion}
 
 In this study, we demonstrate how P-spline regression, combined with parameter resampling, can be used to generate uncertainty intervals for quantities derived from disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious diseases), as well as other outcome measures.
 
-We focus on specific outcome measures (onset/offset time and protected fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines (TODO cite RSV paper). 
+We focus on specific outcome measures (onset/offset time and preventable fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines. 
 
 To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and the Comprehensive R Archive Network (CRAN), and its documentation includes examples beyond those shown here.
 
 The flexibility of our approach comes at a price. We validated our approach only for our input data and for our outcome measures; applications of this approach to other types of analysis will have to be validated independently. Our R package makes this validation simple to perform, but the validation is inherently time-consuming; whereas our analysis took minutes to run, validation of our analysis took hours. 
 
-Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC), because the computationally expensive step in our approach is validation, not the analysis itself. In our RSV research, the hours-long validation does not need to be repeated for subsequent analyses of onset, offset, or protected fraction on data sets with characteristics that were covered by our validation.
+Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC), because the computationally expensive step in our approach is validation, not the analysis itself. In our RSV research, the hours-long validation does not need to be repeated for subsequent analyses of onset, offset, or preventable fraction on data sets with characteristics that were covered by our validation.
 
 The estimates produced by our method are likely to be biased (as shown in our RSV application); measuring that bias (using our validation tools) and assessing its impact on results is, necessarily, left up to the individual application.
 
