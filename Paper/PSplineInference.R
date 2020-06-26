@@ -80,8 +80,8 @@ import::from(magrittr, "%>%")
 
 inlinePlotWidth = 3.1
 inlinePlotHeight = 2.5
-pagePlotWidth = inlinePlotWidth * 2.1
-pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
+pagePlotWidth = inlinePlotWidth * 1.8
+pagePlotHeight = inlinePlotHeight * 1.8 * 2 / 5
 plotTextBaseSize = 8
 
 figuresDir = paste0(getOption("pspline.paper.output", "."), "/figures")
@@ -106,7 +106,6 @@ commonOptions = list(
     panel.grid.major.x=element_blank(),
     legend.title=element_blank(),
     axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
     legend.position="bottom"
   )
 )
@@ -114,26 +113,25 @@ commonOptions = list(
 tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-    geom_point(aes(x=time, y=cases), size=.5) +
-    commonOptions
+  geom_point(aes(x=time, y=cases), size=.5) +
+  commonOptions
 
 dev.off()
 
 tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-  geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="grey") +
-  geom_point(aes(x=time, y=cases), size=.5) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="black", size=0.5) +
+  geom_point(aes(x=time, y=cases), size=.5, color="black", shape=1) +
   commonOptions
-
 
 dev.off()
 
 tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
-  geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
+  geom_line(aes(x=time, y=cases, group=pspline.sample), color="black", size=0.2) +
+  geom_point(data=obs, aes(x=time, y=cases), size=0.5, color="black", shape=1) +
   commonOptions
 
 dev.off()
@@ -141,11 +139,11 @@ dev.off()
 tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
-  geom_point(data=predThresholdsMini, aes(x=onset, y=0), size=0.75, shape=17) +
-  geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), linetype="11") +
-  geom_point(data=predThresholdsMini, aes(x=offset, y=0), size=0.75, shape=17) +
-  geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), linetype="11") +
+  geom_line(aes(x=time, y=cases, group=pspline.sample), color="black", size=0.2) +
+  geom_point(data=predThresholdsMini, aes(x=onset, y=0), size=0.5, shape=17) +
+  geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), size=0.1) +
+  geom_point(data=predThresholdsMini, aes(x=offset, y=0), size=0.5, shape=17) +
+  geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), size=0.1) +
   commonOptions
 
 dev.off()
@@ -158,19 +156,20 @@ splineData = data %>% filter(pspline.sample < sampleDisplayNsim)
 ggplot(predThresholdsFull) +
   # geom_line(data=splineData, aes(x=time, y=cases, group=pspline.sample), color="gray") +
   # geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-  geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="black", size=0.2) +
+  geom_point(data=obs, aes(x=time, y=cases), size=0.25, color="black", shape=1) +
   geom_density(
     data=predThresholdsFull,
     aes(x=onset, y=5 * ..density..),
     # width=1,
-    fill="gray50", color=NA, trim=TRUE
+    fill="black", color=NA, trim=TRUE
     # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
   geom_density(
     data=predThresholdsFull,
     aes(x=offset, y=5 * ..density..),
     # width=1,
-    fill="gray50", color=NA, trim=TRUE
+    fill="black", color=NA, trim=TRUE
     # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
   # coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +

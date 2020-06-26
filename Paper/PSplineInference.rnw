@@ -19,6 +19,7 @@
 \usepackage{setspace}
 \usepackage{etoolbox}
 \usepackage{ifthen}
+\usepackage[margin=1em]{subcaption}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[mode=image|tex]{standalone}
@@ -329,48 +330,42 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
-\paperincludegraphic{\figuresDir/sampleBestFit}
-\caption[P-spline approximation of RSV incidence]{Incidence of RSV-associated hospitalizations, with best-fit P-spline}
-\label{fig:sampleBestFit}
+\begin{subfigure}[t]{0.45\textwidth}
+    \paperincludegraphic{\figuresDir/sampleBestFit}
+    \caption[P-spline approximation of RSV incidence]{Incidence of RSV-associated hospitalizations, with best-fit P-spline}
+    \label{fig:sampleBestFit}
+\end{subfigure}
+\begin{subfigure}[t]{0.45\textwidth}
+    \paperincludegraphic{\figuresDir/samplePredMini}
+    \caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with $\Sexpr{sampleNsimMini}$ sampled approximating $P$-splines}
+    \label{fig:samplePredMini}
+\end{subfigure}
+\begin{subfigure}[t]{0.45\textwidth}
+    \paperincludegraphic{\figuresDir/samplePredOnsetMini}
+    \caption[Estimates of RSV season onset and offset]{Estimates of RSV season onset and offset numerically computed from P-spline approximations to RSV incidence.}
+    \label{fig:samplePredOnsetMini}
+\end{subfigure}
+\begin{subfigure}[t]{0.45\textwidth}
+    \paperincludegraphic{\figuresDir/samplePredOnsetFull}
+    \caption[Distribution of estimated RSV season onset]{Distribution of estimates of RSV season onset and offset.}
+    \label{fig:samplePredOnsetFull}
+\end{subfigure}
 \end{center}
+    \caption{}
 \end{figure}
 
 In this model $\hat{c_k} \approx \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $E(y(t))$ is a function of $c_k$ and the distribution of each $c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
-\begin{figure}
-\begin{center}
-\paperincludegraphic{\figuresDir/samplePredMini}
-\caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with $\Sexpr{sampleNsimMini}$ sampled approximating $P$-splines}
-\label{fig:samplePredMini}
-\end{center}
-\end{figure}
-
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
-\int_{t_\mathit{min}}^{t_\mathit{on}} y(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt \\
-\int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \hat{I}(t) dt
+\int_{t_\mathit{min}}^{t_\mathit{on}} y(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt \\
+\int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{align*}
 
-Given any $y(t)$ sampled via $c_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thus indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
-
-\begin{figure}
-\begin{center}
-\paperincludegraphic{\figuresDir/samplePredOnsetMini}
-\caption[Estimates of RSV season onset and offset]{Estimates of RSV season onset and offset numerically computed from P-spline approximations to RSV incidence.}
-\label{fig:samplePredOnsetMini}
-\end{center}
-\end{figure}
+Given any $y(t)$ sampled via $c_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thus indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetFull}.
 
 Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
-
-\begin{figure}
-\begin{center}
-\paperincludegraphic{\figuresDir/samplePredOnsetFull}
-\caption[Distribution of estimated RSV season onset]{Distribution of estimates of RSV season onset and offset.}
-\label{fig:samplePredOnsetFull}
-\end{center}
-\end{figure}
 
 We defined our other outcome measure, the preventable fraction ($F_p$) of a prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, as:
 
