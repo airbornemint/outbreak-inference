@@ -41,7 +41,8 @@ library(doParallel)
 library(parallel)
 
 # Set up parallel processing, used for simulation study
-registerDoParallel(detectCores())
+limitCores = ifelse(as.logical(Sys.getenv("_R_CHECK_LIMIT_CORES_", "FALSE")), 2, NA)
+registerDoParallel(min(detectCores(), limitCores, na.rm=TRUE))
 opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
 ```
 
