@@ -200,10 +200,11 @@
 Ben Artin\textsuperscript{1*},
 Daniel M.\ Weinberger\textsuperscript{1},
 Virginia E.\ Pitzer\textsuperscript{1},
-Joshua L.\ Warren\textsuperscript{1}
+Joshua L.\ Warren\textsuperscript{2}
 \\
 \bigskip
 \textbf{1} Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University, New Haven, Connecticut, US
+\textbf{2} Department of Biostatistics, Yale School of Public Health, Yale University, New Haven, Connecticut, US
 \\
 \bigskip
 
