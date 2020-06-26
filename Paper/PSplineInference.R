@@ -128,7 +128,7 @@ dev.off()
 tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-  geom_line(data=predCasesBest, aes(x=time, y=cases.median, color="black"), size=0.5) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases.median, color="black"), size=0.2) +
   geom_point(aes(x=time, y=cases, size=0.5), color="black", shape=1) +
   scale_color_identity(guide="legend", breaks=c("black"), labels=c("Model"), name=NULL) +
   scale_size_identity(guide="legend", breaks=c(0.5), labels=c("Observed"), name=NULL) +
