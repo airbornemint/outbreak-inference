@@ -98,6 +98,6 @@ truth.results.scalars <- function(truth, fun.observations, n.observations, fun.m
         fun.observations() %>%
         observed.results.scalars(truth, expected, fun.model, fun.outcome, n.samples, level) %>%
         mutate(idx.observations=idx)
-    }, .parallel=TRUE)
+    }, .parallel=TRUE, .paropts=list(.packages=c("dplyr")))
 }
 
