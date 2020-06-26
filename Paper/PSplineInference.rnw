@@ -415,9 +415,9 @@ To evaluate the results of our method, we consider three measures of robustness:
 
 \begin{itemize}
 \item Coverage: the fraction of estimated $95$\% confidence intervals that (correctly) include the true value of the outcome measure
-\item Mean absolute error: the mean absolute value of the difference between point estimates and the true value
-\item Error sign: the sign of the mean difference between point estimates and the true value
-\item Scaled mean absolute error (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
+\item Mean absolute error (MAE): the mean absolute value of the difference between point estimates and the true value
+\item MAE sign: the sign of the mean difference between point estimates and the true value
+\item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
 The results of our simulation study are shown in Table~\ref{fig:samplePredOnsetFull}.
@@ -426,31 +426,30 @@ The results of our simulation study are shown in Table~\ref{fig:samplePredOnsetF
 \begin{tabular}{lllll}
 
     & 
-Season onset &
-Season offset &
-Protected fraction \\ \hline
-Coverage &
+\multicolumn{2}{c}{\textbf{Season timing}} &
+\\
+    & 
+\textbf{Onset (weeks)} &
+\textbf{Offset (weeks)} &
+\textbf{Preventable fraction} \\ \hline
+\textbf{Coverage} &
 \Sexpr{format(round(100*validationResults$summary$onset.good, 2), scientific=FALSE)}\% &
 \Sexpr{format(round(100*validationResults$summary$offset.good, 2), scientific=FALSE)}\% &
-\Sexpr{format(round(100*validationResults$summary$preventable.good, 2), scientific=FALSE)}\% \\ \hline
-MAE (SE) &
-\Sexpr{format(round(validationResults$summary$onset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.se, 3), scientific=FALSE)}) weeks &
-\Sexpr{format(round(validationResults$summary$offset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.se, 3), scientific=FALSE)}) weeks &
-\Sexpr{format(round(validationResults$summary$preventable.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$preventable.bias.se, 4), scientific=FALSE)}) \\ \hline
-Error sign &
-$\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$ &
-$\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$ &
-$\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$ \\ \hline
-Scaled MAE (SE) &
-\Sexpr{format(round(validationResults$summary$onset.bias.frac, 3), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.frac.se, 4), scientific=FALSE)}) &
-\Sexpr{format(round(validationResults$summary$offset.bias.frac, 3), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.frac.se, 4), scientific=FALSE)}) &
+\Sexpr{format(round(100*validationResults$summary$preventable.good, 2), scientific=FALSE)}\% \\ % \hline
+\textbf{MAE (SE)} &
+$\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$onset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.se, 3), scientific=FALSE)}) &
+$\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$offset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.se, 3), scientific=FALSE)}) &
+$\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$preventable.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$preventable.bias.se, 4), scientific=FALSE)}) \\ % \hline
+\textbf{Scaled MAE (SE)} &
+\Sexpr{format(round(100*validationResults$summary$onset.bias.frac, 3), scientific=FALSE)}\% (\Sexpr{format(round(validationResults$summary$onset.bias.frac.se, 4), scientific=FALSE)}) &
+\Sexpr{format(round(100*validationResults$summary$offset.bias.frac, 3), scientific=FALSE)}\% (\Sexpr{format(round(validationResults$summary$offset.bias.frac.se, 4), scientific=FALSE)}) &
 ---
 \end{tabular}
 \caption{Simulation study results. MAE: Mean absolute Error. SE: Standard error}
 \label{fig:samplePredOnsetFull}
 \end{table}
 
-Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
+Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($\sim0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
 The preventable fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
 
