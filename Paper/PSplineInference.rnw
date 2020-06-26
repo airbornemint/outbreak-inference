@@ -332,29 +332,29 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 \begin{center}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/sampleBestFit}
-    \caption[P-spline approximation of RSV incidence]{Incidence of RSV-associated hospitalizations, with best-fit P-spline}
+    \caption[P-spline approximation of RSV incidence]{Best-fit P-spline model of RSV incidence}
     \label{fig:sampleBestFit}
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/samplePredMini}
-    \caption[P-spline samples approximating of RSV incidence]{Incidence of RSV-associated hospitalizations, with $\Sexpr{sampleNsimMini}$ sampled approximating $P$-splines}
+    \caption[P-spline samples approximating of RSV incidence]{$\Sexpr{sampleNsimMini}$ different sampled P-spline models of RSV incidence}
     \label{fig:samplePredMini}
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/samplePredOnsetMini}
-    \caption[Estimates of RSV season onset and offset]{Estimates of RSV season onset and offset numerically computed from P-spline approximations to RSV incidence.}
+    \caption[Estimates of RSV season onset and offset]{$\Sexpr{sampleNsimMini}$ different computed estimates of RSV season onset and offset.}
     \label{fig:samplePredOnsetMini}
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/samplePredOnsetFull}
-    \caption[Distribution of estimated RSV season onset]{Distribution of estimates of RSV season onset and offset.}
+    \caption[Distribution of estimated RSV season onset]{Sampled distribution of RSV season onset and offset estimates.}
     \label{fig:samplePredOnsetFull}
 \end{subfigure}
 \end{center}
     \caption{}
 \end{figure}
 
-In this model $\hat{c_k} \approx \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $E(y(t))$ is a function of $c_k$ and the distribution of each $c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $c_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $y(t)$ is a function of $c_k$ and the distribution of each $c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
