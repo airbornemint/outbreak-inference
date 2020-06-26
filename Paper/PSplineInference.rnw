@@ -203,7 +203,7 @@ Virginia E.\ Pitzer\textsuperscript{1},
 Joshua L.\ Warren\textsuperscript{1}
 \\
 \bigskip
-\textbf{1} Yale School of Public Health, Yale University, New Haven, Connecticut, US
+\textbf{1} Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University, New Haven, Connecticut, US
 \\
 \bigskip
 
