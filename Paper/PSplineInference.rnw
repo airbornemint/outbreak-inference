@@ -261,7 +261,7 @@ To answer these questions, we defined the following outcome measures:
 \item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics. Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves. The fitting curves we use are penalized basis splines (P-splines), which have been shown to have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
+Existing approaches to estimating those outcomes measures either were time-consuming or did not provide interval estimates, and hence we developed our method to enable more computationally efficient interval estimation of time-based outbreak characteristics. Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves using parameter resampling. The fitting curves we use are penalized basis splines (P-splines), which have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior.\cite{Eilers:1996kz}
 
 Additionally, we used a simulation study to validate this interval estimation method for our outcome measures.
 
@@ -299,7 +299,7 @@ and treating the spline linear coefficients $c_{i,k}$ as the model parameters $\
 \end{aligned}\label{eqn:model}
 \end{equation}
 
-with $\beta_0$ and $c_{i,k}$ as model parameters, and $n_i$ and $P_i$ chosen prior to analysis.
+with $\beta_0$ and $\beta_{i,j} = c_{i,k}$ as model parameters, and $n_i$ and $P_i$ chosen prior to analysis.
 
 This model can be fitted to data simply by minimizing $\Vert y - E(y) \Vert^2$; however, this approach often leads to overfitting, especially with a larger number of knots. To mitigate this, the model can be modified to instead minimize $\Vert y - E(y) \Vert^2 + P$, where $P$ is a \textit{penalty function} that measures non-smoothness of the model response variable. This approach balances closeness of fit with smoothness. B-splines used in a model with a penalty function are known as \textit{penalized B-splines} (P-splines)\cite{Eilers:1996kz}. A variety of penalty functions have been defined; the most common ones use $p$-th order differences between the model and the data, for some small integer $p$ (often $p = 2$). As with general cyclic splines, \textit{cyclic P-splines} are an extension of P-splines to periodic functions.
 
@@ -317,7 +317,7 @@ By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:
 \end{center}
 \end{figure}
 
-To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t) = I(t)$ as the model response variable, $\log$ link function, and a 20-term cubic spline basis $B_k$ (with 2nd degree smoothing penalty) as the only model term:
+To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t)$ as the model response variable, $\log$ link function, and a 20-term cubic spline basis $B_k$ as the only model term:
 
 \begin{equation}
 \begin{aligned}
@@ -326,7 +326,7 @@ To estimate the season onset and offset for this RSV season, we begin by fitting
 \end{aligned}
 \end{equation}
 
-The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
+The best fit produced by this model (using a 2nd degree smoothing penalty) is shown in Fig~\ref{fig:sampleBestFit}.
 
 \begin{figure}
 \begin{center}
@@ -354,7 +354,7 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
     \caption{}
 \end{figure}
 
-In this model $c_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $y(t)$ is a function of $c_k$ and the distribution of each $c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
@@ -363,7 +363,7 @@ Having obtained a smooth model of our incidence data, we can turn to our first o
 \int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{align*}
 
-Given any $y(t)$ sampled via $c_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thus indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
+Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
 
 Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
@@ -391,7 +391,7 @@ We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each
 \item Fit a $\log$-linked cubic P-spline to $y^*(t)$ to obtain true instantaneous incidence $y_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
 \end{enumerate}
 
-The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our research. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our data. 
+The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our approach. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our data. 
 
 For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $y(t) \sim \Poiss(y_0(t))$ at weekly intervals. We also calculated the true values of $t_\mathit{on}$ and $t_\mathit{off}$ directly from $y_0(t)$ for each season.
 
