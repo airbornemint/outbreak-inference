@@ -335,7 +335,7 @@ The best fit produced by this model is shown in Fig~\ref{fig:sampleBestFit}.
 \end{center}
 \end{figure}
 
-In this model $\hat{c_k} \approx \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $E(y(t))$ is a function of $\c_k$ and the distribution of each $\c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $\hat{c_k} \approx \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $c_k = \mu_k$. Since $E(y(t))$ is a function of $c_k$ and the distribution of each $c_k$ is known from the model, we can sample $y(t)$ indirectly by sampling $c_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k c_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ different $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
 
 \begin{figure}
 \begin{center}
