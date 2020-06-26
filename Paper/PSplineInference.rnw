@@ -208,7 +208,7 @@ Joshua L.\ Warren\textsuperscript{1}
 \bigskip
 
 % Use the asterisk to denote corresponding authorship and provide email address in note below.
-* ben.artin@yale.edu
+* ben@artins.org
 
 \end{flushleft}
 
