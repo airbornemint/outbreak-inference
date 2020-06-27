@@ -45,6 +45,7 @@
 #' @author Ben Artin \email{ben@@artins.org}
 #'
 #' @examples
+#' \donttest{
 #' # Simulate an outbreak for analysis
 #' cases = data.frame(
 #'   time=seq(0, 51),
@@ -90,6 +91,7 @@
 #'     xmax=thresholds$offset.upper,
 #'     ymin=-Inf, ymax=Inf, alpha=.25) +
 #'  labs(x="Time", y="Incidence")
+#' }
 #'
 #' @importFrom stats coef na.omit predict quantile rnorm ecdf
 #' @importFrom utils head tail
