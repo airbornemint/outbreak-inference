@@ -18,3 +18,4 @@ LICENSE.md
 ^build.env$
 ^gitlab-ci.yml$
 ^Presentations$
+^Dockerfile$
