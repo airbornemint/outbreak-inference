@@ -53,7 +53,7 @@ quantile.multi = function(data, probs, prob.names) {
         mutate(name=name)
     }) %>%
     melt(id.vars="name") %>%
-    mutate(variable=sprintf(as.character(variable), name)) %>%
+    mutate(variable=sprintf(as.character(.data$variable), .data$name)) %>%
     dcast(. ~ variable) %>%
     select(-.)
 }
@@ -70,7 +70,7 @@ quantile.outcomes = function(data, model, probs, prob.names) {
   predictors = intersect(names(data), pred.vars(model))
 
   confints = function(samples) {
-    outcomes = samples %>% select(-pspline.sample)
+    outcomes = samples %>% select(-.data$pspline.sample)
     if (length(predictors) > 0) {
       common = outcomes %>% select(predictors) %>% summarize_all(first)
       outcomes %<>% select(-predictors)
@@ -100,7 +100,7 @@ quantile.outcomes = function(data, model, probs, prob.names) {
 #' @return list of ECDFs
 #' @keywords internal
 ecdf.outcomes = function(data, model) {
-  data %<>% select(-pspline.sample)
+  data %<>% select(-.data$pspline.sample)
   outcomes = setdiff(names(data), pred.vars(model))
   lapply(outcomes, function(outcome) {
     ecdf(data[[outcome]])

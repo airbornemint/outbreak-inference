@@ -103,4 +103,5 @@
 #' @importFrom magrittr %>% %<>%
 #' @importFrom assertthat assert_that
 #' @importFrom plotrix std.error
+#' @importFrom rlang .data
 NULL
