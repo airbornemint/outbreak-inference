@@ -8,7 +8,7 @@ stages:
   - pdf
 
 variables:
-  R_BUILD_DIR: "build"
+  R_BUILD_DIR: "package"
   KNITR_OUTPUT_DIR: "knitr"
   TEX_DIR: "Paper"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"

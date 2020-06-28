@@ -7,7 +7,7 @@
 LICENSE.md
 ^\.git
 ^Paper
-^build
+^package
 ^knitr
 ^overleaf
 ^review
