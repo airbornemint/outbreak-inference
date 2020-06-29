@@ -33,6 +33,7 @@ infectious disease outbreaks, such as \code{\link{pspline.outbreak.cases}} and \
 of outbreak onset and offset.
 }
 \examples{
+\donttest{
 # Simulate an outbreak for analysis
 cases = data.frame(
   time=seq(0, 51),
@@ -78,6 +79,7 @@ ggplot() +
     xmax=thresholds$offset.upper,
     ymin=-Inf, ymax=Inf, alpha=.25) +
  labs(x="Time", y="Incidence")
+}
 
 }
 \author{

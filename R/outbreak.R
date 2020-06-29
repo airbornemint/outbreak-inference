@@ -44,9 +44,9 @@ pspline.outbreak.cumcases = function(model, data) {
   data %>%
     rename_at(time.name, function(x) "pspline.time") %>%
     rename_at(cases.name, function(x) "pspline.cases") %>%
-    arrange(pspline.time) %>%
-    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
-    select(-pspline.cases) %>%
+    arrange(.data$pspline.time) %>%
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(.data$pspline.time, .data$pspline.cases)) %>%
+    select(-.data$pspline.cases) %>%
     rename_at("pspline.cumcases", function(x) cumcases.name) %>%
     rename_at("pspline.time", function(x) time.name)
 }
@@ -67,10 +67,10 @@ pspline.outbreak.cumcases.relative = function(model, data) {
   data %>%
     rename_at(time.name, function(x) "pspline.time") %>%
     rename_at(cases.name, function(x) "pspline.cases") %>%
-    arrange(pspline.time) %>%
-    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
-    mutate(pspline.cumcases=pspline.cumcases / max(pspline.cumcases)) %>%
-    select(-pspline.cases) %>%
+    arrange(.data$pspline.time) %>%
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(.data$pspline.time, .data$pspline.cases)) %>%
+    mutate(pspline.cumcases=.data$pspline.cumcases / max(.data$pspline.cumcases)) %>%
+    select(-.data$pspline.cases) %>%
     rename_at("pspline.cumcases", function(x) cumcases.name) %>%
     rename_at("pspline.time", function(x) time.name)
 }

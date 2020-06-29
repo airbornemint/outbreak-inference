@@ -45,6 +45,7 @@
 #' @author Ben Artin \email{ben@@artins.org}
 #'
 #' @examples
+#' \donttest{
 #' # Simulate an outbreak for analysis
 #' cases = data.frame(
 #'   time=seq(0, 51),
@@ -90,15 +91,17 @@
 #'     xmax=thresholds$offset.upper,
 #'     ymin=-Inf, ymax=Inf, alpha=.25) +
 #'  labs(x="Time", y="Incidence")
+#' }
 #'
 #' @importFrom stats coef na.omit predict quantile rnorm ecdf
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
-#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all
+#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all summarize across
 #' @importFrom reshape2 melt dcast
 #' @importFrom plyr adply ldply
 #' @importFrom stats setNames
 #' @importFrom magrittr %>% %<>%
 #' @importFrom assertthat assert_that
 #' @importFrom plotrix std.error
+#' @importFrom rlang .data
 NULL

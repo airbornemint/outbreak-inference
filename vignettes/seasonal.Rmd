@@ -40,9 +40,11 @@ library(ggplot2)
 library(doParallel)
 library(parallel)
 
+# Housekeeping for publishing on CRAN
+source("cran.R")
+
 # Set up parallel processing, used for simulation study
-limitCores = ifelse(as.logical(Sys.getenv("_R_CHECK_LIMIT_CORES_", "FALSE")), 2, NA)
-registerDoParallel(min(detectCores(), limitCores, na.rm=TRUE))
+registerDoParallel(min(detectCores(), vignette.eval$limitCores, na.rm=TRUE))
 opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
 ```
 
@@ -205,12 +207,12 @@ basePlot(casesEst, c("casesObs", "casesEst")) +
 
 Another simple outcome measure that the package can calculate for us is the relative cumulative incidence, using the `pspline.outbreak.cumcases.relative` function. Here we estimate and plot cumulative incidence at the 95% confidence level. Because we are calculating *relative* incidence, the outcome is constrained to 0 before the outbreak starts and to 1 after the outbreak ends, and therefore the confidence intervals are at their narrowest before and after the outbreak. 
 
-```{r estimate cum cases, include=FALSE}
+```{r estimate cum cases, include=FALSE, eval=vignette.eval$full}
 cumCasesRelEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases.relative, samples=n, level=0.95)
 ```
 
-```{r estimate cum cases plot}
+```{r estimate cum cases plot, eval=vignette.eval$full}
 basePlot(cumCasesRelEst, c("casesObs", "casesEst")) +
   geom_ribbon(aes(x=time, ymin=cases.cumrel.lower, ymax=cases.cumrel.upper, fill="casesEst")) +
   geom_point(data=obs, aes(x=time, y=cases.cumrel, color="casesObs", size="casesObs")) +
@@ -319,7 +321,7 @@ seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatment
 
 This is how we would use it:
 
-```{r custom est parameterized, include=FALSE}
+```{r custom est parameterized, include=FALSE, eval=vignette.eval$full}
 seriousEst <- model %>%
   pspline.estimate.timeseries(
     predictors, 
@@ -329,7 +331,7 @@ seriousEst <- model %>%
   )
 ```
 
-```{r custom est parameterized plot}
+```{r custom est parameterized plot, eval=vignette.eval$full}
 basePlot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
   geom_line(aes(x=time, y=seriouscases.cum.median, color="seriousEstMedian")) +
   geom_line(data=cumCasesEst, aes(x=time, y=cases.cum.median, color="casesEstMedian")) +
@@ -377,7 +379,7 @@ kable_styling(
 
 Similar to time series outcomes, we can obtain the individual samples of a scalar outcome using the `pspline.sample.scalars` function. This is useful for visualization -- in this example, we show the density plot of the estimated time when medication supply will run out:
 
-```{r plot supply duration, warning=FALSE}
+```{r plot supply duration, warning=FALSE, eval=vignette.eval$full}
 supplyDurationSamples <- model %>% 
   pspline.sample.scalars(predictors, medicationSupplyEnd(medicationQuantity=50), samples=n)
 
@@ -452,7 +454,7 @@ Finally, we need a way to calculate outcomes. We aready wrote `medicationSupplyE
 
 Simulation studies are time-consuming, so for demonstration puspose we'll only include 10*10=100 simulations in this study. A proper simulation study would need to be bigger.
 
-```{r validate supply duration, include=FALSE}
+```{r validate supply duration, include=FALSE, eval=vignette.eval$full}
 set.seed(0)
 validationResults = pspline.validate.scalars(
   fun.truth=generateTruths,
@@ -466,12 +468,12 @@ validationResults = pspline.validate.scalars(
 )
 ```
 
-The simulation study shows that using the P-spline GAM method to obtain the 95% confidence interval for the date when the supply of 50 doses will run out yields confidence intervals that contain the true value `r (validationResults$supply.duration.good * 100)[1]`% of the time
+The simulation study shows whether the 95% confidence interval reported by the P-spline GAM method actually contains the true value 95% of the time:
 
-```{r validate supply duration table}
+```{r validate supply duration table, eval=vignette.eval$full}
 kable_styling(
   kable(
-    validationResults$summary$supply.duration.good, 
+    sprintf("%.2f%%", validationResults$summary$supply.duration.good * 100), 
     caption="Validation results: frequency with which true value is included in the 95% CI", 
     col.names=c("Supply duration")
   )

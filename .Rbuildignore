@@ -7,7 +7,7 @@
 LICENSE.md
 ^\.git
 ^Paper
-^build
+^package
 ^knitr
 ^overleaf
 ^review
@@ -18,3 +18,4 @@ LICENSE.md
 ^build.env$
 ^gitlab-ci.yml$
 ^Presentations$
+^Dockerfile$

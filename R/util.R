@@ -36,12 +36,13 @@ eval.model = function(params, model, predictors, outcome) {
   # Get model predictions for given param values
   fit = predict(model, predictors, type="lpmatrix") %*% params
 
-  predictors %>%
-    mutate(
-      pspline.out=model$family$linkinv(fit)
-    ) %>%
-    rename_at("pspline.out", function(x) model.var(model)) %>%
-    outcome(model, .)
+  model %>% outcome(
+    predictors %>%
+      mutate(
+        pspline.out=model$family$linkinv(fit)
+      ) %>%
+      rename_at("pspline.out", function(x) model.var(model))
+  )
 }
 
 #' @keywords internal
@@ -53,9 +54,9 @@ quantile.multi = function(data, probs, prob.names) {
         mutate(name=name)
     }) %>%
     melt(id.vars="name") %>%
-    mutate(variable=sprintf(as.character(variable), name)) %>%
+    mutate(variable=sprintf(as.character(.data$variable), .data$name)) %>%
     dcast(. ~ variable) %>%
-    select(-.)
+    select(-".")
 }
 
 #' Calculate quantiles of model outcome variables
@@ -69,28 +70,19 @@ quantile.multi = function(data, probs, prob.names) {
 quantile.outcomes = function(data, model, probs, prob.names) {
   predictors = intersect(names(data), pred.vars(model))
 
-  confints = function(samples) {
-    outcomes = samples %>% select(-pspline.sample)
-    if (length(predictors) > 0) {
-      common = outcomes %>% select(predictors) %>% summarize_all(first)
-      outcomes %<>% select(-predictors)
+    confints = function(samples) {
+      samples %>% 
+        select(-.data$pspline.sample) %>% 
+        quantile.multi(probs, prob.names)
     }
-    outcomes %<>% quantile.multi(probs, prob.names)
-
-    if (length(predictors) > 0) {
-      outcomes %<>% cbind(common)
-    }
-
-    return(outcomes)
-  }
 
   if (length(predictors) > 0) {
     data %>%
       group_by_at(predictors) %>%
-      do(confints(.)) %>%
+      summarize(confints(across())) %>%
       ungroup()
   } else {
-    data %>% do(confints(.))
+    data %>% summarize(confints(across()))
   }
 }
 
@@ -100,7 +92,7 @@ quantile.outcomes = function(data, model, probs, prob.names) {
 #' @return list of ECDFs
 #' @keywords internal
 ecdf.outcomes = function(data, model) {
-  data %<>% select(-pspline.sample)
+  data %<>% select(-.data$pspline.sample)
   outcomes = setdiff(names(data), pred.vars(model))
   lapply(outcomes, function(outcome) {
     ecdf(data[[outcome]])

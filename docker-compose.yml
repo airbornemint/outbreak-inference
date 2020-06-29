@@ -17,12 +17,12 @@ services:
             - |
                 devtools::build(
                     pkg="/package", 
-                    path="${R_BUILD_DIR:-build}", 
+                    path="${R_BUILD_DIR:-package}", 
                     vignettes=${R_BUILD_VIGNETTES:-FALSE}, 
                     binary=FALSE
                 )
         volumes:
-            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+            - "./${R_BUILD_DIR:-package}:/package/${R_BUILD_DIR:-package}"
         
     ############################################################
     # Commands for checking the package
@@ -33,7 +33,7 @@ services:
                 devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))
         env_file: build.env
         volumes:
-            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+            - "./${R_BUILD_DIR:-package}:/package/${R_BUILD_DIR:-package}"
 
     ############################################################
     # Tools for building the paper
@@ -59,7 +59,7 @@ services:
                 )
         env_file: build.env
         volumes:
-            - "./${R_BUILD_DIR:-build}:/tex/${R_BUILD_DIR:-build}"
+            - "./${R_BUILD_DIR:-package}:/tex/${R_BUILD_DIR:-package}"
             - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
        
     ############################################################
