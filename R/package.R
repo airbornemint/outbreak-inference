@@ -45,7 +45,6 @@
 #' @author Ben Artin \email{ben@@artins.org}
 #'
 #' @examples
-#' \donttest{
 #' # Simulate an outbreak for analysis
 #' cases = data.frame(
 #'   time=seq(0, 51),
@@ -59,13 +58,17 @@
 #' # Generate time series at which model will be evaluated for estimates
 #' # Usually you want this to be the same as the time interval that your observations are in, except
 #' # divided into small increments (here, eps)
-#' eps = .05
+#' # Using a smaller eps gives more accurate estimates, but takes longer to run. A smaller value than 0.25 would be better for final analysis
+#' eps = .1
 #' estTimes = data.frame(time=seq(min(cases$time) - 0.5, max(cases$time) + 0.5 - eps, by=eps))
 #' 
 #' # Estimate incidence
 #' estCases = pspline.estimate.timeseries(
 #'   model, estTimes,
-#'   pspline.outbreak.cases, level=.95
+#'   pspline.outbreak.cases,
+#'   # Using a large number of samples makes the analysis more robust; using only 40 samples makes this example run fast (default is 2000)
+#'   samples=40, 
+#'   level=.95
 #' )
 #' 
 #' # Estimate time when outbreak crosses 5\% and 95\% of cumulative case count
@@ -73,7 +76,10 @@
 #' offsetThreshold = 1 - onsetThreshold
 #' thresholds = pspline.estimate.scalars(
 #'   model, estTimes,
-#'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), level=.95
+#'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), 
+#'   # Using a large number of samples makes the analysis more robust; using only 40 samples makes this example run fast (default is 2000)
+#'   samples=40, 
+#'   level=.95
 #' )
 #' 
 #' # Plot cumulative incidence estimates and threshold estimates
@@ -91,7 +97,6 @@
 #'     xmax=thresholds$offset.upper,
 #'     ymin=-Inf, ymax=Inf, alpha=.25) +
 #'  labs(x="Time", y="Incidence")
-#' }
 #'
 #' @importFrom stats coef na.omit predict quantile rnorm ecdf
 #' @importFrom utils head tail
