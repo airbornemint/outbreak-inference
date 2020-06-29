@@ -435,14 +435,6 @@ In summary, ours is a method of retrospective analysis of infectious disease out
 \appendix
 \section*{Supplement: P-spline GAMs in brief}
 
-A \textit{generalized additive model} provides a framework for modeling a response variable $y$, using predictor variables $x_i, i=1, \hdots, p$, with corresponding potentially non-linear predictor functions $f_i, i = 1, \hdots, p$, and a link function $g$, such that the expected value, $E(y)$, is defined as
-
-\begin{equation}
-    g\left(E(y)\right) = \beta_0 + \sum_{i=1}^p f_i(x_i; \beta_{i,1}, \beta_{i,2}, \hdots)
-\end{equation}
-
-where $\beta_0$ and $\beta_{i,j}$ represent unknown model parameters.
-
 A \textit{spline} of order $n$ is a piecewise polynomial real function $S(x)$ of degree $n - 1$ on interval $[x_L, x_R]$; the points $p_1, p_2, \dots, p_m \in [x_L, x_R]$ at which its polynomial segments join are known as its \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[x_L, x_R]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
 For any set of knots $P = \left\{ p_1, \dots, p_m \right\}$, we can construct a unique set of $m - n$ splines of order $n$ known as the \textit{basis splines (B-splines) over $P$}, denoted with $B_k(x; n; P), k = 1, \hdots, m-n$. Every spline $S(x)$ of order $n$ with knots $P$ can be uniquely represented as a linear combination of the basis splines $B_k(x; n; P)$ such that:
@@ -452,6 +444,14 @@ S(x) = \sum_{k=1}^{m-n} c_k B_k(x; n; p_1, \hdots, p_m), c_k\in\mathbb{R}
 \end{equation}
 
 A \textit{cyclic spline} of order $n$ is a piecewise polynomial periodic real function $f(x) = f(x - T)$. As with non-cyclic splines, a cyclic spline of order $n$ is continuous in up to $n - 1$ derivatives, and we only consider those continuous in exactly $n - 1$ derivatives. Use of cyclic splines is often necessary in infectious disease modeling because non-cyclic splines do not guarantee smoothness at $x_L \pm k T$ when extended to multiple periods. Basis splines of cyclic splines are themselves cyclic.
+
+A \textit{generalized additive model} provides a framework for modeling a response variable $y$, using predictor variables $x_i, i=1, \hdots, p$, with corresponding potentially non-linear predictor functions $f_i, i = 1, \hdots, p$, and a link function $g$, such that the expected value, $E(y)$, is defined as
+
+\begin{equation}
+    g\left(E(y)\right) = \beta_0 + \sum_{i=1}^p f_i(x_i; \beta_{i,1}, \beta_{i,2}, \hdots)
+\end{equation}
+
+where $\beta_0$ and $\beta_{i,j}$ represent unknown model parameters.
 
 Splines can be used for each predictor function in a GAM by setting:
 
