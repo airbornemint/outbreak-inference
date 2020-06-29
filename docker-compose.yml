@@ -30,7 +30,7 @@ services:
         image: package-tools:dev
         command:
             - |
-                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))
+                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'), run_dont_test=TRUE)
         env_file: build.env
         volumes:
             - "./${R_BUILD_DIR:-package}:/package/${R_BUILD_DIR:-package}"
