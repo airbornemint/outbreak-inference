@@ -15,6 +15,7 @@ services:
         image: package-tools:dev
         command:
             - |
+                devtools::document(roclets = c('rd'))
                 devtools::build(
                     pkg="/package", 
                     path="${R_BUILD_DIR:-package}", 
