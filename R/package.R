@@ -53,13 +53,13 @@
 #' 
 #' # Generate GAM model for outbreak; see mgcv for details
 #' library(mgcv)
-#' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=cases)
+#' model = gam(cases ~ s(time, k=10, bs="cp", m=3), family=poisson, data=cases)
 #' 
 #' # Generate time series at which model will be evaluated for estimates
 #' # Usually you want this to be the same as the time interval that your observations are in, except
 #' # divided into small increments (here, eps). Using a smaller eps gives more accurate estimates, 
-#' # but takes longer to run. A value smaller than 0.25 would be better for final analysis
-#' eps = .25
+#' # but takes longer to run. A value smaller than 0.5 would be better for final analysis
+#' eps = 0.5
 #' estTimes = data.frame(time=seq(min(cases$time) - 0.5, max(cases$time) + 0.5 - eps, by=eps))
 #' 
 #' # Estimate incidence
@@ -67,8 +67,8 @@
 #'   model, estTimes,
 #'   pspline.outbreak.cases,
 #'   # Using a large number of samples makes the analysis more robust; 
-#'   # using only 20 samples makes this example run fast (default is 2000)
-#'   samples=20, 
+#'   # using only 15 samples makes this example run fast (default is 2000)
+#'   samples=15, 
 #'   level=.95
 #' )
 #' 
@@ -79,8 +79,8 @@
 #'   model, estTimes,
 #'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), 
 #'   # Using a large number of samples makes the analysis more robust; 
-#'   # using only 20 samples makes this example run fast (default is 2000)
-#'   samples=20, 
+#'   # using only 15 samples makes this example run fast (default is 2000)
+#'   samples=15, 
 #'   level=.95
 #' )
 #' 

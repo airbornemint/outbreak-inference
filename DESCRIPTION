@@ -1,6 +1,6 @@
 Package: pspline.inference
 Title: Estimation of Non-Linear Outcomes of Infectious Disease Outbreaks using Generalized Additive Modeling with Penalized Basis Splines 
-Version: 0.22
+Version: 0.23
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre", "cph"))
 Description: Stochastic inference of non-linear outcomes of infectious disease outbreaks using generalized additive (mixed) models.
 Depends: R (>= 3.4.0)
