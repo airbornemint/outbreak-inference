@@ -10,12 +10,12 @@ To accomplish this, you:
 
 With this information, `pspline.inference` samples the outcome measure of interest from the model to calculate the estimates.
 
-This package can handle two types of outcome measures:
+This package can handle two types of estimates:
 
- * Scalar outcomes, in which a single numerical outcome is calculated from the system (for example, the time when an infectious disease outbreak reaches its peak)
+ * Scalar estimates, in which a single numerical outcome is calculated from the system (for example, the time when an infectious disease outbreak reaches its peak)
  * Time series estimates, in which a time series of outcomes is calculated from the system (for example, the cumulative incidence during an outbreak).
  
- See package documentation in R — `?pspline.inference` — for more information.
+ See package documentation in R — `?pspline.inference` — for more information, as well as the package vignette — `vignette('seasonal')`.
  
 ## Installation
  
