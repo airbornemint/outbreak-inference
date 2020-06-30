@@ -18,8 +18,12 @@ The package works by using generalized additive models (GAMs) with penalized bas
 
 We begin by loading the package:
 
-```{r package, include=FALSE}
+```{r package}
 library(pspline.inference)
+library(mgcv)
+library(magrittr)
+library(dplyr)
+library(kableExtra)
 ```
 
 ```{r setup, include=FALSE}
@@ -189,7 +193,7 @@ In this simple example, we estimate the 95% confidence interval for infection ca
 
 We will see examples later of how to estimate custom outcomes, but for this simple example we can use the `pspline.outbreak.cases` function (which is built into the package) to calculate our outcome of interest. 
 
-```{r estimated cases, include=FALSE}
+```{r estimated cases}
 casesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cases, samples=n, level=0.95)
 ```
@@ -207,7 +211,7 @@ basePlot(casesEst, c("casesObs", "casesEst")) +
 
 Another simple outcome measure that the package can calculate for us is the relative cumulative incidence, using the `pspline.outbreak.cumcases.relative` function. Here we estimate and plot cumulative incidence at the 95% confidence level. Because we are calculating *relative* incidence, the outcome is constrained to 0 before the outbreak starts and to 1 after the outbreak ends, and therefore the confidence intervals are at their narrowest before and after the outbreak. 
 
-```{r estimate cum cases, include=FALSE, eval=vignette.eval$full}
+```{r estimate cum cases, eval=vignette.eval$full}
 cumCasesRelEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases.relative, samples=n, level=0.95)
 ```
@@ -237,7 +241,7 @@ basePlot(casesSamples, c("casesObs", "casesEstSamples")) +
 
 It may be useful -- especially for visualization purposes -- to obtain outcome estimates as well as the outcome samples those estimates were derived from. Calling `pspline.sample.timeseries` followed by `pspline.confints.timeseries` (which is what `pspline.estimate.timeseries` does internally) gives you access to individual samples as well as their resultant confidence interval. Here we draw 100 samples and then calculate a confidence interval from them. 
 
-```{r cases estimates and stats, include=FALSE}
+```{r cases estimates and stats}
 casesSamples <- model %>%
   pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=100)
   
@@ -275,14 +279,14 @@ seriousDiseaseCases <- function(model, data) {
 
 We can now combine our custom outcome measure calculation with time series estimation:
 
-```{r custom time series est, include=FALSE}
+```{r custom time series est}
 seriousEst <- model %>%
   pspline.estimate.timeseries(predictors, seriousDiseaseCases, samples=n, level=0.95)
 ```
 
 We'll also calculate an estimate of all cumulative cases (serious or not), to better visualize the effect of the treatment
 
-```{r custom cum cases est, include=FALSE}
+```{r custom cum cases est}
 cumCasesEst <- model %>%
   pspline.estimate.timeseries(predictors, pspline.outbreak.cumcases, samples=n, level=0.95)
 ```
@@ -321,7 +325,7 @@ seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatment
 
 This is how we would use it:
 
-```{r custom est parameterized, include=FALSE, eval=vignette.eval$full}
+```{r custom est parameterized, eval=vignette.eval$full}
 seriousEst <- model %>%
   pspline.estimate.timeseries(
     predictors, 
@@ -365,7 +369,9 @@ medicationSupplyEnd <- function(medicationQuantity) {
 
 supplyDurationEst <- model %>% 
   pspline.estimate.scalars(predictors, medicationSupplyEnd(medicationQuantity=50))
+```
 
+```{r estimate supply duration table, echo=TRUE}
 kable_styling(
   kable(
     supplyDurationEst, 
