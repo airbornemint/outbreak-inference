@@ -113,7 +113,7 @@ ggplot(cumCasesRelEst, c("casesObs", "casesEst")) +
 
 The package provides access to the individual samples of the outcome measure, which can be helpful for visualization. For example, if you ask for 15 sampled estimates of case counts, you will get a data frame with a `pspline.sample` column identifying the 15 time series samples:
 
-```{r plot cases estimates}
+```{r plot cases estimates, eval=vignette.eval$full}
 casesSamples <- model %>%
   pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=15)
   
@@ -127,7 +127,7 @@ ggplot(casesSamples, c("casesObs", "casesEstSamples")) +
 
 It may be useful -- especially for visualization purposes -- to obtain outcome estimates as well as the outcome samples those estimates were derived from. Calling `pspline.sample.timeseries` followed by `pspline.confints.timeseries` (which is what `pspline.estimate.timeseries` does internally) gives you access to individual samples as well as their resultant confidence interval. Here we take 100 samples across the entire time series, then calculate confidence intervals from them:
 
-```{r cases estimates and stats}
+```{r cases estimates and stats, eval=vignette.eval$full}
 casesSamples <- model %>%
   pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=100)
   
@@ -189,7 +189,7 @@ ggplot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
 
 Our custom outcome calculation function will probably be more useful if we allow progression rate, treatment success rate, and treatment supply to be varied. We can accomplish this by using a function within a function:
 
-```{r custom calc parameterized}
+```{r custom calc parameterized, eval=vignette.eval$full}
 seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatmentMax) {
   function(model, data) {
     # Calculate cumulative incidence
@@ -293,7 +293,7 @@ Being able to estimate an outcome is useful, but in order to trust those estimat
 Let's run a simulation study to validate our estimate of the time when the medication supply will run out, as described in the previous examples. First, we need a function to generate a true outbreak:
 
 
-```{r generate truth}
+```{r generate truth, eval=vignette.eval$full}
 
 generateTruths <- function() {
   timeMin = 1
@@ -322,7 +322,7 @@ generateTruths <- function() {
 
 Next, we need a function which will generate observations from a true process. Since we are dealing with infectious disease incidence, we will take observations to be Poisson-distributed with the distribution parameter equal to the true value. We will sample the true process in one-week increments:
 
-```{r generate observations}
+```{r generate observations, eval=vignette.eval$full}
 generateObservations <- function(truth) {
   # Initialize with observation sampling times
   observed = data.frame(time = seq(min(truth$time) + 0.5, max(truth$time), 1))
@@ -336,7 +336,7 @@ generateObservations <- function(truth) {
 
 We also need to specify how to create a model from a set of observations. We'll use Poisson (log) link and a 20-knot cyclic cubic p-spline:
 
-```{r make model}
+```{r make model, eval=vignette.eval$full}
 makeModel <- function(data) {
   gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
 }

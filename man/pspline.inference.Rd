@@ -47,7 +47,7 @@ model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=cases)
 # Usually you want this to be the same as the time interval that your observations are in, except
 # divided into small increments (here, eps). Using a smaller eps gives more accurate estimates, 
 # but takes longer to run. A value smaller than 0.25 would be better for final analysis
-eps = .1
+eps = .25
 estTimes = data.frame(time=seq(min(cases$time) - 0.5, max(cases$time) + 0.5 - eps, by=eps))
 
 # Estimate incidence
@@ -55,8 +55,8 @@ estCases = pspline.estimate.timeseries(
   model, estTimes,
   pspline.outbreak.cases,
   # Using a large number of samples makes the analysis more robust; 
-  # using only 40 samples makes this example run fast (default is 2000)
-  samples=40, 
+  # using only 20 samples makes this example run fast (default is 2000)
+  samples=20, 
   level=.95
 )
 
@@ -67,8 +67,8 @@ thresholds = pspline.estimate.scalars(
   model, estTimes,
   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), 
   # Using a large number of samples makes the analysis more robust; 
-  # using only 40 samples makes this example run fast (default is 2000)
-  samples=40, 
+  # using only 20 samples makes this example run fast (default is 2000)
+  samples=20, 
   level=.95
 )
 
