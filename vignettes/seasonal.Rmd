@@ -3,7 +3,7 @@ author: "Ben Artin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Example of applying p-spline inference to seasonal infections}
+  %\VignetteIndexEntry{P-spline estimation of seasonal infection outcomes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{pspline.inference, dplyr, mgcv, ggplot2, knitr, kableExtra, magrittr, doParallel, parallel, import}
@@ -18,7 +18,7 @@ The package works by using generalized additive models (GAMs) with penalized bas
 
 We begin by loading the package and a few other libraries needed by the code below:
 
-```{r setup}
+```{r setup, message=FALSE}
 library(pspline.inference)
 
 library(mgcv)
@@ -49,15 +49,15 @@ obs$cases.cum <- cumsum(obs$cases)
 obs$cases.cumrel <- obs$cases.cum / max(obs$cases.cum)
 ```
 
-Next, we generate a log-linked (`family=poisson`) GAM with 20-knot (`k=20`) cubic (`m=3`) cyclic P-splines (`bs="cp"`). You can vary the number of knots as needed. Fewer knots result in faster computation, but looser fit; more knots will take longer to compute, but increasing the number of knots beyond a certain point will not improve the fit. We chose 20 knots for our analysis by increasing the number of knots and plotting the model predictions until fit visualy converged. 
+Next, we generate a log-linked (`family=poisson`) GAM with 20-knot (`k=20`) cubic (`m=3`) cyclic P-splines (`bs="cp"`). You can vary the number of knots as needed. Fewer knots result in faster computation, but looser fit; more knots will take longer to compute, but increasing the number of knots beyond a certain point will not improve the fit. In your analysis, start with a small number of knots and increase it until adding more doesn't change the results. 
 
 ```{r model}
 model <- gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=obs)
 ```
 
-Generate a vector of time values at which the model will be sampled. This is used for analysis (whenever the analysis requires numeric integration) as well as visualization (whenever a spline is plotted). Higher `sampleFreq` increases the accuracy of results, but also increases computation time.
+Generate a vector of time values at which the model will be sampled. This is used for analysis (in particular, for estimation of rates of change and areas under curves) as well as visualization (plotting splines). Higher `sampleFreq` increases the accuracy of results, but also increases computation time.
 
-Here, we set up the time covariate so that it runs from one half time period (inclusive) before the start of the observed times to one half time period (non-inclusive) after the end of the observed times. 
+Here, we set up the time time values so they run from one half time period (inclusive) before the start of the observed times to one half time period (non-inclusive) after the end of the observed times. 
 
 ```{r model time}
 sampleFreq <- 20
@@ -65,17 +65,17 @@ modelTime <- seq(min(obs$time) - 0.5, max(obs$time) + 0.5 - 1 / sampleFreq, 1 / 
 predictors = data.frame(time=modelTime)
 ```
 
-This is the number of samples that will be drawn from the outcome distribution. Higher `n` decreases the variance of results, but also increases computation time.
+This is the number of samples that will be drawn from the outcome distribution. Higher `n` decreases the variance of results, but also increases computation time. 20 is enough for draft analysis and this demo.
 
 ```{r model samples}
 n <- 20
 ```
 
-There are two main types of outcome measures that this package can estimate: time series outcomes (in which an outcome estimate is calculated for each observed time point), and scalar outcomes (in which a single overall outcome estimate is calculated). 
+There are two main types of outcome measures that this package can estimate: time series outcomes (in which an outcome estimate is calculated for each observed time point), and scalar outcomes (in which a single overall outcome estimate is calculated across all time points). 
 
 ## Example 1: Time series outcome estimation
 
-In this simple example, we estimate the 95% confidence interval for infection case counts. The workhorse of time series estimation is the `pspline.estimate.timeseries` function, which takes three parameters: a data from of covariates at which the outcome will be estimated (`covariates`, which we set up above), a function which calculates the desired outcome, and the number of samples we want to draw (`n`).
+In this simple example, we estimate the 95% confidence interval for infection case counts. The workhorse of time series estimation is the `pspline.estimate.timeseries` function, which takes three parameters: a data frame of predictors at which the outcome will be estimated (`predictors`, which we set up above), a function which calculates the desired outcome, and the number of samples we want to draw (`n`).
 
 We will see examples later of how to estimate custom outcomes, but for this simple example we can use the `pspline.outbreak.cases` function (which is built into the package) to calculate our outcome of interest. 
 
@@ -123,21 +123,9 @@ ggplot(casesSamples, c("casesObs", "casesEstSamples")) +
   labs(y="Cases")
 ```
 
-## Example 4: Combining sampled outcomes with summary statistics
+Here `casesSamples` is a data frame of `cases` values for each `time` value, for 100 different samples. The samples are differentiated by the `pspline.sample` column. 
 
-It may be useful -- especially for visualization purposes -- to obtain outcome estimates as well as the outcome samples those estimates were derived from. Calling `pspline.sample.timeseries` followed by `pspline.confints.timeseries` (which is what `pspline.estimate.timeseries` does internally) gives you access to individual samples as well as their resultant confidence interval. Here we take 100 samples across the entire time series, then calculate confidence intervals from them:
-
-```{r cases estimates and stats, eval=vignette.eval$full}
-casesSamples <- model %>%
-  pspline.sample.timeseries(predictors, pspline.outbreak.cases, samples=100)
-  
-casesEst <- casesSamples %>% 
-  pspline.confints.timeseries(model, level=0.95)
-```
-
-Here `casesSamples` is a data frame of `cases` values for each `time` value, for 100 different samples. The samples are differentiated by the `pspline.sample` column. Similarly, `casesEst` is a data frame containing the median, the lowel CL, and the upper CL of the case count (as in example 2 above), for the same 100 samples. 
-
-## Example 5: Estimation of a custom time series outcome
+## Example 4: Estimation of a custom time series outcome
 
 Suppose that the infection we are investigating progresses to serious disease in 80% of cases, but that it can be treated — before it progresses — with a treatment that has a 90% success rate. Also suppose that our supply is limited to 50 treatments, and that treatment is administered to all infected people until we run out of supply.
 
@@ -187,7 +175,7 @@ ggplot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
   labs(y="Cases")
 ```
 
-Our custom outcome calculation function will probably be more useful if we allow progression rate, treatment success rate, and treatment supply to be varied. We can accomplish this by using a function within a function:
+Our custom outcome calculation function would probably be more useful if it allowed progression rate, treatment success rate, and treatment supply to be varied. We can accomplish this by using a function within a function:
 
 ```{r custom calc parameterized, eval=vignette.eval$full}
 seriousDiseaseCases <- function(progressionRate, treatmentSuccessRate, treatmentMax) {
@@ -221,15 +209,7 @@ seriousEst <- model %>%
   )
 ```
 
-```{r custom est parameterized plot, eval=vignette.eval$full}
-ggplot(seriousEst, c("casesObs", "casesEstMedian", "seriousEstMedian")) +
-  geom_line(aes(x=time, y=seriouscases.cum.median, color="seriousEstMedian")) +
-  geom_line(data=cumCasesEst, aes(x=time, y=cases.cum.median, color="casesEstMedian")) +
-  geom_point(data=obs, aes(x=time, y=cases.cum, color="casesObs", size="casesObs")) +
-  labs(y="Cases")
-```
-
-## Example 6: Scalar outcome measures
+## Example 5: Scalar outcome measures
 
 Rather than considering the expected incidence of the infection at hand, and its serious manifestation, let us now consider a related question: if we administer preventative medication on a first-come-first-served basis, and we have 50 doses of it, when do we expect to run out?
 
@@ -267,7 +247,7 @@ kable_styling(
 )
 ```
 
-## Example 7: Accessing individual scalar samples
+## Example 6: Accessing individual scalar samples
 
 Similar to time series outcomes, we can obtain the individual samples of a scalar outcome using the `pspline.sample.scalars` function. This is useful for visualization -- in this example, we show the density plot of the estimated time when medication supply will run out:
 
@@ -286,12 +266,11 @@ ggplot(seriousEst, c("casesObs", "casesEst", "supplyEnd")) +
   labs(x=NULL, y="Cumulative incidence")
 ```
 
-## Example 8: Outcome estimate validation
+## Example 7: Outcome estimate validation
 
-Being able to estimate an outcome is useful, but in order to trust those estimates, we need to validate the method of estimation. This is what the `pspline.validate.scalars` function is for. It performs a simulation study by first generating one of more underlyign true behaviors of the process we are interested in, then generating one or more sets of observations from each true system, and then computing the outcome measures for each true process and each set of observations. The results it returns specify whether the true value of an outcome measure was included in the confidence interval the required number of times.
+Being able to estimate an outcome is useful, but in order to trust those estimates, we need to validate the method of estimation. This is what the `pspline.validate.scalars` function is for. It performs a simulation study by first generating one of more hypothetical true states of the process we are interested in, then generating one or more sets of observations from each true state, and then computing the outcome measures for each true process and each set of observations. The results of validation specify whether the true value of an outcome measure was included in the confidence interval the required number of times.
 
 Let's run a simulation study to validate our estimate of the time when the medication supply will run out, as described in the previous examples. First, we need a function to generate a true outbreak:
-
 
 ```{r generate truth, eval=vignette.eval$full}
 
@@ -342,11 +321,13 @@ makeModel <- function(data) {
 }
 ```
 
-Finally, we need a way to calculate outcomes. We aready wrote `medicationSupplyEnd` above, and it's critical that we use the exact same function for validation as we do for estimation. Let's now run a simulation study; we need to choose the number of truths we will generate and the number of observation sets we'll generate from each truth, as well as the confidence level and the number of splines that will be sampled to estimate the outcome from each set of observations.
+Finally, we need a way to calculate outcomes. We already wrote `medicationSupplyEnd` above, and it's obviously necessaty that we use the exact same function for validation as we do for estimation.
 
-Simulation studies are time-consuming, so for demonstration puspose we'll only include 10*10=100 simulations in this study. A proper simulation study would need to be bigger.
+Let's now run a simulation study; we need to choose the number of truths we will generate and the number of observation sets we'll generate from each truth, as well as the confidence level and the number of splines that will be sampled to estimate the outcome from each set of observations.
 
-```{r validate supply duration, eval=vignette.eval$full}
+Simulation studies are time-consuming, so for demonstration purpose we'll only include 10*10=100 simulations in this study. A proper simulation study would need to be bigger.
+
+```{r validate supply duration, message=FALSE, warning=FALSE, include=FALSE}
 set.seed(0)
 validationResults = pspline.validate.scalars(
   fun.truth=generateTruths,
@@ -360,13 +341,13 @@ validationResults = pspline.validate.scalars(
 )
 ```
 
-The simulation study shows whether the 95% confidence interval reported by the P-spline GAM method actually contains the true value 95% of the time:
+The simulation study shows whether the 95% confidence interval reported by the P-spline GAM method actually contains the true value 95% of the time. Due to the low power of the simulation study (only 10 truths and 10 observations), this validation doesn't quite reach 95%:
 
 ```{r validate supply duration table, eval=vignette.eval$full}
 kable_styling(
   kable(
     sprintf("%.2f%%", validationResults$summary$supply.duration.good * 100), 
-    caption="Validation results: frequency with which true value is included in the 95% CI", 
+    caption="Coverage: frequency with which true value is included in the 95% CI", 
     col.names=c("Supply duration")
   )
 )
