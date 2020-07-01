@@ -14,7 +14,7 @@ vignette: >
 
 The purpose of this package is to allow estimation of complex outcome measures of infectious disease outbreaks.
 
-The package works by using generalized additive models (GAMs) with penalized basis splines (p-splines) to approximate the observed data. Approximating splines are sampled from their distribution, and for each approximating spline, the outcome measure of interest is calculated. This yields a sampling distribution of the outcome measure of interest, from which point and itnerval estimates can then be obtained. 
+The package works by using generalized additive models (GAMs) with penalized basis splines (P-splines) to approximate the observed data. Approximating splines are sampled from their distribution, and for each approximating spline, the outcome measure of interest is calculated. This yields a sampling distribution of the outcome measure of interest, from which point and itnerval estimates can then be obtained. 
 
 We begin by loading the package and a few other libraries needed by the code below:
 
@@ -313,7 +313,7 @@ generateObservations <- function(truth) {
 }
 ```
 
-We also need to specify how to create a model from a set of observations. We'll use Poisson (log) link and a 20-knot cyclic cubic p-spline:
+We also need to specify how to create a model from a set of observations. We'll use Poisson (log) link and a 20-knot cyclic cubic P-spline:
 
 ```{r make model, eval=vignette.eval$full}
 makeModel <- function(data) {
