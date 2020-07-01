@@ -327,10 +327,10 @@ Let's now run a simulation study; we need to choose the number of truths we will
 
 Simulation studies are time-consuming, so for demonstration purpose we'll only include 10*10=100 simulations in this study. A proper simulation study would need to be bigger.
 
-```{r validate supply duration, message=FALSE, warning=FALSE, include=FALSE}
+```{r validate supply duration, message=FALSE, warning=FALSE, include=FALSE, eval=vignette.eval$full}
 set.seed(0)
 validationResults = pspline.validate.scalars(
-  fun.truth=generateTruths,
+  fun.truth=c,
   n.truths=10,
   fun.observations=generateObservations,
   n.observations=10,
