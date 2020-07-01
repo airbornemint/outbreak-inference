@@ -87,4 +87,3 @@ COPY Paper/renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
 COPY Paper .
-COPY vignettes/seasonal.csv /vignettes/seasonal.csv
