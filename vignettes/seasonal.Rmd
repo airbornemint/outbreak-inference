@@ -44,7 +44,7 @@ Next, we load observations. The example dataset is a CSV file consisting of week
 We also calculate observed cumulative incidence (absolute and relative) here; these are used only for subsequent visualization, not for analysis.
 
 ```{r data}
-obs <- read.csv("seasonal.csv")
+obs <- read.csv(system.file("extdata", "seasonal.csv", package="pspline.inference"))
 obs$cases.cum <- cumsum(obs$cases)
 obs$cases.cumrel <- obs$cases.cum / max(obs$cases.cum)
 ```

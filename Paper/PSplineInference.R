@@ -6,7 +6,7 @@ import::from(mgcv, gam)
 
 source("./Common.R")
 
-obs = read.csv("../vignettes/seasonal.csv")
+obs = read.csv(system.file("extdata", "seasonal.csv", package="pspline.inference"))
 obs$cases.cum = cumsum(obs$cases)
 obs$cases.cumrel = obs$cases.cum / max(obs$cases.cum)
 
