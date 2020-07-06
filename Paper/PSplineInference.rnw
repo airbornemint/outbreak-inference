@@ -226,7 +226,7 @@ There is often a need to estimate the characteristics of epidemics or seasonalit
 % Use first person. 
 \section*{Author summary}
 
-Prevention and treatment of seasonal infections use numerous resources, such as pharmaceuticals, laboratory equipment, and clinical and non-clinical staff. Optimizing the use of these resources usually requires forecasting the timing of infectious disease seasons. In our research of respiratory syncytial virus (a seasonal respiratory infection that is a significant cause of infant hospitalizations and mortality world-wide) we used splines (a type of mathematical curve with convenient and well-understood statistical properties) to develop a new approach to obtain interval estimates of temporal characteristics (such as onset and offset) of seasonal epidemics. We also developed an R package to facilitate use or our methods in other research. Here we present our general approach and outline its applications to RSV.
+Prevention and treatment of seasonal infections use numerous resources, such as pharmaceuticals, laboratory equipment, and clinical and non-clinical staff. Optimizing the use of these resources usually requires forecasting the timing of infectious disease seasons. In our research of respiratory syncytial virus (a seasonal respiratory infection that is a significant cause of infant hospitalizations and mortality world-wide) we used splines (a type of mathematical curves with convenient and well-understood statistical properties) to develop a new approach to obtain interval estimates of temporal characteristics of seasonal epidemics, such as the beginning and the end dates. We also developed an R package to facilitate use or our methods in other research. Here we present our general approach and outline its applications to RSV.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Content
@@ -240,9 +240,9 @@ Analyses of infectious disease dynamics often make inferences based on timing fo
 
 Calculating the uncertainty of estimates from these types of GAM/GLM-based methods presents a challenge under frequentist approaches. These challenges are exemplified by analyses of the dynamics of respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. \cite{Hall:2013jo,Hall:2009gi} In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive, and the duration of antibody protection is short-lived, \cite{Andabaka:2013dr,Hampp:2011ju} so administration of prophylaxis needs to be timed with the RSV season to provide optimal protection. \cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} Therefore, estimating the timing of initiation of the RSV season in different locations is important. 
 
-Frequentist models provide measures of uncertainty for the individual model parameters. However, calculating the quantities of interest from those model parameters often requires differentiation or integration with respect to time (for example, to identify outbreak transition points or to determine overall disease burden), and frequentist approaches typically offer no straightforward way to calculate uncertainty of differentiated or integrated model parameters. As a result, frequentist tools in RSV research --- such as those evaluated in \cite{Midgley:2017bo} --- typically leave out uncertainty from estimation. When they do allow for uncertainty estimates, frequentist methods in infectious disease modeling are often either complex to use (for example, block bootstrapping) or computationally intensive --- or both. Parameter resampling is an approach that offers uncertainty estimation and balances ease of use with computational efficiency, and has been applied to infectious disease modeling. \cite{Lauer:2018bp,Weinberger2020.04.15.20066431}
+Frequentist models provide measures of uncertainty for the individual model parameters. However, calculating the quantities of interest from those model parameters often requires differentiation or integration with respect to time (for example, to identify outbreak transition points or to determine overall disease burden), and frequentist approaches typically offer no straightforward way to calculate uncertainty of differentiated or integrated model parameters. As a result, frequentist tools in RSV research --- such as those evaluated in \cite{Midgley:2017bo} --- typically leave out uncertainty from estimation. When they do allow for uncertainty estimates, frequentist methods in infectious disease modeling are often either complex to use (for example, block bootstrapping) or computationally intensive --- or both. Parameter resampling is an approach that offers uncertainty estimation and balances ease of use with computational efficiency, and has been applied in infectious disease modeling. \cite{Lauer:2018bp,Weinberger2020.04.15.20066431}
 
-In this study, our goal was to generalize prior work on parameter resampling to develop a general framework of retrospective analysis of infectious diseases that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as outbreak onset time) while being flexible as to the precise definition of the characteristic of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the time of the start and the end of its seasons.
+In this study, our goal was to generalize prior work on parameter resampling to develop a general framework of retrospective analysis of infectious diseases that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as outbreak onset time) while being flexible as to the precise definition of the characteristics of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the star and end date of seasonal epidemics.
 
 \section*{Methods}
 
@@ -260,7 +260,7 @@ To answer these questions, we defined the following outcome measures:
 \item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Our approach is to fit a family of smooth curves through the observed disease incidence time series, and infer time-domain features of the outbreak from these curves using parameter resampling. The fitting curves we use are penalized basis splines (P-splines), which have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior. Most notably for our application, P-spline parameters estimated by GAM are asymptotically normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function. 
+Our approach is to fit a family of smooth curves through the observed disease incidence time series, and to infer time-domain features of the outbreak from these curves using parameter resampling. The fitting curves we use are penalized basis splines (P-splines), which have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior. Most notably for our application, P-spline parameters estimated by GAM are asymptotically normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function. 
 \cite{Eilers:1996kz}
 
 Additionally, we used a simulation study to validate this interval estimation method for our outcome measures.
@@ -277,7 +277,7 @@ By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:
 \end{center}
 \end{figure}
 
-To estimate the season onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t)$ as the model response variable, $\log$ link function, and a 20-term cubic spline basis $B_k$ as the only model term:
+To estimate the onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t)$ as the model response variable, $\log$ link function, and a 20-term cubic spline basis $B_k$ as the only model term:
 
 \begin{equation}
 \begin{aligned}
@@ -297,12 +297,12 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/samplePredMini}
-    \caption[P-spline samples approximating of RSV incidence]{$\Sexpr{sampleNsimMini}$ different sampled P-spline models of RSV incidence}
+    \caption[P-spline samples approximating of RSV incidence]{\Sexpr{toTitleCase(sampleNsimMiniText)} different sampled P-spline models of RSV incidence}
     \label{fig:samplePredMini}
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
     \paperincludegraphic{\figuresDir/samplePredOnsetMini}
-    \caption[Estimates of RSV season onset and offset]{$\Sexpr{sampleNsimMini}$ different computed estimates of RSV season onset and offset.}
+    \caption[Estimates of RSV season onset and offset]{\Sexpr{toTitleCase(sampleNsimMiniText)} different computed estimates of RSV season onset and offset.}
     \label{fig:samplePredOnsetMini}
 \end{subfigure}
 \begin{subfigure}[t]{0.45\textwidth}
@@ -314,7 +314,7 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
     \caption{}
 \end{figure}
 
-In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows $\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $\Sexpr{sampleNsimMini}$ times.
+In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
 
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
@@ -323,7 +323,7 @@ Having obtained a smooth model of our incidence data, we can turn to our first o
 \int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{align*}
 
-Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same $\Sexpr{sampleNsimMini}$ $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
+Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same \Sexpr{sampleNsimMiniText} $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
 
 Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
@@ -351,7 +351,7 @@ We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each
 \item Fit a $\log$-linked cubic P-spline to $y^*(t)$ to obtain true instantaneous incidence $y_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
 \end{enumerate}
 
-The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our approach. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our data. 
+The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our approach. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our dataset of RSV-related hospitalizations in Conneticut. 
 
 For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $y(t) \sim \Poiss(y_0(t))$ at weekly intervals. We also calculated the true values of $t_\mathit{on}$ and $t_\mathit{off}$ directly from $y_0(t)$ for each season.
 
@@ -368,7 +368,7 @@ To evaluate the results of our method, we consider three measures of robustness:
 \item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
-The results of our simulation study are shown in Table~\ref{table:results}.
+The results of our simulation study are shown in Table~\ref{table:results}. Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($\sim0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
 
 \begin{table}[h]
 \begin{tabular}{lllll}
@@ -397,31 +397,27 @@ $\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$\
 \label{table:results}
 \end{table}
 
-Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($\sim0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
-
 The preventable fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
 
 Overall, our simulation study shows that our estimation method for onset, offset, and preventable fraction meets the needs of our RSV research.
 
 \section*{Discussion}
 
-In this study, we demonstrate how P-spline regression, combined with parameter resampling, can be used to generate uncertainty intervals for quantities derived from disease epidemic data. This is a general approach that can be applied to other to other systems (such as outbreaks of other infectious diseases), as well as other outcome measures.
+In this study, we demonstrate how P-spline regression, combined with parameter resampling, can be used to generate uncertainty intervals for quantities derived from epidemic disease data. This is a general approach that can be applied to other to other systems, such as outbreaks of other infectious diseases, as well as other outcome measures.
 
 We focus on specific outcome measures (onset/offset time and preventable fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines. 
 
 To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference}\cite{psplineInferencePackage} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and the Comprehensive R Archive Network (CRAN), and its documentation includes examples beyond those shown here.
 
-We considered including a head-to-head comparison between our approach and any number of alternative approaches to estimation of time-based outbreak characterstics. However, such comparison would have required defining what it means to compare a point-estimation method to an interval-estimation method and what it means to compare two methods of estimating onset and offset in absence of a standardized meaning of onset and offset. We therefore decided head-to-head comparision was not within the scope of this initial report, and instead report we focus here on an absolute evaluation of the correctness of our approach by means of the simulation study. 
+We considered including a head-to-head comparison between our approach and any number of alternative approaches to estimation of time-based outbreak characteristics. However, such comparison would have required defining what it means to compare a point-estimation method to an interval-estimation method and what it means to compare two methods of estimating onset and offset in the absence of a standardized meaning of onset and offset. We therefore decided head-to-head comparison was not within the scope of this initial report, and instead we focus here on an absolute evaluation of the correctness of our approach by means of the simulation study. 
 
-The flexibility of our approach does come at a price. We validated it only for our input data and for our outcome measures; applications of this approach to other types of analysis will have to be validated independently. Our R package makes this validation simple to perform, but the validation is inherently time-consuming; whereas our analysis took minutes-to-hours to run, validation of our analysis took hours-to-days. 
-
-Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo approaches (MCMC) on datasets of comparable size, because the computationally expensive step in our approach is validation, not the analysis itself. For example, although validation for our RSV outcome measures took hours of computer time, the analysis itself took only minutes; and the time-consuming validation does not need to be repeated for subsequent analyses of onset, offset, or protected fraction on data sets with characteristics that were covered by our validation.
+The flexibility of our approach does come at a price. We validated it only for our input data and for our outcome measures; applications of this approach to other types of analysis will have to be validated independently. Our R package makes this validation simple to perform, but the validation is inherently time-consuming; whereas our analysis took minutes-to-hours to run, validation of our analysis took hours-to-days. Even with that computational cost, our approach is computationally less demanding than Bayesian Markov chain Monte Carlo (MCMC) approaches on datasets of comparable size, because the computationally expensive step in our approach is validation, not the analysis itself. 
 
 The estimates produced by our method are likely to be biased (as shown in our RSV application); measuring that bias (using our validation tools) and assessing its impact on results is, necessarily, left up to the individual application.
 
 Our method is inherently retrospective; the strengths of our approach come from considering the incidence time series as a whole, and it therefore cannot, in its current form, be applied to real-time analysis. 
 
-In summary, ours is a method of retrospective analysis of infectious disease outbreaks based on P-splines; it is computationally less demanding that Bayesian MCMC methods, yet --- unlike the common frequentist methods --- it allows interval estimation of time-based outbreak characteristics. Although we only validated it for our analysis of RSV seasonality, it is applicable to other similar systems, and --- by publishing it on CRAN --- we hope to facilitate its use in other analyses. 
+In summary, ours is a method of retrospective analysis of infectious disease outbreaks based on P-splines; it is computationally less demanding than Bayesian MCMC methods, yet --- unlike the common frequentist methods --- it allows interval estimation of time-based outbreak characteristics. Although we only validated it for our analysis of RSV seasonality, it is applicable to other similar systems, and --- by publishing it on CRAN --- we hope to facilitate its use in other analyses. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -3,6 +3,7 @@ import::from(pspline.inference, pspline.outbreak.cumcases.relative, pspline.outb
 
 import::from(dplyr, "%>%", rename, mutate, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
 import::from(mgcv, gam)
+import::from(tools, toTitleCase)
 
 source("./Common.R")
 
@@ -50,6 +51,7 @@ predCumSingle = sampleParamsSingle %>% predCum(model, predictors)
 predFractionSingle = sampleParamsSingle %>% predFraction(model, predictors)
 
 sampleNsimMini = 5
+sampleNsimMiniText = "five"
 sampleParamsMini = model %>% pspline.inference:::sample.params(sampleNsimMini)
 predCasesMini = sampleParamsMini %>% predCases(model, predictors)
 predCumMini = sampleParamsMini %>% predCum(model, predictors)
