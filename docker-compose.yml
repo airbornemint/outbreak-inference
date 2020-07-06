@@ -51,7 +51,7 @@ services:
         entrypoint: ["Rscript", "-e"]
         command: 
             - |
-                install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); 
+                ${INSTALL_FN:-remotes::install_github}("${R_PACKAGE_ARCHIVE:-weinbergerlab/pspline.inference@main}"); 
                 options(pspline.paper.validation.run=${KNITR_RUN_VALIDATION:-FALSE}); 
                 options(pspline.paper.output='${KNITR_OUTPUT_DIR:-knitr}'); 
                 knitr::knit(
