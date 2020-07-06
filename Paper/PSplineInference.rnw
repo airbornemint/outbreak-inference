@@ -348,7 +348,7 @@ Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and 
 
 \section*{Results}
 
-To evaluate the results of our method, we consider three measures of robustness: 
+To evaluate the results of our method, we considered three measures of robustness: 
 
 \begin{itemize}
 \item Coverage: the fraction of estimated $95$\% confidence intervals that (correctly) include the true value of the outcome measure
@@ -357,7 +357,7 @@ To evaluate the results of our method, we consider three measures of robustness:
 \item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
-The results of our simulation study are shown in Table~\ref{table:results}. Of note, the onset estimates have a slight negative bias (underestimate), whereas the offset estimates have a positive bias (overestimate) of equal magnitude, due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($\sim0.15$ weeks) does not rise to significance in our RSV research, especially since in our research we compare onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction does not alter our results. 
+The process of performing a simulation study is straightfords, but the measures of robustness it yields must be interpreted in the context of the research at hand. In our particular case, we found that the onset estimates had a slight negative bias (underestimate), whereas the offset estimates had a positive bias (overestimate) of equal magnitude (Table~\ref{table:results}), due to the inherently asymmetric shape of the outbreak curve at onset and at offset. The magnitude of bias for onset/offset estimates ($\sim0.15$ weeks) did not rise to significance in our RSV research, especially since we compared onset/offset estimates between different regions and therefore a small bias consistent in magnitude and direction did not alter our conclusions. 
 
 \begin{table}[h]
 \begin{tabular}{lllll}
