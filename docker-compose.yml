@@ -95,19 +95,15 @@ services:
     paper-plos-comp-biol:
         image: paper-tools:dev
         command: 
-            - >
+            - |
+                cp knitr/figures/*.tif output
+                cp knitr/PSplineInference.tex plos2015.bst /PSplineInference.bib output
                 cd output
-
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
-
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
                 python3 /tex/export-plos-comp-biol.py PSplineInference.tex
-                
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
         volumes:
+            - ./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr
             - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
 
     ############################################################
