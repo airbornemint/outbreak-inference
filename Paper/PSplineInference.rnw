@@ -299,7 +299,7 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
         \hspace{0pt}%
         \subfloat{\label{fig:pspline-samplePredOnsetFull}\paperincludegraphic{\figuresDir/samplePredOnsetFull}}%
     \end{center}%
-    \caption[]{\subref{fig:pspline-sampleBestFit} Best-fit P-spline model of RSV incidence; \subref{fig:pspline-samplePredMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different sampled P-spline models of RSV incidence; \subref{fig:pspline-samplePredOnsetMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different computed estimates of RSV season onset and offset; \subref{fig:pspline-samplePredOnsetFull} Sampled distribution of RSV season onset and offset estimates.}%
+    \caption[]{The steps involved in outcome estimation using penalized splines, demonstrated by estimating onset and offset of seasonal outbreaks of RSV. \subref{fig:pspline-sampleBestFit} Best-fit P-spline model of RSV incidence; \subref{fig:pspline-samplePredMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different sampled P-spline models of RSV incidence; \subref{fig:pspline-samplePredOnsetMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different computed estimates of RSV season onset and offset; \subref{fig:pspline-samplePredOnsetFull} Sampled distribution of RSV season onset and offset estimates.}%
     \label{fig:pspline}%
 \end{figure}
 
