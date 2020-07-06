@@ -19,7 +19,7 @@
 \usepackage{setspace}
 \usepackage{etoolbox}
 \usepackage{ifthen}
-\usepackage[margin=1em]{subcaption}
+\usepackage{subfig}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[mode=image|tex]{standalone}
@@ -286,35 +286,24 @@ To estimate the onset and offset for this RSV season, we begin by fitting a cycl
 \end{aligned}
 \end{equation}
 
-The best fit produced by this model (using a 2nd degree smoothing penalty) is shown in Fig~\ref{fig:sampleBestFit}.
+The best fit produced by this model (using a 2nd degree smoothing penalty) is shown in Fig~\ref{fig:pspline-sampleBestFit}.
 
-\begin{figure}
-\begin{center}
-\begin{subfigure}[t]{0.45\textwidth}
-    \paperincludegraphic{\figuresDir/sampleBestFit}
-    \caption[P-spline approximation of RSV incidence]{Best-fit P-spline model of RSV incidence}
-    \label{fig:sampleBestFit}
-\end{subfigure}
-\begin{subfigure}[t]{0.45\textwidth}
-    \paperincludegraphic{\figuresDir/samplePredMini}
-    \caption[P-spline samples approximating of RSV incidence]{\Sexpr{toTitleCase(sampleNsimMiniText)} different sampled P-spline models of RSV incidence}
-    \label{fig:samplePredMini}
-\end{subfigure}
-\begin{subfigure}[t]{0.45\textwidth}
-    \paperincludegraphic{\figuresDir/samplePredOnsetMini}
-    \caption[Estimates of RSV season onset and offset]{\Sexpr{toTitleCase(sampleNsimMiniText)} different computed estimates of RSV season onset and offset.}
-    \label{fig:samplePredOnsetMini}
-\end{subfigure}
-\begin{subfigure}[t]{0.45\textwidth}
-    \paperincludegraphic{\figuresDir/samplePredOnsetFull}
-    \caption[Distribution of estimated RSV season onset]{Sampled distribution of RSV season onset and offset estimates.}
-    \label{fig:samplePredOnsetFull}
-\end{subfigure}
-\end{center}
-    \caption{}
+\begin{figure}%
+    \begin{center}%
+        \hspace{0pt}%
+        \subfloat{\label{fig:pspline-sampleBestFit}\paperincludegraphic{\figuresDir/sampleBestFit}}%
+        \hspace{0pt}%
+        \subfloat{\label{fig:pspline-samplePredMini}\paperincludegraphic{\figuresDir/samplePredMini}}%
+        \hspace{0pt}%
+        \subfloat{\label{fig:pspline-samplePredOnsetMini}\paperincludegraphic{\figuresDir/samplePredOnsetMini}}%
+        \hspace{0pt}%
+        \subfloat{\label{fig:pspline-samplePredOnsetFull}\paperincludegraphic{\figuresDir/samplePredOnsetFull}}%
+    \end{center}%
+    \caption[]{\subref{fig:pspline-sampleBestFit} Best-fit P-spline model of RSV incidence; \subref{fig:pspline-samplePredMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different sampled P-spline models of RSV incidence; \subref{fig:pspline-samplePredOnsetMini} \Sexpr{toTitleCase(sampleNsimMiniText)} different computed estimates of RSV season onset and offset; \subref{fig:pspline-samplePredOnsetFull} Sampled distribution of RSV season onset and offset estimates.}%
+    \label{fig:pspline}%
 \end{figure}
 
-In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:samplePredMini} shows \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
+In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:pspline-samplePredMini} shows \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
 
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
@@ -323,9 +312,9 @@ Having obtained a smooth model of our incidence data, we can turn to our first o
 \int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{align*}
 
-Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same \Sexpr{sampleNsimMiniText} $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:samplePredOnsetMini}.
+Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same \Sexpr{sampleNsimMiniText} $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:pspline-samplePredOnsetMini}.
 
-Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
+Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:pspline-samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
 We defined our other outcome measure, the preventable fraction ($F_p$) of a prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, as:
 
