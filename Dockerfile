@@ -83,6 +83,8 @@ WORKDIR /tex
 
 COPY Paper/.Rprofile .Rprofile
 COPY Paper/renv renv
+# Install remotes before deps to avoid rebuilding if deps change
+RUN Rscript -e "renv::install('remotes')"
 COPY Paper/renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
