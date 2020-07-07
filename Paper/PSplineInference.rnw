@@ -283,11 +283,11 @@ To estimate the onset and offset for this RSV season, we begin by fitting a cycl
 
 \begin{equation}
 \begin{aligned}
-    y(t) &= \Poiss(\lambda(t)) \\
+    y(t) &\stackrel{\text{ind}}{\sim} \text{Poisson}(\lambda(t)) \\
     \log\left(\lambda(t)\right) &= \beta_0 + \sum_{k=1}^{20} \beta_k B_k(t)
 \end{aligned}
 \end{equation}
-
+    
 The best fit produced by this model (using a 2nd degree smoothing penalty) is shown in Fig~\ref{fig:pspline-sampleBestFit}.
 
 \begin{figure}%
