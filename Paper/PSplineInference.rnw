@@ -355,11 +355,10 @@ To evaluate the results of our method, we considered three measures of robustnes
 \begin{itemize}
 \item Coverage: the fraction of estimated $95$\% confidence intervals that (correctly) include the true value of the outcome measure
 \item Mean absolute error (MAE): the mean absolute value of the difference between point estimates and the true value
-\item MAE sign: the sign of the mean difference between point estimates and the true value
 \item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
 \end{itemize}
 
-The process of performing a simulation study is straightforward, but the measures of robustness it yields must be interpreted in the context of the research at hand. In our particular case, we found that the onset estimates had a slight negative bias (underestimate), whereas the offset estimates had a positive bias (overestimate) of equal magnitude (Table~\ref{table:results}), due to the inherently asymmetric shape of the outbreak curve at onset and at offset. Furthermore, the MAE for onset/offset estimates ($\sim0.15$ weeks) did not affect the conclusions of our RSV research as it was small compared to effect sizes (1-2 weeks). 
+The process of performing a simulation study is straightforward, but the measures of robustness it yields must be interpreted in the context of the research at hand. In our particular case, the MAE of onset/offset estimates ($\sim0.15$ weeks, see Table~\ref{table:results}) was small compared to time periods of interest in our analysis (which were 1 weeks or more), and therefore we accepted these estimates as valid for our analysis. The MAE for preventable fraction was similarly non-consequential to our results. Overall, the simulation study showed that our estimation method for onset, offset, and preventable fraction met the needs of our RSV research.
 
 \begin{table}[h]
 \begin{tabular}{lllll}
@@ -376,9 +375,9 @@ The process of performing a simulation study is straightforward, but the measure
 \Sexpr{format(round(100*validationResults$summary$offset.good, 2), scientific=FALSE)}\% &
 \Sexpr{format(round(100*validationResults$summary$preventable.good, 2), scientific=FALSE)}\% \\ % \hline
 \textbf{MAE (SE)} &
-$\Sexpr{ifelse(validationResults$summary$onset.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$onset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.se, 3), scientific=FALSE)}) &
-$\Sexpr{ifelse(validationResults$summary$offset.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$offset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.se, 3), scientific=FALSE)}) &
-$\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$\Sexpr{format(round(validationResults$summary$preventable.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$preventable.bias.se, 4), scientific=FALSE)}) \\ % \hline
+\Sexpr{format(round(validationResults$summary$onset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$onset.bias.se, 3), scientific=FALSE)}) &
+\Sexpr{format(round(validationResults$summary$offset.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$offset.bias.se, 3), scientific=FALSE)}) &
+\Sexpr{format(round(validationResults$summary$preventable.bias, 2), scientific=FALSE)} (\Sexpr{format(round(validationResults$summary$preventable.bias.se, 4), scientific=FALSE)}) \\ % \hline
 \textbf{Scaled MAE (SE)} &
 \Sexpr{format(round(100*validationResults$summary$onset.bias.frac, 3), scientific=FALSE)}\% (\Sexpr{format(round(validationResults$summary$onset.bias.frac.se, 4), scientific=FALSE)}) &
 \Sexpr{format(round(100*validationResults$summary$offset.bias.frac, 3), scientific=FALSE)}\% (\Sexpr{format(round(validationResults$summary$offset.bias.frac.se, 4), scientific=FALSE)}) &
@@ -387,10 +386,6 @@ $\Sexpr{ifelse(validationResults$summary$preventable.bias.sign > 0, "+", "-")}$\
 \caption{Simulation study results. MAE: Mean absolute Error. SE: Standard error}
 \label{table:results}
 \end{table}
-
-The preventable fraction demonstrates a slight negative bias, which also does not rise to significance in our RSV research. 
-
-Overall, our simulation study shows that our estimation method for onset, offset, and preventable fraction meets the needs of our RSV research.
 
 \section*{Discussion}
 
