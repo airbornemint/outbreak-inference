@@ -20,6 +20,8 @@
 \usepackage{etoolbox}
 \usepackage{ifthen}
 \usepackage{subfig}
+\usepackage{caption} 
+\captionsetup[table]{skip=10pt}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[mode=image|tex]{standalone}
