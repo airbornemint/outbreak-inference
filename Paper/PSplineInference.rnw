@@ -305,7 +305,7 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
     \label{fig:pspline}%
 \end{figure}
 
-In this model $\beta_k \sim \Norm(\mu_k, \sigma_k)$, with the best-fit corresponding to $\beta_k = \mu_k$. Since $y(t)$ is a function of $\beta_k$ and the distribution of each $\beta_k$ is known, we can sample $y(t)$ indirectly by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Fig~\ref{fig:pspline-samplePredMini} shows \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
+If we assume that $\beta_k \sim \Norm(\mu_k, \sigma_k)$, we can use the P-spline GAM to obtain a Bayesian confidence interval across the entire function $y(t)$ by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. This confidence interval has been shown to closely approximate the nominal frequentist confidence interval across the entire function for non-linear data following Poisson, binomial, and gamma distributions\cite{MARRA:2012fi}. Fig~\ref{fig:pspline-samplePredMini} shows \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
 
 Having obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
