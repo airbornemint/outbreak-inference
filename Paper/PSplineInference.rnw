@@ -305,9 +305,9 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
     \label{fig:pspline}%
 \end{figure}
 
-If we assume that $\beta_k \sim \Norm(\mu_k, \sigma_k)$, we can use the P-spline GAM to obtain a Bayesian confidence interval for $y(t)$ across the entire function by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Under this assumption, the Bayesian confidence interval has been shown to closely approximate the frequentist confidence interval across the entire function for non-linear data that follows a Poisson, binomial, or gamma distribution\cite{MARRA:2012fi}. Fig~\ref{fig:pspline-samplePredMini} demonstrates this in the form of \Sexpr{sampleNsimMiniText} $y(t)$ curves produced by independently sampling each $\beta_i$ \Sexpr{sampleNsimMiniText} times.
+If we assume the large-sample posterior distribution of $\beta_k \sim \Norm(\mu_k, \sigma_k)$, we can use the P-spline GAM to obtain a Bayesian confidence interval for $y(t)$ across the entire function by sampling $\beta_i$ and calculating $y(t) = \exp(\beta_0 + \sum_k \beta_i B_k(t)$. Under this assumption, the Bayesian confidence interval has been shown to closely approximate the frequentist confidence interval across the entire function for non-linear data that follows a Poisson, binomial, or gamma distribution\cite{WOOD:2006dc,MARRA:2012fi}. Fig~\ref{fig:pspline-samplePredMini} demonstrates this in the form of $N=\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $N=\Sexpr{sampleNsimMini}$ times; as $N$ increases, the sampled curves yield a whole-function confidence interval for $y(t)$.
 
-Having thus obtained a smooth model of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
+Having thus obtained a smooth model with confidence intervals of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
 \int_{t_\mathit{min}}^{t_\mathit{on}} y(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt \\
