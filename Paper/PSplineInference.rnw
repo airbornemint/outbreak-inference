@@ -413,6 +413,7 @@ In summary, ours is a method of retrospective analysis of infectious disease out
 
 \appendix
 \section*{Supplement: P-spline GAMs in brief}
+\ref{app:splines}
 
 A \textit{spline} of order $n$ is a piecewise polynomial real function $S(x)$ of degree $n - 1$ on interval $[x_L, x_R]$; the points $p_1, p_2, \dots, p_m \in [x_L, x_R]$ at which its polynomial segments join are known as its \textit{knots}. Owing to its construction, a spline of order $n$ has up to  $n - 1$ continuous derivatives throughout $[x_L, x_R]$; for our analysis, we only consider splines with exactly $n - 1$ continuous derivatives.
 
