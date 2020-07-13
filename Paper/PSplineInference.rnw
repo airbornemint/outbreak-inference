@@ -238,17 +238,17 @@ Prevention and treatment of seasonal infections use numerous resources, such as 
 
 \section*{Introduction}
 
-Analyses of infectious disease dynamics often make inferences based on timing for various quantities of clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Some aspects of timing can be estimated ad-hoc directly from disease incidence data; more typically, a regression model (e.g., a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculations of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
+Analyses of infectious disease dynamics often make inferences based on timing for various quantities of clinical and public health interest; for example, the start and the end of seasonal outbreaks, duration of outbreaks, and/or optimal timing of prophylaxis or treatment. Some aspects of timing can be estimated ad-hoc directly from disease incidence data; more typically, a regression model (for example, a generalized linear model (GLM) or a generalized additive model (GAM)) is fitted to a time series of observed disease counts, and the calculations of the quantities of interest are made based on combinations of parameters estimated from the fitted model. 
 
 Calculating the uncertainty of estimates from these types of GAM/GLM-based methods presents a challenge under frequentist approaches. These challenges are exemplified by analyses of the dynamics of respiratory syncytial virus (RSV) --- a respiratory infection that has annual or biennial seasonal pattern and is a major infectious cause of infant morbidity and mortality globally. \cite{Hall:2013jo,Hall:2009gi} In some countries, high-risk infants are administered antibody prophylaxis throughout the period of high RSV incidence. The therapy is expensive, and the duration of antibody protection is short-lived, \cite{Andabaka:2013dr,Hampp:2011ju} so administration of prophylaxis needs to be timed with the RSV season to provide optimal protection. \cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} Therefore, estimating the timing of initiation of the RSV season in different locations is important. 
 
-Frequentist models provide measures of uncertainty for the individual model parameters. However, calculating the quantities of interest from those model parameters often requires differentiation or integration with respect to time (for example, to identify outbreak transition points or to determine overall disease burden), and frequentist approaches typically offer no straightforward way to calculate uncertainty of differentiated or integrated model parameters. As a result, frequentist tools in RSV research --- such as those evaluated in \cite{Midgley:2017bo} --- typically leave out uncertainty from estimation. When they do allow for uncertainty estimates, frequentist methods in infectious disease modeling are often either complex to use (for example, block bootstrapping) or computationally intensive --- or both. Parameter resampling is an approach that offers uncertainty estimation and balances ease of use with computational efficiency, and has been applied in infectious disease modeling. \cite{Lauer:2018bp,Weinberger2020.04.15.20066431}
+Frequentist model fitting procedures provide measures of uncertainty for the individual model parameters. However, calculating the quantities of interest from those model parameters often requires differentiation or integration with respect to time (for example, to identify outbreak transition points or to determine overall disease burden), which can complicate the process of deriving large sample standard errors. As a result, these tools in RSV research, such as those evaluated in \cite{Midgley:2017bo}, typically ignore uncertainty and focus solely on estimation. When they do consider uncertainty estimation, these methods in infectious disease modeling are often either complex to use (for example, block bootstrapping), computationally intensive, or both. Parameter resampling is an approach that offers uncertainty estimation, balances ease of use with computational efficiency, and has been previously applied in infectious disease modeling. \cite{Lauer:2018bp,Weinberger2020.04.15.20066431}
 
-In this study, our goal was to generalize prior work on parameter resampling to develop a general framework of retrospective analysis of infectious diseases that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as outbreak onset time) while being flexible as to the precise definition of the characteristics of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data --- and how the fitted model can then be used to calculate estimates of the uncertainty intervals for characteristics of the epidemic, such as the star and end date of seasonal epidemics.
+In this study, our goal was to generalize prior work on parameter resampling to develop a general framework of retrospective analysis of infectious diseases that allows estimation of uncertainty intervals for time-based outbreak characteristics (such as outbreak onset time) while being flexible as to the precise definition of the characteristics of interest. To that end, we will show how functional data analysis using GAMs with penalized splines can be used to fit smooth curves to infectious disease incidence data, and how the fitted model can then be used to calculate uncertainty intervals for characteristics of the epidemic, such as the start and end date of seasonal epidemics.
 
 \section*{Methods}
 
-We developed this method for our RSV research, in which the principal questions were:
+We developed this method in the context of our RSV research, in which the principal questions were:
 
 \begin{itemize}
 \item Is the period during which RSV prophylaxis is administered well-matched to the timing of RSV seasons?
@@ -258,14 +258,11 @@ We developed this method for our RSV research, in which the principal questions 
 To answer these questions, we defined the following outcome measures:
 
 \begin{itemize}
-\item Season onset and offset, defined as the points in time when the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season
+\item Season onset and offset, defined as the points in time when the cumulative incidence of RSV rises above 2.5\% and 97.5\% of the total incidence of RSV for the entire season.
 \item Preventable fraction of a prophylaxis regimen, defined as the fraction of all prophylaxis-naive RSV cases occurring during the period when the prophylaxis regimen provides protection from RSV. 
 \end{itemize}
 
-Our approach is to fit a family of smooth curves through the observed disease incidence time series, and to infer time-domain features of the outbreak from these curves using parameter resampling. The fitting curves we use are penalized basis splines (P-splines), which have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior. Most notably for our application, P-spline parameters estimated by GAM are asymptotically normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function. 
-\cite{Eilers:1996kz}
-
-Additionally, we used a simulation study to validate this interval estimation method for our outcome measures.
+Our approach is to fit a family of smooth curves through the observed disease incidence time series, and to infer time-domain features of the outbreak from these curves using parameter resampling. The fitting curves we use are penalized basis splines (P-splines), which have several desirable qualities, including computational compactness and efficiency and well-understood statistical behavior. Most notably for our application, P-spline parameters estimated by GAM are asymptotically normally distributed, provided that the underlying phenomenon is well-approximated by a piecewise-polynomial function. \cite{Eilers:1996kz} Additionally, we developed a simulation study to validate this interval estimation method for our outcome measures.
 
 \subsection*{Outcome estimation}
 
@@ -274,17 +271,17 @@ By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:
 \begin{figure}
 \begin{center}
 \paperincludegraphic{\figuresDir/sampleCases}
-\caption{Incidence of RSV-associated hospitalizations}
+\caption{Incidence of RSV-associated hospitalizations.}
 \label{fig:sampleCases}
 \end{center}
 \end{figure}
 
-To estimate the onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM to the observations, using incidence $y(t)$ as the model response variable, $\log$ link function, and a 20-term cubic spline basis $B_k$ as the only model term:
+To estimate the onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM (see Appendix\~\ref{app:splines}) to the observations, using incidence at time $t$, $y(t)$, as the model response variable, the $\log$ link function, and a 20-term cubic spline basis, $B_k\left(t\right)$, as the only predictor such that
 
 \begin{equation}
 \begin{aligned}
-    y(t) &\stackrel{\text{ind}}{\sim} \text{Poisson}(\lambda(t)) \\
-    \log\left(\lambda(t)\right) &= \beta_0 + \sum_{k=1}^{20} \beta_k B_k(t)
+    y(t)|\lambda\left(t\right) &\stackrel{\text{ind}}{\sim} \text{Poisson}\left\{\lambda(t)\right\} \\
+    \log\left\{\lambda(t)\right\} &= \beta_0 + \sum_{k=1}^{20} \beta_k B_k(t)
 \end{aligned}
 \end{equation}
     
@@ -305,23 +302,23 @@ The best fit produced by this model (using a 2nd degree smoothing penalty) is sh
     \label{fig:pspline}%
 \end{figure}
 
-Using the asymptotic normality of the large-sample posterior distribution of $\beta_k$ \cite{WOOD:2006dc,MARRA:2012fi}, we can use parameter estimates (and uncertainty estimates) from the P-spline GAM to obtain a large sample credible interval for $y(t)$ across the entire function by sampling $\beta_k$ from this distribution and calculating $y(t) = \exp\left\{\beta_0 + \sum_k \beta_k B_k(t)\right\}$. The resulting large sample credible interval has been shown to closely approximate the frequentist confidence interval across the entire function for non-linear data that follows a Poisson, binomial, or gamma distribution\cite{WOOD:2006dc,MARRA:2012fi}. Fig~\ref{fig:pspline-samplePredMini} demonstrates this in the form of $N=\Sexpr{sampleNsimMini}$ $y(t)$ curves produced by independently sampling each $\beta_i$ $N=\Sexpr{sampleNsimMini}$ times; as $N$ increases, the sampled curves yield a whole-function confidence interval for $y(t)$.
+Using the asymptotic normality of the large-sample posterior distribution of $\beta_k$, we can use parameter estimates (and uncertainty estimates) from the P-spline GAM to obtain a large sample credible interval for $\lambda(t)$ by sampling $\beta_k$ from this distribution and calculating $\lambda(t) = \exp\left\{\beta_0 + \sum_{k=1}^{20} \beta_k B_k(t)\right\}$. The resulting large sample credible interval has been shown to closely approximate the frequentist confidence interval across the entire function for non-linear data that follows a Poisson, binomial, or gamma distribution\cite{WOOD:2006dc,MARRA:2012fi}. Fig~\ref{fig:pspline-samplePredMini} demonstrates this in the form of $N=5$ $\lambda(t)$ curves produced by independently sampling each $\beta_k$ $N=5$ times; as $N$ increases, the sampled curves yield large sample confidence intervals for $\lambda(t)$ across all values of $t$.
 
-Having obtained a smooth model with confidence intervals of our incidence data, we can turn to our first outcome measures of interest --- time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
+Having obtained a smooth model with confidence intervals of the expected incidence, we can turn to our first outcome measures of interest, time of outbreak onset ($t_\mathit{on}$) and offset ($t_\mathit{off}$), defined by:
 
 \begin{align*}
-\int_{t_\mathit{min}}^{t_\mathit{on}} y(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt \\
-\int_{t_\mathit{min}}^{t_\mathit{off}} y(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
-\end{align*}
-
-Given any $y(t)$ sampled via $\beta_i$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their (unknown) distributions. The same \Sexpr{sampleNsimMiniText} $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:pspline-samplePredOnsetMini}.
+    \int_{t_\mathit{min}}^{t_\mathit{on}} \lambda(t) dt &= 0.025 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \lambda(t) dt \\
+    \int_{t_\mathit{min}}^{t_\mathit{off}} \lambda(t) dt &= 0.975 \cdot \int_{t_\mathit{min}}^{t_\mathit{max}} \lambda(t) dt
+    \end{align*}
+    
+Given any $\lambda(t)$ sampled via $\beta_k$ sampling, we numerically solve for the corresponding $t_\mathit{on}$ and $t_\mathit{off}$, thereby indirectly sampling $t_\mathit{on}$ and $t_\mathit{off}$ from their sampling distributions. The same five $y(t)$ with their corresponding $t_\mathit{on}$ and $t_\mathit{off}$ are shown in Fig~\ref{fig:pspline-samplePredOnsetMini}.
 
 Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approximation of the unknown distributions of $t_\mathit{on}$ and $t_\mathit{off}$. In our example, sampling $N = \Sexpr{sampleNsimFull}$ times yields the distributions of $t_\mathit{on}$ and $t_\mathit{off}$ shown in Fig~\ref{fig:pspline-samplePredOnsetFull}. From these distributions, we can calculate our desired point estimates (median) and interval estimates (quantiles): $\hat{t}_\mathit{on} = \Sexpr{round(estThresholdsFull['onset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['onset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['onset.upper'], 2)}$ weeks), $\hat{t}_\mathit{off} = \Sexpr{round(estThresholdsFull['offset.median'], 2)}$ weeks ($\Sexpr{level*100}$\% CI: $\Sexpr{round(estThresholdsFull['offset.lower'], 2)}$ - $\Sexpr{round(estThresholdsFull['offset.upper'], 2)}$ weeks).
 
 We defined our other outcome measure, the preventable fraction ($F_p$) of a prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, as:
 
 \begin{equation*}
-    F_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} y(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
+    F_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} lambda(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{equation*}
 
 We repeated the above method to estimate the preventable fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season.
@@ -331,34 +328,34 @@ We repeated the above method to estimate the preventable fraction of the prophyl
 We began by generating $N_\mathit{season} = \Sexpr{simNTruth}$ RSV seasons. Each season was generated as follows:
 
 \begin{enumerate}
-\item Randomly choose epidemiologic week of season start $t_\mathit{start} \sim \Unif(\Sexpr{onsetSimMin}, \Sexpr{onsetSimMax})$, epidemiologic week of season end $t_\mathit{end} \sim \Unif(\Sexpr{offsetSimMin}, \Sexpr{offsetSimMax})$, and peak incidence $y_\mathit{max} \sim \Unif(\Sexpr{peakSimMin}, \Sexpr{peakSimMax})$.
+\item Randomly choose epidemiologic week of season start $t_\mathit{start} \sim \Unif(\Sexpr{onsetSimMin}, \Sexpr{onsetSimMax})$, epidemiologic week of season end $t_\mathit{end} \sim \Unif(\Sexpr{offsetSimMin}, \Sexpr{offsetSimMax})$, and peak incidence $\lambda_\mathit{max} \sim \Unif(\Sexpr{peakSimMin}, \Sexpr{peakSimMax})$.
 \item Calculate \begin{equation*}
-    y^*(t) = \begin{cases}
-        {1 \over 2} (1 + \cos(2 \pi {t - t_\mathit{start} \over t_\mathit{end} - t_\mathit{start}})) \cdot y_\mathit{max} &\text{for } t_\mathit{start} \leq t \leq t_\mathit{end} \\
+    \lambda^*(t) = \begin{cases}
+        {1 \over 2} (1 + \cos(2 \pi {t - t_\mathit{start} \over t_\mathit{end} - t_\mathit{start}})) \cdot \lambda_\mathit{max} &\text{for } t_\mathit{start} \leq t \leq t_\mathit{end} \\
         0 &\text{otherwise}
     \end{cases}
 \end{equation*}
-    to produce a curve roughly of the desired shape (rising from 0 to $y_\mathit{max}$, then falling back to 0, between $t_\mathit{start}$ and $t_\mathit{end}$).
-\item Fit a $\log$-linked cubic P-spline to $y^*(t)$ to obtain true instantaneous incidence $y_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
+    to produce a curve roughly of the desired shape (rising from 0 to $\lambda_\mathit{max}$, then falling back to 0, between $t_\mathit{start}$ and $t_\mathit{end}$).
+\item Fit a $\log$-linked cubic P-spline to $\lambda^*(t)$ to obtain true instantaneous incidence $\lambda_0(t)$; this ensures that the true incidence is smooth in the second derivative. 
 \end{enumerate}
 
-The number of seasons was chosen to balance power of our simulation and its computational demand, as the simulation study is the most time-consuming component of our approach. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our dataset of RSV-related hospitalizations in Conneticut. 
+The number of seasons was chosen to balance power of the simulated outcome estimation with computational demand. The ranges of the parameters for the simulated seasons were chosen to include the observed characteristics in our actual dataset of RSV-related hospitalizations in Connecticut. 
 
-For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $y(t) \sim \Poiss(y_0(t))$ at weekly intervals. We also calculated the true values of $t_\mathit{on}$ and $t_\mathit{off}$ directly from $y_0(t)$ for each season.
+For each season, we then generated $N_\mathit{obs} = \Sexpr{simNObs}$ sets of observations by sampling observed incidence $y(t) \stackrel{\text{ind}}{\sim} \Poiss\left\{\lambda_0(t)\right\}$ at weekly intervals. We also calculated the true values of $t_\mathit{on}$ and $t_\mathit{off}$ directly from $\lambda_0(t)$ for each season.
 
-Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $y_0(t)$) were contained in the 95\% CI  95\% of the time. We repeated the same process to validate the preventable fraction estimates.
+Finally, we used the method described above to obtain $\hat{t}_\mathit{on}$ and $\hat{t}_\mathit{off}$ estimates for each of the $N_\mathit{season} \cdot N_\mathit{obs} = \Sexpr{simNTruth * simNObs}$ sets of observations, in order to verify that the true values of $t_\mathit{on}$ and $t_\mathit{off}$ calculated directly from $\lambda_0(t)$) were contained in the 95\% CI $\approx$95\% of the time. We repeated the same process to validate the preventable fraction estimates.
 
 \section*{Results}
 
-To evaluate the results of our method, we considered three measures of robustness: 
+To evaluate the results of our method, we considered three performance metrics: 
 
 \begin{itemize}
-\item Coverage: the fraction of estimated $95$\% confidence intervals that (correctly) include the true value of the outcome measure
-\item Mean absolute error (MAE): the mean absolute value of the difference between point estimates and the true value
-\item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$
+\item Coverage: the fraction of estimated $95$\% confidence intervals that include the true value of the outcome measure.
+\item Mean absolute error (MAE): the mean absolute value of the difference between point estimates and the true value.
+\item Scaled MAE (for onset and offset only): mean absolute error divided by $t_\mathit{off} - t_\mathit{on}$.
 \end{itemize}
 
-The process of performing a simulation study is straightforward, but the measures of robustness it yields must be interpreted in the context of the research at hand. In our particular case, the MAE of onset/offset estimates ($\sim0.15$ weeks, see Table~\ref{table:results}) was small compared to time periods of interest in our analysis (which were 1 weeks or more), and therefore we accepted these estimates as valid for our analysis. The MAE for preventable fraction was similarly non-consequential to our results. Overall, the simulation study showed that our estimation method for onset, offset, and preventable fraction met the needs of our RSV research.
+The process of performing a simulation study is straightforward, but the measures of robustness it yields must be interpreted in the context of the research at hand. In our particular case, the MAE of onset/offset estimates ($\sim0.15$ weeks, see Table~\ref{table:results}) was small compared to time periods of interest in our analysis (which were 1 weeks or more). The MAE for preventable fraction was similarly non-consequential to our results. Overall, the simulation study showed that our estimation method for onset, offset, and preventable fraction met the needs of our RSV research.
 
 \begin{table}[h]
 \begin{tabular}{lllll}
@@ -383,7 +380,7 @@ The process of performing a simulation study is straightforward, but the measure
 \Sexpr{format(round(100*validationResults$summary$offset.bias.frac, 3), scientific=FALSE)}\% (\Sexpr{format(round(validationResults$summary$offset.bias.frac.se, 4), scientific=FALSE)}) &
 ---
 \end{tabular}
-\caption{Simulation study results. MAE: Mean absolute Error. SE: Standard error}
+\caption{Simulation study results. MAE: Mean absolute Error. SE: Standard error.}
 \label{table:results}
 \end{table}
 
@@ -393,7 +390,7 @@ In this study, we demonstrate how P-spline regression, combined with parameter r
 
 We focus on specific outcome measures (onset/offset time and preventable fraction) that are relevant for RSV. Validating our estimation of those quantities using a simulation study gives methodological grounding to this approach. Direct public health applications of this approach include investigation of the potential benefits of region-specific RSV prophylaxis guidelines. 
 
-To facilitate application of P-spline estimation to other research, we wrote an R package  --- \texttt{pspline.inference}\cite{psplineInferencePackage} --- that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and the Comprehensive R Archive Network (CRAN), and its documentation includes examples beyond those shown here.
+To facilitate application of P-spline estimation to other research, we wrote an R package, \texttt{pspline.inference}\cite{psplineInferencePackage}, that encapsulate our methods in an easy-to-use programming interface. It allows the user to obtain interval estimates of a user-defined outcome measure (as long as it's computable from the model response variable), regardless of how complex its computation; it also provides an easy way to conduct a simulation study to validate estimation of the user-defined outcome measure on user-supplied data, thereby making it simple to develop and validate novel outcome measures. The package is available on GitHub and the Comprehensive R Archive Network (CRAN), and its documentation includes examples beyond those shown here.
 
 We considered including a head-to-head comparison between our approach and any number of alternative approaches to estimation of time-based outbreak characteristics. However, such comparison would have required defining what it means to compare a point-estimation method to an interval-estimation method and what it means to compare two methods of estimating onset and offset in the absence of a standardized meaning of onset and offset. We therefore decided head-to-head comparison was not within the scope of this initial report, and instead we focus here on an absolute evaluation of the correctness of our approach by means of the simulation study. 
 
@@ -403,7 +400,7 @@ The estimates produced by our method are likely to be biased (as shown in our RS
 
 Our method is inherently retrospective; the strengths of our approach come from considering the incidence time series as a whole, and it therefore cannot, in its current form, be applied to real-time analysis. 
 
-In summary, ours is a method of retrospective analysis of infectious disease outbreaks based on P-splines; it is computationally less demanding than Bayesian MCMC methods, yet --- unlike the common frequentist methods --- it allows interval estimation of time-based outbreak characteristics. Although we only validated it for our analysis of RSV seasonality, it is applicable to other similar systems, and --- by publishing it on CRAN --- we hope to facilitate its use in other analyses. 
+In summary, ours is a method of retrospective analysis of infectious disease outbreaks based on P-splines; it is computationally less demanding than Bayesian MCMC methods, yet, unlike the common frequentist approaches, it allows for more straightforward interval estimation of time-based outbreak characteristics. Although we only validated it for our analysis of RSV seasonality, it is applicable to other similar systems, and by publishing it on CRAN, we hope to facilitate its use in other analyses. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -445,7 +442,7 @@ and treating the spline linear coefficients $c_{i,k}$ as the model parameters $\
 
 \begin{equation}
 \begin{aligned}
-    g\left(E(y)\right) &= \beta_0 +  \sum_{i=1}^{p} \left( \sum_{k=1}^{n_i - m_i} c_{i,k} B_{i,k}(x_i; n_i; p_{i,1}, \hdots, p_{i,m_i}) \right)
+    g\left\{E(y)\right\} &= \beta_0 +  \sum_{i=1}^{p} \left\{ \sum_{k=1}^{n_i - m_i} c_{i,k} B_{i,k}(x_i; n_i; p_{i,1}, \hdots, p_{i,m_i}) \right\}
 \end{aligned}\label{eqn:model}
 \end{equation}
 
