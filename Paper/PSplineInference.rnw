@@ -318,7 +318,7 @@ Sampling a large number of $t_\mathit{on}$ and $t_\mathit{off}$ yields an approx
 We defined our other outcome measure, the preventable fraction ($F_p$) of a prophylaxis regimen that offers protection between $t_\mathit{start}$ and $t_\mathit{end}$, as:
 
 \begin{equation*}
-    F_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} lambda(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
+    F_p(t_\mathit{start}, t_\mathit{end}) = \int_{t_\mathit{start}}^{t_\mathit{end}} \lambda(t) dt / \int_{t_\mathit{min}}^{t_\mathit{max}} y(t) dt
 \end{equation*}
 
 We repeated the above method to estimate the preventable fraction of the prophylaxis regimen recommended by the American Academy of Pediatrics as well as several alternative prophylaxis regimens, which then enabled us to assess the potential benefit of adjusting the prophylaxis regimen to better align with the local RSV season.
