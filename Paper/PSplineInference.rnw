@@ -276,7 +276,7 @@ By way of example, consider the (hypothetical) RSV season shown in Fig~\ref{fig:
 \end{center}
 \end{figure}
 
-To estimate the onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM (see Appendix\~\ref{app:splines}) to the observations, using incidence at time $t$, $y(t)$, as the model response variable, the $\log$ link function, and a 20-term cubic spline basis, $B_k\left(t\right)$, as the only predictor such that
+To estimate the onset and offset for this RSV season, we begin by fitting a cyclic P-spline GAM (see Appendix~\ref{app:splines}) to the observations, using incidence at time $t$, $y(t)$, as the model response variable, the $\log$ link function, and a 20-term cubic spline basis, $B_k\left(t\right)$, as the only predictor such that
 
 \begin{equation}
 \begin{aligned}
