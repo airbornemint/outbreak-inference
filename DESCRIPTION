@@ -3,7 +3,7 @@ Title: Estimation of Characteristics of Seasonal and Sporadic Infectious Disease
 Date: 2020-07-01
 Version: 1.0.0
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre", "cph"))
-Description: Stochastic inference of infectious disease outcomes using generalized additive (mixed) models.
+Description: Inference of infectious disease outcomes using generalized additive (mixed) models with penalied basis splines (P-Splines)
 Depends: R (>= 3.4.0)
 Imports: stats, utils, mgcv, dplyr, magrittr, assertthat, plyr, reshape2, plotrix, rlang
 Suggests: import, ggplot2, data.table, ggstance, knitr, rmarkdown, roxygen2, kableExtra, doParallel, parallel, stringr, scales, testthat
