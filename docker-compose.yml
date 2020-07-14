@@ -51,32 +51,43 @@ services:
         entrypoint: ["Rscript", "-e"]
         command: 
             - |
-                install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); 
+                ${INSTALL_FN:-remotes::install_github}("${R_PACKAGE_ARCHIVE:-weinbergerlab/pspline.inference@main}"); 
                 options(pspline.paper.validation.run=${KNITR_RUN_VALIDATION:-FALSE}); 
-                options(pspline.paper.output='${KNITR_OUTPUT_DIR:-knitr}'); 
+                options(pspline.paper.output='knitr'); 
                 knitr::knit(
                     'PSplineInference.rnw', 
-                    output='${KNITR_OUTPUT_DIR:-knitr}/PSplineInference.tex'
+                    output='knitr/PSplineInference.tex'
                 )
         env_file: build.env
         volumes:
             - "./${R_BUILD_DIR:-package}:/tex/${R_BUILD_DIR:-package}"
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr"
        
     ############################################################
     # Commands for converting figures to PDF and EPS
     paper-figures:
         image: paper-tools:dev
-        environment:
-            KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
         command: 
             - |
-                cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
+                cd knitr/figures ;
                 find . -name "*.tex" -exec latexmk -pdf {} \;
                 find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
                 find . -name "*.tif" -exec convert -compress lzw {} {} \;
         volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr"
+
+    ############################################################
+    # Commands for exporting paper for overleaf
+    paper-overleaf:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p overleaf/figures
+                cp knitr/PSplineInference.tex plos2015.bst PSplineInference.bib overleaf
+                cp knitr/figures/*.tex overleaf/figures
+        volumes:
+            - ./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex/overleaf
 
     ############################################################
     # Commands for exporting paper for PLOS Comp Biol
@@ -84,19 +95,15 @@ services:
     paper-plos-comp-biol:
         image: paper-tools:dev
         command: 
-            - >
+            - |
+                cp knitr/figures/*.tif output
+                cp knitr/PSplineInference.tex plos2015.bst /PSplineInference.bib output
                 cd output
-
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
-
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
                 python3 /tex/export-plos-comp-biol.py PSplineInference.tex
-                
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
         volumes:
+            - ./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr
             - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
 
     ############################################################

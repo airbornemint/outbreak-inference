@@ -3,6 +3,7 @@ import::from(pspline.inference, pspline.outbreak.cumcases.relative, pspline.outb
 
 import::from(dplyr, "%>%", rename, mutate, select, filter, group_by, ungroup, do, arrange, first, last, inner_join)
 import::from(mgcv, gam)
+import::from(tools, toTitleCase)
 
 source("./Common.R")
 
@@ -50,6 +51,7 @@ predCumSingle = sampleParamsSingle %>% predCum(model, predictors)
 predFractionSingle = sampleParamsSingle %>% predFraction(model, predictors)
 
 sampleNsimMini = 5
+sampleNsimMiniText = "five"
 sampleParamsMini = model %>% pspline.inference:::sample.params(sampleNsimMini)
 predCasesMini = sampleParamsMini %>% predCases(model, predictors)
 predCumMini = sampleParamsMini %>% predCum(model, predictors)
@@ -70,7 +72,8 @@ sampleDisplayNsim = 100
 
 # ---- figures ----
 
-import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs, sec_axis, geom_histogram)
+import::from(ggplot2, ggplot, theme_light, geom_point, aes, scale_x_continuous, scale_y_continuous, geom_line, geom_segment, theme, coord_cartesian, element_blank, element_text, geom_rect, geom_text, geom_violin, geom_density, labs, sec_axis, geom_histogram, scale_color_identity, scale_size_identity, scale_shape_identity, margin, unit, element_rect, scale_fill_identity)
+import::from(dplyr, "%>%", filter, mutate, do, arrange, first, last, ungroup)
 import::from(ggstance, geom_violinh)
 import::from(gridExtra, grid.arrange)
 import::from(grDevices, dev.off)
@@ -79,8 +82,8 @@ import::from(magrittr, "%>%")
 
 inlinePlotWidth = 3.1
 inlinePlotHeight = 2.5
-pagePlotWidth = inlinePlotWidth * 2.1
-pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
+pagePlotWidth = inlinePlotWidth * 1.8
+pagePlotHeight = inlinePlotHeight * 1.8 * 2 / 5
 plotTextBaseSize = 8
 
 figuresDir = paste0(getOption("pspline.paper.output", "."), "/figures")
@@ -105,34 +108,43 @@ commonOptions = list(
     panel.grid.major.x=element_blank(),
     legend.title=element_blank(),
     axis.ticks.x=element_blank(),
-    axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
-    legend.position="bottom"
+    legend.position=c(0.025, 0.975),
+    legend.justification = c("left", "top"),
+    legend.margin = margin(0, 2, 0, 2),
+    legend.box.margin = margin(0, 2, 0, 2),
+    legend.box.spacing = unit(0, "in"),
+    legend.spacing = unit(0, "in"),
+    legend.key.height = unit(0.25, "line")
   )
 )
 
 tikz(sprintf("%s/sampleCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-    geom_point(aes(x=time, y=cases), size=.5) +
-    commonOptions
+  geom_point(aes(x=time, y=cases, shape=16), size=.5) +
+  scale_shape_identity(guide="legend", breaks=c(16), labels=("Observed"), name=NULL) +
+  commonOptions
 
 dev.off()
 
 tikz(sprintf("%s/sampleBestFit.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(obs) +
-  geom_line(data=predCasesBest, aes(x=time, y=cases.median), color="grey") +
-  geom_point(aes(x=time, y=cases), size=.5) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases.median, color="black"), size=0.2) +
+  geom_point(aes(x=time, y=cases, size=0.5), color="black", shape=1) +
+  scale_color_identity(guide="legend", breaks=c("black"), labels=c("Model"), name=NULL) +
+  scale_size_identity(guide="legend", breaks=c(0.5), labels=c("Observed"), name=NULL) +
   commonOptions
-
 
 dev.off()
 
 tikz(sprintf("%s/samplePredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
-  geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
+  geom_line(aes(x=time, y=cases, group=pspline.sample, color="black"), size=0.2) +
+  geom_point(data=obs, aes(x=time, y=cases, size=0.5), color="black", shape=1) +
+  scale_color_identity(guide="legend", breaks=c("black"), labels=c("Model"), name=NULL) +
+  scale_size_identity(guide="legend", breaks=c(0.5), labels=c("Observed"), name=NULL) +
   commonOptions
 
 dev.off()
@@ -140,11 +152,13 @@ dev.off()
 tikz(sprintf("%s/samplePredOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10, standAlone = TRUE)
 
 ggplot(predCasesMini) +
-  geom_line(aes(x=time, y=cases, group=pspline.sample), color="grey") +
-  geom_point(data=predThresholdsMini, aes(x=onset, y=0), size=0.75, shape=17) +
-  geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), linetype="11") +
-  geom_point(data=predThresholdsMini, aes(x=offset, y=0), size=0.75, shape=17) +
-  geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), linetype="11") +
+  geom_line(aes(x=time, y=cases, group=pspline.sample, size=0.2), color="black") +
+  geom_point(data=predThresholdsMini, aes(x=onset, y=0, shape=17), size=0.5) +
+  geom_segment(data=predThresholdsMini, aes(x=onset, xend=onset, y=onset.cases, yend=0), size=0.1) +
+  geom_point(data=predThresholdsMini, aes(x=offset, y=0, shape=17), size=0.5) +
+  geom_segment(data=predThresholdsMini, aes(x=offset, xend=offset, y=offset.cases, yend=0), size=0.1) +
+  scale_shape_identity(guide="legend", breaks=c(17), labels=c("Onset / offset"), name=NULL) +
+  scale_size_identity(guide="legend", breaks=c(0.2), labels=c("Model"), name=NULL) +
   commonOptions
 
 dev.off()
@@ -157,22 +171,26 @@ splineData = data %>% filter(pspline.sample < sampleDisplayNsim)
 ggplot(predThresholdsFull) +
   # geom_line(data=splineData, aes(x=time, y=cases, group=pspline.sample), color="gray") +
   # geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) +
-  geom_point(data=obs, aes(x=time, y=cases), size=0.5) +
+  geom_line(data=predCasesBest, aes(x=time, y=cases.median, size=0.2), color="black") +
+  geom_point(data=obs, aes(x=time, y=cases, shape=1), size=0.25, color="black") +
   geom_density(
     data=predThresholdsFull,
-    aes(x=onset, y=5 * ..density..),
+    aes(x=onset, y=5 * ..density.., fill="black"),
     # width=1,
-    fill="gray50", color=NA, trim=TRUE
+    color=NA, trim=TRUE
     # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
   geom_density(
     data=predThresholdsFull,
-    aes(x=offset, y=5 * ..density..),
+    aes(x=offset, y=5 * ..density.., fill="black"),
     # width=1,
-    fill="gray50", color=NA, trim=TRUE
+    color=NA, trim=TRUE
     # trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
   ) +
   # coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
+  scale_shape_identity(guide="legend", breaks=c(1), labels=c("Observed"), name=NULL) +
+  scale_fill_identity(guide="legend", breaks=c("black"), labels=c("Onset / offset"), name=NULL) +
+  scale_size_identity(guide="legend", breaks=c(0.2), labels=c("Model"), name=NULL) +
   commonOptions
 
 dev.off()
