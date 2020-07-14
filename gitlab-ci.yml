@@ -111,20 +111,18 @@ knitr:
   variables:
     KNITR_RUN_VALIDATION: "FALSE"
 
-figures:
-  stage: figures
-  extends: 
-    - .docker
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-figures
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-figures"
-    paths:
-      - "${KNITR_OUTPUT_DIR}/figures/*.pdf"
-      - "${KNITR_OUTPUT_DIR}/figures/*.tif"
-  only:
-    - /^[Pp]aper([/-].*)?$/
+# figures:
+#   stage: figures
+#   extends: 
+#     - .docker
+#   script:
+#     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+#     - docker-compose ${COMPOSE_FILES} run paper-figures
+#   artifacts:
+#     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-figures"
+#     paths:
+#       - "${KNITR_OUTPUT_DIR}/figures/*.pdf"
+#       - "${KNITR_OUTPUT_DIR}/figures/*.tif"
 
 overleaf:
   stage: exports
