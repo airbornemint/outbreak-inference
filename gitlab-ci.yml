@@ -56,7 +56,7 @@ build:
   variables:
     R_BUILD_VIGNETTES: "TRUE"
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([\/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
       when: manual
     - when: always
   
@@ -73,7 +73,7 @@ check:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run package-check
   rules:
-    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([\/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
       when: manual
     - when: always
   needs:
