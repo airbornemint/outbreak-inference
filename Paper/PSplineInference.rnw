@@ -26,14 +26,14 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[mode=image|tex]{standalone}
 \usepackage{tikz}
-\usepackage{draftwatermark}
-\SetWatermarkScale{1}
-\SetWatermarkAngle{45}
-\SetWatermarkFontSize{4ex}
-\SetWatermarkHorCenter{12ex}
-\SetWatermarkVerCenter{12ex}
-\SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 7}
+% \usepackage{draftwatermark}
+% \SetWatermarkScale{1}
+% \SetWatermarkAngle{45}
+% \SetWatermarkFontSize{4ex}
+% \SetWatermarkHorCenter{12ex}
+% \SetWatermarkVerCenter{12ex}
+% \SetWatermarkLightness{.5}
+% \SetWatermarkText{DRAFT 7}
 
 \usepackage{amssymb}
 \usepackage{wasysym}
