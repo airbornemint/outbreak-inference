@@ -55,9 +55,10 @@ build:
   extends: .build
   variables:
     R_BUILD_VIGNETTES: "TRUE"
-  except: 
-    - /^[Pp]aper([/-].*)?$/
-    - /^validation(-.*)?$/
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: manual
+    - when: always
   
 ⚡️ build:
   extends: .build
@@ -71,10 +72,11 @@ check:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run package-check
-  except:
-    - /^[Pp]aper([/-].*)?$/
-    - /^validation(-.*)?$/
-  dependencies:
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: manual
+    - when: always
+  needs:
     - build
 
 .knitr:
@@ -84,7 +86,7 @@ check:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-knit
-  dependencies:
+  needs:
     - ⚡️ build
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
@@ -97,8 +99,10 @@ knitr:
     - docker-cpu:comp8
   variables:
     KNITR_RUN_VALIDATION: "TRUE"
-  only:
-    - /^validation(-.*)?$/
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: always
+    - when: manual
 
 ⚡️ knitr:
   extends: .knitr
@@ -106,8 +110,6 @@ knitr:
     - docker-mem:3
   variables:
     KNITR_RUN_VALIDATION: "FALSE"
-  only:
-    - /^[Pp]aper([/-].*)?$/
 
 figures:
   stage: figures
@@ -135,8 +137,6 @@ overleaf:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
-  only:
-    - /^[Pp]aper([/-].*)?$/
 
 # plos-comp-biol:
 #   stage: exports
@@ -151,8 +151,6 @@ overleaf:
 #       - '${REVIEW_ARTIFACTS_DIR}/*.tex'
 #       - '${REVIEW_ARTIFACTS_DIR}/Fig*.tif'
 #       - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
-#   only:
-#     - /^[Pp]aper([/-].*)?$/
 
 pdf:
   stage: pdf
@@ -166,5 +164,3 @@ pdf:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "PSplineInference.pdf"
-  only: 
-    - /^[Pp]aper([/-].*)?$/
