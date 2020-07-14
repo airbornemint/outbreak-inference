@@ -131,6 +131,8 @@ overleaf:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-overleaf
+  needs:
+    - ⚡️ knitr
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
