@@ -44,9 +44,9 @@ pspline.outbreak.cumcases = function(model, data) {
   data %>%
     rename_at(time.name, function(x) "pspline.time") %>%
     rename_at(cases.name, function(x) "pspline.cases") %>%
-    arrange(pspline.time) %>%
-    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
-    select(-pspline.cases) %>%
+    arrange(.data$pspline.time) %>%
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(.data$pspline.time, .data$pspline.cases)) %>%
+    select(-.data$pspline.cases) %>%
     rename_at("pspline.cumcases", function(x) cumcases.name) %>%
     rename_at("pspline.time", function(x) time.name)
 }
@@ -67,10 +67,10 @@ pspline.outbreak.cumcases.relative = function(model, data) {
   data %>%
     rename_at(time.name, function(x) "pspline.time") %>%
     rename_at(cases.name, function(x) "pspline.cases") %>%
-    arrange(pspline.time) %>%
-    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(pspline.time, pspline.cases)) %>%
-    mutate(pspline.cumcases=pspline.cumcases / max(pspline.cumcases)) %>%
-    select(-pspline.cases) %>%
+    arrange(.data$pspline.time) %>%
+    mutate(pspline.cumcases=pspline.outbreak.calc.cumcases(.data$pspline.time, .data$pspline.cases)) %>%
+    mutate(pspline.cumcases=.data$pspline.cumcases / max(.data$pspline.cumcases)) %>%
+    select(-.data$pspline.cases) %>%
     rename_at("pspline.cumcases", function(x) cumcases.name) %>%
     rename_at("pspline.time", function(x) time.name)
 }
@@ -87,10 +87,13 @@ pspline.outbreak.thresholds = function(onset=NA, offset=NA) {
   function(model, data) {
     # Calculate cumulative case counts from the model and parameters
     data.cumrel = pspline.outbreak.cumcases.relative(model, data)
+    time.name = pred.var(model)
+    cases.name = model.var(model)
+    cumcases.name = sprintf("%s.cumrel", cases.name)
 
     data.frame(
-      onset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, onset),
-      offset=threshold.ts(data.cumrel$time, data.cumrel$cases.cumrel, offset)
+      onset=threshold.ts(data.cumrel[[time.name]], data.cumrel[[cumcases.name]], onset),
+      offset=threshold.ts(data.cumrel[[time.name]], data.cumrel[[cumcases.name]], offset)
     )
   }
 }

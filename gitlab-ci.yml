@@ -8,7 +8,7 @@ stages:
   - pdf
 
 variables:
-  R_BUILD_DIR: "build"
+  R_BUILD_DIR: "package"
   KNITR_OUTPUT_DIR: "knitr"
   TEX_DIR: "Paper"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"
@@ -20,6 +20,10 @@ variables:
         - docker
     services:
         - docker:18.09.7-dind
+    variables:
+        DOCKER_HOST: tcp://docker:2375/
+        DOCKER_DRIVER: overlay2
+        DOCKER_TLS_CERTDIR: ""
     image: ${CI_REGISTRY}/ci-utilities/ci-commands/gitlab-docker-compose-ci
 
 tools:
@@ -50,15 +54,16 @@ tools:
 build:
   extends: .build
   variables:
-    BUILD_VIGNETTES: "TRUE"
-  except: 
-    - /^[Pp]aper([/-].*)?$/
-    - /^validation(-.*)?$/
+    R_BUILD_VIGNETTES: "TRUE"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([\/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: manual
+    - when: always
   
 ⚡️ build:
   extends: .build
   variables:
-    BUILD_VIGNETTES: "FALSE"
+    R_BUILD_VIGNETTES: "FALSE"
 
 check:
   stage: check
@@ -67,10 +72,11 @@ check:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run package-check
-  except:
-    - /^[Pp]aper([/-].*)?$/
-    - /^validation(-.*)?$/
-  dependencies:
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^[Pp]aper([\/-].*)?$/ || $CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: manual
+    - when: always
+  needs:
     - build
 
 .knitr:
@@ -80,7 +86,7 @@ check:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-knit
-  dependencies:
+  needs:
     - ⚡️ build
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
@@ -93,8 +99,10 @@ knitr:
     - docker-cpu:comp8
   variables:
     KNITR_RUN_VALIDATION: "TRUE"
-  only:
-    - /^validation(-.*)?$/
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^validation(-.*)?$/'
+      when: always
+    - when: manual
 
 ⚡️ knitr:
   extends: .knitr
@@ -102,57 +110,47 @@ knitr:
     - docker-mem:3
   variables:
     KNITR_RUN_VALIDATION: "FALSE"
-  only:
-    - /^[Pp]aper([/-].*)?$/
 
-figures:
-  stage: figures
-  extends: 
-    - .docker
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-figures
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-figures"
-    paths:
-      - "${KNITR_OUTPUT_DIR}/figures/*.pdf"
-      - "${KNITR_OUTPUT_DIR}/figures/*.tif"
-  only:
-    - /^[Pp]aper([/-].*)?$/
+# figures:
+#   stage: figures
+#   extends: 
+#     - .docker
+#   script:
+#     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+#     - docker-compose ${COMPOSE_FILES} run paper-figures
+#   artifacts:
+#     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-figures"
+#     paths:
+#       - "${KNITR_OUTPUT_DIR}/figures/*.pdf"
+#       - "${KNITR_OUTPUT_DIR}/figures/*.tif"
 
 overleaf:
   stage: exports
   extends: 
     - .docker
   script:
-    - mkdir -p "${OVERLEAF_ARTIFACTS_DIR}/figures"
-    - cp "${KNITR_OUTPUT_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp "${KNITR_OUTPUT_DIR}"/figures/*.tex "${OVERLEAF_ARTIFACTS_DIR}/figures"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-overleaf
+  needs:
+    - ⚡️ knitr
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
-  only:
-    - /^[Pp]aper([/-].*)?$/
 
-plos-comp-biol:
-  stage: exports
-  extends: 
-    - .docker
-  script:
-    - mkdir -p "${REVIEW_ARTIFACTS_DIR}"
-    - cp "${KNITR_OUTPUT_DIR}/figures"/*.tif  "${REVIEW_ARTIFACTS_DIR}"
-    - cp "${KNITR_OUTPUT_DIR}/PSplineInference.tex" "${TEX_DIR}/plos2015.bst" "${TEX_DIR}/PSplineInference.bib" "${REVIEW_ARTIFACTS_DIR}"
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-plos-comp-biol
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
-    paths:
-      - '${REVIEW_ARTIFACTS_DIR}/*.tex'
-      - '${REVIEW_ARTIFACTS_DIR}/*.tif'
-      - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
-  only:
-    - /^[Pp]aper([/-].*)?$/
+# plos-comp-biol:
+#   stage: exports
+#   extends: 
+#     - .docker
+#   script:
+#     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+#     - docker-compose ${COMPOSE_FILES} run paper-plos-comp-biol
+#   artifacts:
+#     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-plos-comp-biol"
+#     paths:
+#       - '${REVIEW_ARTIFACTS_DIR}/*.tex'
+#       - '${REVIEW_ARTIFACTS_DIR}/Fig*.tif'
+#       - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
 
 pdf:
   stage: pdf
@@ -162,9 +160,9 @@ pdf:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-pdf
     - mv "${OVERLEAF_ARTIFACTS_DIR}/PSplineInference.pdf" .
+  needs:
+    - overleaf
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "PSplineInference.pdf"
-  only: 
-    - /^[Pp]aper([/-].*)?$/

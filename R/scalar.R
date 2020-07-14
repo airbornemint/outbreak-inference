@@ -21,7 +21,7 @@ pspline.calc.scalars = function(samples, model, predictors, outcomes) {
   samples %>% adply(1, function(params) {
       eval.model(params, model, predictors, outcomes)
     }, .id="pspline.sample") %>%
-    mutate(pspline.sample=as.numeric(pspline.sample))
+    mutate(pspline.sample=as.numeric(.data$pspline.sample))
 }
 
 #' Runs simulations on an outbreak GAM/GAMM for the purpose of estimating

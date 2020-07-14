@@ -46,38 +46,50 @@
 #'
 #' @examples
 #' # Simulate an outbreak for analysis
-#' cases = rpois(52, c(rep(1, 13), seq(1, 50, length.out=13), seq(50, 1, length.out=13), rep(1, 13)))
-#' data = data.frame(cases=cases, time=seq(0, 51))
-#'
+#' cases = data.frame(
+#'   time=seq(0, 51),
+#'   cases=rpois(52, c(rep(1, 13), seq(1, 50, length.out=13), seq(50, 1, length.out=13), rep(1, 13)))
+#' )
+#' 
 #' # Generate GAM model for outbreak; see mgcv for details
 #' library(mgcv)
-#' model = gam(cases ~ s(time, k=20, bs="cp", m=3), family=poisson, data=data)
-#'
+#' model = gam(cases ~ s(time, k=10, bs="cp", m=3), family=poisson, data=cases)
+#' 
 #' # Generate time series at which model will be evaluated for estimates
 #' # Usually you want this to be the same as the time interval that your observations are in, except
-#' # divided into small increments (here, eps)
-#' eps = .05
-#' data = data.frame(time=seq(min(data$time) - 0.5, max(data$time) + 0.5 - eps, by=eps))
-#'
-#' # Estimate cumulative incidence
-#' cumCases = pspline.estimate.timeseries(
-#'   model, data,
-#'   pspline.outbreak.cumcases, level=.95
-#')
-#'
-#' # Estimate time when outbreak crosses 5% and 95% of cumulative case count
-#' onsetThreshold = 0.05
+#' # divided into small increments (here, eps). Using a smaller eps gives more accurate estimates, 
+#' # but takes longer to run. A value smaller than 0.5 would be better for final analysis
+#' eps = 0.5
+#' estTimes = data.frame(time=seq(min(cases$time) - 0.5, max(cases$time) + 0.5 - eps, by=eps))
+#' 
+#' # Estimate incidence
+#' estCases = pspline.estimate.timeseries(
+#'   model, estTimes,
+#'   pspline.outbreak.cases,
+#'   # Using a large number of samples makes the analysis more robust; 
+#'   # using only 15 samples makes this example run fast (default is 2000)
+#'   samples=15, 
+#'   level=.95
+#' )
+#' 
+#' # Estimate time when outbreak crosses 5\% and 95\% of cumulative case count
+#' onsetThreshold = 0.025
 #' offsetThreshold = 1 - onsetThreshold
 #' thresholds = pspline.estimate.scalars(
-#'   model, data,
-#'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), level=.95
+#'   model, estTimes,
+#'   pspline.outbreak.thresholds(onset=onsetThreshold, offset=offsetThreshold), 
+#'   # Using a large number of samples makes the analysis more robust; 
+#'   # using only 15 samples makes this example run fast (default is 2000)
+#'   samples=15, 
+#'   level=.95
 #' )
-#'
+#' 
 #' # Plot cumulative incidence estimates and threshold estimates
 #' library(ggplot2)
-#' ggplot(cumCases) +
-#'   geom_ribbon(aes(x=time, ymin=cases.cum.lower, ymax=cases.cum.upper), fill=grey(.75)) +
-#'   geom_line(aes(x=time, y=cases.cum.median)) +
+#' ggplot() +
+#'   geom_ribbon(data=estCases, aes(x=time, ymin=cases.lower, ymax=cases.upper), fill=grey(.75)) +
+#'   geom_line(data=estCases, aes(x=time, y=cases.median)) +
+#'   geom_point(data=cases, aes(x=time, y=cases)) +
 #'   annotate("rect",
 #'     xmin=thresholds$onset.lower,
 #'     xmax=thresholds$onset.upper,
@@ -86,18 +98,17 @@
 #'     xmin=thresholds$offset.lower,
 #'     xmax=thresholds$offset.upper,
 #'     ymin=-Inf, ymax=Inf, alpha=.25) +
-#'   annotate("segment", x=-Inf, xend=Inf, y=onsetThreshold, yend=onsetThreshold) +
-#'   annotate("segment", x=-Inf, xend=Inf, y=offsetThreshold, yend=offsetThreshold) +
-#'  labs(x="Time", y="Relative cumulative incidence")
+#'  labs(x="Time", y="Incidence")
 #'
 #' @importFrom stats coef na.omit predict quantile rnorm ecdf
 #' @importFrom utils head tail
 #' @importFrom mgcv mroot
-#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all
+#' @importFrom dplyr bind_rows rename rename_at arrange mutate select do group_by_at ungroup first summarize_all select_at vars contains rename_all summarize across
 #' @importFrom reshape2 melt dcast
 #' @importFrom plyr adply ldply
 #' @importFrom stats setNames
 #' @importFrom magrittr %>% %<>%
 #' @importFrom assertthat assert_that
 #' @importFrom plotrix std.error
+#' @importFrom rlang .data
 NULL

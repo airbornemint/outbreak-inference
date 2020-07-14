@@ -20,40 +20,27 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libgit2-dev \
 	libssl-dev
 
+# Pandoc is needed for vignettes	
+# qpdf is needed for R check
+RUN apt-get update && apt-get install --yes --no-install-recommends \
+	pandoc \
+	pandoc-citeproc \
+	libxt6 \
+	qpdf
 
 ############################################################
 # R with dependencies for building the package
 FROM r AS package-tools
 
-# install2.r needs these
-RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
-
-# These come from CRAN
-RUN install2.r \
-	zipcode \
-	dplyr \
-	knitr \
-	reshape \
-	mgcv \
-	data.table \
-	tikzDevice \
-	sp \
-	mapproj \
-	ggplot2 \
-	ggstance \
-	gridExtra \
-	devtools \
-	import \
-	doParallel \
-	kableExtra \
-	rmarkdown \
-	plotrix
-
-# For deps
 WORKDIR /package
-COPY DESCRIPTION . 
-RUN Rscript -e "devtools::install_deps(upgrade=FALSE)"
-RUN Rscript -e "devtools::install_dev_deps(upgrade=FALSE)"
+
+# Deps
+COPY .Rprofile .Rprofile
+COPY renv renv
+# Devtools before deps to avoid rebuilding devtools if deps change
+RUN Rscript -e "renv::install('devtools')"
+COPY renv.lock renv.lock
+RUN Rscript -e "renv::restore()"
 COPY . .
 
 SHELL ["/bin/bash", "-c"]
@@ -62,12 +49,8 @@ ENTRYPOINT ["Rscript", "-e"]
 ############################################################
 # Tex environment we use to build the paper (it includes R because of knitr)
 FROM r AS tex
-LABEL maintainer="Ben Artin <ben@artins.org>"
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-	pandoc \
-	pandoc-citeproc \
-	qpdf \
 	wget \
 	xzdec \
 	lmodern \
@@ -100,8 +83,9 @@ WORKDIR /tex
 
 COPY Paper/.Rprofile .Rprofile
 COPY Paper/renv renv
+# Install remotes before deps to avoid rebuilding if deps change
+RUN Rscript -e "renv::install('remotes')"
 COPY Paper/renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
 COPY Paper .
-COPY vignettes/seasonal.csv /vignettes/seasonal.csv

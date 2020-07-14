@@ -15,14 +15,15 @@ services:
         image: package-tools:dev
         command:
             - |
+                devtools::document(roclets = c('rd'))
                 devtools::build(
                     pkg="/package", 
-                    path="${R_BUILD_DIR:-build}", 
+                    path="${R_BUILD_DIR:-package}", 
                     vignettes=${R_BUILD_VIGNETTES:-FALSE}, 
                     binary=FALSE
                 )
         volumes:
-            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+            - "./${R_BUILD_DIR:-package}:/package/${R_BUILD_DIR:-package}"
         
     ############################################################
     # Commands for checking the package
@@ -30,10 +31,10 @@ services:
         image: package-tools:dev
         command:
             - |
-                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'))
+                devtools::check_built(path=Sys.getenv('R_PACKAGE_ARCHIVE'), run_dont_test=TRUE)
         env_file: build.env
         volumes:
-            - "./${R_BUILD_DIR:-build}:/package/${R_BUILD_DIR:-build}"
+            - "./${R_BUILD_DIR:-package}:/package/${R_BUILD_DIR:-package}"
 
     ############################################################
     # Tools for building the paper
@@ -44,38 +45,49 @@ services:
             target: paper-tools
        
     ############################################################
-    # Commands for converting figures to PDF and EPS
+    # Commands for knitting the paper
     paper-knit:
         image: paper-tools:dev
         entrypoint: ["Rscript", "-e"]
         command: 
             - |
-                install.packages(Sys.getenv('R_PACKAGE_ARCHIVE')); 
+                ${INSTALL_FN:-remotes::install_github}("${R_PACKAGE_ARCHIVE:-weinbergerlab/pspline.inference@main}"); 
                 options(pspline.paper.validation.run=${KNITR_RUN_VALIDATION:-FALSE}); 
-                options(pspline.paper.output='${KNITR_OUTPUT_DIR:-knitr}'); 
+                options(pspline.paper.output='knitr'); 
                 knitr::knit(
                     'PSplineInference.rnw', 
-                    output='${KNITR_OUTPUT_DIR:-knitr}/PSplineInference.tex'
+                    output='knitr/PSplineInference.tex'
                 )
         env_file: build.env
         volumes:
-            - "./${R_BUILD_DIR:-build}:/tex/${R_BUILD_DIR:-build}"
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${R_BUILD_DIR:-package}:/tex/${R_BUILD_DIR:-package}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr"
        
     ############################################################
     # Commands for converting figures to PDF and EPS
     paper-figures:
         image: paper-tools:dev
-        environment:
-            KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
         command: 
             - |
-                cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
+                cd knitr/figures ;
                 find . -name "*.tex" -exec latexmk -pdf {} \;
                 find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
                 find . -name "*.tif" -exec convert -compress lzw {} {} \;
         volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr"
+
+    ############################################################
+    # Commands for exporting paper for overleaf
+    paper-overleaf:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p overleaf/figures
+                cp knitr/PSplineInference.tex plos2015.bst PSplineInference.bib overleaf
+                cp knitr/figures/*.tex overleaf/figures
+        volumes:
+            - ./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex/overleaf
 
     ############################################################
     # Commands for exporting paper for PLOS Comp Biol
@@ -83,30 +95,23 @@ services:
     paper-plos-comp-biol:
         image: paper-tools:dev
         command: 
-            - >
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
-                
-                python3 -c "import re;
-                import sys;
-                tex = open(sys.argv[1]).read();
-                tex = re.sub(r'\\\\bibliography\{(.*)\}', lambda f: open(f'{f.group(1)}.bbl').read(), tex);
-                open(sys.argv[1], 'w').write(tex);
-                " PSplineInference.tex
-
-                latexmk -pdflua 
-                -usepretex="\edef\outputvariant{ploscompbiol}" 
-                PSplineInference.tex
+            - |
+                cp knitr/figures/*.tif output
+                cp knitr/PSplineInference.tex plos2015.bst /PSplineInference.bib output
+                cd output
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
+                python3 /tex/export-plos-comp-biol.py PSplineInference.tex
+                latexmk -pdflua -usepretex="\edef\outputvariant{ploscompbiol}" PSplineInference.tex
         volumes:
-            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex
+            - ./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr
+            - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
 
     ############################################################
     # Commands for generating our PDF (inline images)
     paper-pdf:
         image: paper-tools:dev
         command: 
-            - latexmk -pdflua PSplineInference.tex
+            - cd output; latexmk -pdflua PSplineInference.tex
         volumes:
-            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/tex/output
 
