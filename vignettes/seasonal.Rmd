@@ -330,7 +330,7 @@ Simulation studies are time-consuming, so for demonstration purpose we'll only i
 ```{r validate supply duration, message=FALSE, warning=FALSE, include=FALSE, eval=vignette.eval$full}
 set.seed(0)
 validationResults = pspline.validate.scalars(
-  fun.truth=c,
+  fun.truth=generateTruths,
   n.truths=10,
   fun.observations=generateObservations,
   n.observations=10,
