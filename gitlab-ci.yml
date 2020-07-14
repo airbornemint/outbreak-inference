@@ -138,21 +138,21 @@ overleaf:
   only:
     - /^[Pp]aper([/-].*)?$/
 
-plos-comp-biol:
-  stage: exports
-  extends: 
-    - .docker
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-plos-comp-biol
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-plos-comp-biol"
-    paths:
-      - '${REVIEW_ARTIFACTS_DIR}/*.tex'
-      - '${REVIEW_ARTIFACTS_DIR}/Fig*.tif'
-      - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
-  only:
-    - /^[Pp]aper([/-].*)?$/
+# plos-comp-biol:
+#   stage: exports
+#   extends: 
+#     - .docker
+#   script:
+#     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+#     - docker-compose ${COMPOSE_FILES} run paper-plos-comp-biol
+#   artifacts:
+#     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-plos-comp-biol"
+#     paths:
+#       - '${REVIEW_ARTIFACTS_DIR}/*.tex'
+#       - '${REVIEW_ARTIFACTS_DIR}/Fig*.tif'
+#       - '${REVIEW_ARTIFACTS_DIR}/*.pdf'
+#   only:
+#     - /^[Pp]aper([/-].*)?$/
 
 pdf:
   stage: pdf
