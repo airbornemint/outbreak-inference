@@ -5,8 +5,8 @@ Date: 2020-07-01
 Version: 1.0.1
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre", "cph"))
 Description: Inference of infectious disease outcomes using generalized additive
-    (mixed) models with penalized basis splines (P-Splines). 
-    <https://medrxiv.org/cgi/content/short/2020.07.14.20138180v1>
+    (mixed) models with penalized basis splines (P-Splines). See 
+    <https://medrxiv.org/cgi/content/short/2020.07.14.20138180v1>.
 Depends: R (>= 3.4.0)
 Imports: stats, utils, mgcv, dplyr, magrittr, assertthat, plyr, reshape2, plotrix, rlang
 Suggests: import, ggplot2, data.table, ggstance, knitr, rmarkdown, roxygen2, kableExtra, doParallel, parallel, stringr, scales, testthat
