@@ -96,4 +96,4 @@ ggplot <- function(data, legends) {
     )
 }
 
-knitr::opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev='svg')
+knitr::opts_chunk$set(fig.width=4, fig.height=3, fig.align="center", dev=ifelse(capabilities('cairo'), 'svg', 'png'))
