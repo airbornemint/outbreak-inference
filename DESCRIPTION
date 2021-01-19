@@ -15,5 +15,5 @@ Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0
-URL: http://github.com/weinbergerlab/pspline.inference
-BugReports: http://github.com/weinbergerlab/pspline.inference/issues
+URL: https://github.com/weinbergerlab/pspline.inference
+BugReports: https://github.com/weinbergerlab/pspline.inference/issues
