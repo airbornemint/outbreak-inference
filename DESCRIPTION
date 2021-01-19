@@ -2,7 +2,7 @@ Package: pspline.inference
 Title: Estimation of Characteristics of Seasonal and Sporadic Infectious Disease
     Outbreaks Using Generalized Additive Modeling with Penalized Basis Splines 
 Date: 2021-01-18
-Version: 1.0.3
+Version: 1.0.4
 Authors@R: person("Ben", "Artin", email = "ben@artins.org", role = c("aut", "cre", "cph"))
 Description: Inference of infectious disease outcomes using generalized additive
     (mixed) models with penalized basis splines (P-Splines). See 
